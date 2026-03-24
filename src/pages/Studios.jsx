@@ -1,4 +1,3 @@
-import introVideo from "../assets/videos/studioIntro.mp4";
 import ImageGallery from "../components/ImageGallery";
 import { getStudioData } from "../platform/studioData";
 
@@ -64,18 +63,21 @@ return(
 
 <div style={styles.banner}>
 
-<video autoPlay loop muted playsInline style={styles.bannerVideo}>
-<source src={introVideo} type="video/mp4"/>
-</video>
+  <video
+    autoPlay
+    loop
+    muted
+    playsInline
+    style={styles.bannerVideo}
+  />
 
-<div style={styles.bannerOverlay}>
-<h1 style={styles.bannerTitle}>
-PrinceMaozi Global Studios
-</h1>
+  <div style={styles.bannerOverlay}>
+    <h1 style={styles.bannerTitle}>
+      PrinceMaozi Global Studios
+    </h1>
+  </div>
+
 </div>
-
-</div>
-
 
 {/* FILM PRODUCTION */}
 
@@ -326,9 +328,10 @@ voices and connect filmmakers with global audiences.
 
 </div>
 
-)
+);  // ✅ FIX 1: added semicolon
 
-}
+}   // ✅ FIX 2: THIS IS THE MISSING BRACKET
+
 
 const styles={
 
