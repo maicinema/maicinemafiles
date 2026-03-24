@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function ImageGallery({ images }) {
+function ImageGallery({ images = [] }) {
 
 const [currentIndex, setCurrentIndex] = useState(null);
 
@@ -40,6 +40,7 @@ return (
 <img
 key={index}
 src={img}
+alt=""
 style={styles.thumb}
 onClick={()=>openImage(index)}
 />
@@ -47,28 +48,41 @@ onClick={()=>openImage(index)}
 
 </div>
 
-{/* VIEWER */}
+{/* IMAGE VIEWER */}
 
 {currentIndex !== null && (
 
 <div style={styles.viewer} onClick={closeViewer}>
 
-<div style={styles.viewerContent} onClick={(e)=>e.stopPropagation()}>
+<div
+style={styles.viewerContent}
+onClick={(e)=>e.stopPropagation()}
+>
 
-<button style={styles.left} onClick={prevImage}>
+<button
+style={styles.left}
+onClick={prevImage}
+>
 ❮
 </button>
 
 <img
 src={images[currentIndex]}
+alt=""
 style={styles.full}
 />
 
-<button style={styles.right} onClick={nextImage}>
+<button
+style={styles.right}
+onClick={nextImage}
+>
 ❯
 </button>
 
-<button style={styles.close} onClick={closeViewer}>
+<button
+style={styles.close}
+onClick={closeViewer}
+>
 ✕
 </button>
 

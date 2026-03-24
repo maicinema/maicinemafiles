@@ -1,0 +1,43 @@
+import { demoFilms } from "./filmLibrary";
+
+export const getComingSoon = () => {
+  const data = localStorage.getItem("comingSoon");
+  return data ? JSON.parse(data) : [];
+};
+
+export const saveComingSoon = (films) => {
+  localStorage.setItem("comingSoon", JSON.stringify(films));
+};
+
+export const getLiveFilms = () => {
+  const data = localStorage.getItem("liveFilms");
+  if (data) return JSON.parse(data);
+  return demoFilms;
+};
+
+export const saveLiveFilms = (films) => {
+  localStorage.setItem("liveFilms", JSON.stringify(films));
+};
+
+export const normalizeViews = (views) => {
+  if (typeof views === "number") return views;
+
+  if (typeof views === "string") {
+    const clean = views.trim().toUpperCase();
+
+    if (clean.endsWith("K")) {
+      const num = parseFloat(clean.replace("K", ""));
+      return isNaN(num) ? 0 : Math.round(num * 1000);
+    }
+
+    if (clean.endsWith("M")) {
+      const num = parseFloat(clean.replace("M", ""));
+      return isNaN(num) ? 0 : Math.round(num * 1000000);
+    }
+
+    const num = parseFloat(clean);
+    return isNaN(num) ? 0 : num;
+  }
+
+  return 0;
+};

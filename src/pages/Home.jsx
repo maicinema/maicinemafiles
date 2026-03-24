@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import banner from "../assets/cinema-banner.jpg";
 import Navbar from "../components/Navbar";
 import SubscribeSection from "../components/SubscribeSection";
@@ -6,10 +7,37 @@ import LeavingSoon from "../components/LeavingSoon";
 import ComingSoonFilms from "../components/ComingSoonFilms";
 
 function Home() {
+  const [animationStage, setAnimationStage] = useState("center");
+
+  useEffect(() => {
+    const cycle = setInterval(() => {
+      setAnimationStage("exit-right");
+
+      setTimeout(() => {
+        setAnimationStage("left-hidden");
+
+        setTimeout(() => {
+          setAnimationStage("center");
+        }, 80);
+      }, 2000);
+    }, 12000);
+
+    return () => clearInterval(cycle);
+  }, []);
+
+  function getHeroTransform() {
+    if (animationStage === "exit-right") return "translateX(130vw)";
+    if (animationStage === "left-hidden") return "translateX(-130vw)";
+    return "translateX(0)";
+  }
+
+  function getHeroTransition() {
+    if (animationStage === "left-hidden") return "none";
+    return "transform 2s ease-in-out";
+  }
+
   return (
     <>
-
-      {/* HERO SECTION */}
       <div
         style={{
           height: "100vh",
@@ -17,13 +45,12 @@ function Home() {
           backgroundSize: "cover",
           backgroundPosition: "center",
           position: "relative",
-          color: "white"
+          color: "white",
+          overflow: "hidden"
         }}
       >
-
         <Navbar />
 
-        {/* DARK OVERLAY */}
         <div
           style={{
             position: "absolute",
@@ -33,44 +60,41 @@ function Home() {
             height: "100%",
             background: "rgba(0,0,0,0.85)"
           }}
-        ></div>
+        />
 
-        {/* HERO TEXT */}
         <div
           style={{
             position: "relative",
             height: "100%",
             display: "flex",
             alignItems: "center",
-            paddingLeft: "80px"
+            paddingLeft: "80px",
+            overflow: "hidden"
           }}
         >
-          <div>
+          <div
+            style={{
+              transform: getHeroTransform(),
+              transition: getHeroTransition(),
+              maxWidth: "800px",
+              willChange: "transform"
+            }}
+          >
             <h1 style={{ fontSize: "64px", margin: "0" }}>
               Welcome to <span style={{ color: "red" }}>MaiCinema</span>
             </h1>
 
             <p style={{ marginTop: "20px", fontSize: "18px", color: "#ccc" }}>
-              Stream powerful short films. Discover new voices.
-              Experience cinema differently.
+              Stream powerful short films. Discover new voices. Experience cinema differently.
             </p>
           </div>
         </div>
-
       </div>
 
-      {/* SUBSCRIBE SECTION */}
       <SubscribeSection />
-
-      {/* TRENDING NOW */}
       <TrendingNow />
-
-      {/* LEAVING SOON */}
       <LeavingSoon />
-
-      {/* COMING SOON */}
       <ComingSoonFilms />
-
     </>
   );
 }

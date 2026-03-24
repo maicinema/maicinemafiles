@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { SUBSCRIPTION_PRICE } from "../config/pricing";
 
 function SubscribeSection(){
 
@@ -15,7 +16,7 @@ Unlock MaiCinema
 <div style={styles.card}>
 
 <h3 style={styles.price}>
-$5 / month
+${SUBSCRIPTION_PRICE} / month
 </h3>
 
 <ul style={styles.list}>
@@ -65,7 +66,8 @@ borderRadius:"10px"
 
 price:{
 fontSize:"28px",
-marginBottom:"20px"
+marginBottom:"20px",
+color:"#00ffae"
 },
 
 list:{

@@ -1,93 +1,84 @@
+import { useEffect, useState } from "react";
 import MovieCard from "./MovieCard";
-
-import film1 from "../assets/film1.jpg";
-import film2 from "../assets/film2.jpg";
-import film3 from "../assets/film3.jpg";
-import film4 from "../assets/film4.jpg";
-import demoFilm from "../assets/videos/demoFilm.mp4";
+import { supabase } from "../lib/supabase";
 
 function TrendingNow() {
+  const [movies, setMovies] = useState([]);
 
-  const movies = [
+  useEffect(() => {
+    loadTrending();
 
-    {
-title:"Silent Streets",
-video: demoFilm,
-genre:"Drama",
-rating:"PG-13",
-description:"A quiet city hides a dangerous secret.",
-views:"12K",
-price:"1.99"
-},
+    const interval = setInterval(() => {
+      loadTrending();
+    }, 5000);
 
-    {
-      title:"Last Frame",
-      image:film2,
-      genre:"Thriller",
-      rating:"PG-16",
-      description:"A filmmaker records something terrifying.",
-      views:"9K",
-      price:"1.99"
-    },
+    return () => clearInterval(interval);
+  }, []);
 
-    {
-      title:"Night Call",
-      image:film3,
-      genre:"Mystery",
-      rating:"PG-13",
-      description:"One phone call changes everything.",
-      views:"14K",
-      price:"1.99"
-    },
+  async function loadTrending() {
+    const { data, error } = await supabase
+      .from("films")
+      .select("*")
+      .eq("status", "live")
+      .order("views", { ascending: false });
 
-    {
-      title:"Dust & Echo",
-      image:film4,
-      genre:"Drama",
-      rating:"PG",
-      description:"A story about memory and loss.",
-      views:"7K",
-      price:"1.99"
+    if (error) {
+      console.log("Trending films error:", error);
+      return;
     }
 
-  ];
+    const now = new Date();
+
+    const publicFilms = (data || []).filter((film) => {
+      if (!film.contract_expires_at) return true;
+      return new Date(film.contract_expires_at) > now;
+    });
+
+    const topFive = publicFilms.slice(0, 5).map((film) => ({
+      ...film,
+      image: film.poster
+    }));
+
+    console.log("Trending top films:", topFive);
+    setMovies(topFive);
+  }
 
   return (
     <div style={styles.section}>
-
       <h2 style={styles.heading}>Trending Now</h2>
 
       <div style={styles.grid}>
-        {movies.map((movie, index) => (
-          <MovieCard
-            key={index}
-            movie={movie}
-          />
+        {movies.map((movie) => (
+          <div key={movie.id} style={styles.cardWrap}>
+            <MovieCard movie={movie} />
+          </div>
         ))}
       </div>
-
     </div>
   );
 }
 
 const styles = {
-
-  section:{
-    background:"black",
-    padding:"80px"
+  section: {
+    background: "black",
+    padding: "80px"
   },
 
-  heading:{
-    color:"white",
-    marginBottom:"30px"
+  heading: {
+    color: "white",
+    marginBottom: "30px"
   },
 
-  grid:{
-    display:"grid",
-    gridTemplateColumns:"repeat(4, 1fr)",
-    gap:"30px"
+  grid: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "30px",
+    alignItems: "flex-start"
+  },
+
+  cardWrap: {
+    flex: "0 0 auto"
   }
-
 };
 
 export default TrendingNow;

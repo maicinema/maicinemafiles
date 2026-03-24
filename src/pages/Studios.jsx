@@ -1,5 +1,6 @@
 import introVideo from "../assets/videos/studioIntro.mp4";
 import ImageGallery from "../components/ImageGallery";
+import { getStudioData } from "../platform/studioData";
 
 /* PRODUCTION */
 import production1 from "../assets/studio/production1.jpg";
@@ -34,15 +35,26 @@ import founder from "../assets/studio/founder1.jpg";
 
 function Studios(){
 
-const team=[
+const studioData = getStudioData();
 
-{ name:"Daniel Brooks", role:"Lead Developer"},
-{ name:"Sophia Martinez", role:"Marketing Director"},
-{ name:"Michael Tan", role:"Production Manager"},
-{ name:"Aisha Bello", role:"Social Media Manager"},
-{ name:"David Kim", role:"Public Relations Lead"}
+/* DEFAULT TEAM */
 
-]
+const defaultTeam = [
+
+{ name:"Daniel Brooks", role:"Lead Developer" },
+{ name:"Sophia Martinez", role:"Marketing Director" },
+{ name:"Michael Tan", role:"Production Manager" },
+{ name:"Aisha Bello", role:"Social Media Manager" },
+{ name:"David Kim", role:"Public Relations Lead" }
+
+];
+
+/* ENSURE TEAM ALWAYS SHOWS */
+
+const team =
+(studioData?.team && studioData.team.length > 0)
+? studioData.team
+: defaultTeam;
 
 return(
 
@@ -239,9 +251,7 @@ ownership and gaining exposure to international audiences.
 By focusing on short films and emerging filmmakers,
 MaiCinema encourages experimentation, originality,
 and storytelling that reflects diverse cultures
-and perspectives. The platform represents a new
-digital stage for filmmakers who want their work
-to reach viewers across the world.
+and perspectives.
 </p>
 
 <ImageGallery
@@ -346,9 +356,7 @@ position:"relative",
 paddingLeft:"80px"
 },
 
-bannerTitle:{
-fontSize:"48px"
-},
+bannerTitle:{fontSize:"48px"},
 
 section:{padding:"80px"},
 
@@ -363,13 +371,6 @@ width:"100%",
 maxWidth:"800px",
 borderRadius:"10px",
 marginBottom:"30px"
-},
-
-gallery:{
-display:"grid",
-gridTemplateColumns:"repeat(5,1fr)",
-gap:"20px",
-marginTop:"30px"
 },
 
 founderCard:{
@@ -405,6 +406,6 @@ color:"#aaa",
 fontSize:"14px"
 }
 
-}
+};
 
-export default Studios
+export default Studios;

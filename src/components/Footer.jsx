@@ -1,179 +1,186 @@
 import { FaYoutube, FaFacebook, FaInstagram } from "react-icons/fa";
 import whatsappQR from "../assets/whatsappQR.png";
+import { PLATFORM } from "../config/platform";
 
 function Footer() {
-  return (
-    <footer style={styles.footer}>
 
-      {/* NEWSLETTER */}
-      <div style={styles.newsletter}>
+return (
 
-        <h2 style={styles.title}>
-          Join the MaiCinema Newsletter
-        </h2>
+<footer style={styles.footer}>
 
-        <p style={styles.text}>
-          Get updates about new films, releases and events.
-        </p>
+{/* NEWSLETTER */}
 
-        <div style={styles.form}>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            style={styles.input}
-          />
+<div style={styles.newsletter}>
 
-          <button style={styles.button}>
-            Subscribe
-          </button>
-        </div>
+<h2 style={styles.title}>
+Join the MaiCinema Newsletter
+</h2>
 
-      </div>
+<p style={styles.text}>
+Get updates about new films, releases and events.
+</p>
 
+<div style={styles.form}>
 
-      {/* SOCIAL MEDIA */}
-      <div style={styles.socials}>
+<input
+type="email"
+placeholder="Enter your email"
+style={styles.input}
+/>
 
-        <p style={{ color:"#aaa" }}>
-          Follow MaiCinema
-        </p>
+<button style={styles.button}>
+Subscribe
+</button>
 
-        <div style={styles.icons}>
+</div>
 
-          {/* YOUTUBE */}
-          <a
-            href="https://www.youtube.com/@OfficialMaicinema"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FaYoutube size={36} style={styles.icon}/>
-          </a>
-
-          {/* FACEBOOK */}
-          <a
-            href="https://www.facebook.com/share/1Apo6bi89E/?mibextid=wwXIfr"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FaFacebook size={36} style={styles.icon}/>
-          </a>
-
-          {/* INSTAGRAM */}
-          <a
-            href="https://www.instagram.com/official_maicinema"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FaInstagram size={36} style={styles.icon}/>
-          </a>
-
-        </div>
+</div>
 
 
-        {/* WHATSAPP QR */}
+{/* SOCIAL MEDIA */}
 
-        <div style={styles.qrContainer}>
+<div style={styles.socials}>
 
-          <p style={{ color:"#aaa", marginBottom:"10px" }}>
-            Scan to join our WhatsApp
-          </p>
+<p style={{color:"#aaa"}}>
+Follow MaiCinema
+</p>
 
-          <img
-            src={whatsappQR}
-            alt="WhatsApp QR"
-            style={styles.qr}
-          />
+<div style={styles.icons}>
 
-        </div>
+<a
+href={PLATFORM.youtube}
+target="_blank"
+rel="noopener noreferrer"
+>
+<FaYoutube size={36} style={styles.icon}/>
+</a>
 
-      </div>
+<a
+href={PLATFORM.facebook}
+target="_blank"
+rel="noopener noreferrer"
+>
+<FaFacebook size={36} style={styles.icon}/>
+</a>
+
+<a
+href={PLATFORM.instagram}
+target="_blank"
+rel="noopener noreferrer"
+>
+<FaInstagram size={36} style={styles.icon}/>
+</a>
+
+</div>
 
 
-      {/* COPYRIGHT */}
-      <div style={styles.copy}>
-        © 2026 MaiCinema. All Rights Reserved.
-      </div>
+{/* WHATSAPP QR */}
 
-    </footer>
-  );
+<div style={styles.qrContainer}>
+
+<p style={{color:"#aaa",marginBottom:"10px"}}>
+Scan to join our WhatsApp
+</p>
+
+<img
+src={whatsappQR}
+alt="WhatsApp QR"
+style={styles.qr}
+/>
+
+</div>
+
+</div>
+
+
+{/* COPYRIGHT */}
+
+<div style={styles.copy}>
+© 2026 MaiCinema. All Rights Reserved.
+</div>
+
+</footer>
+
+);
+
 }
 
 const styles = {
 
-  footer:{
-    background:"#000",
-    color:"white",
-    padding:"80px 20px",
-    textAlign:"center"
-  },
+footer:{
+background:"#000",
+color:"white",
+padding:"80px 20px",
+textAlign:"center"
+},
 
-  newsletter:{
-    marginBottom:"60px"
-  },
+newsletter:{
+marginBottom:"60px"
+},
 
-  title:{
-    fontSize:"28px"
-  },
+title:{
+fontSize:"28px"
+},
 
-  text:{
-    color:"#aaa",
-    marginTop:"10px"
-  },
+text:{
+color:"#aaa",
+marginTop:"10px"
+},
 
-  form:{
-    marginTop:"20px",
-    display:"flex",
-    justifyContent:"center",
-    gap:"10px"
-  },
+form:{
+marginTop:"20px",
+display:"flex",
+justifyContent:"center",
+gap:"10px"
+},
 
-  input:{
-    padding:"12px",
-    width:"260px",
-    border:"none"
-  },
+input:{
+padding:"12px",
+width:"260px",
+border:"none"
+},
 
-  button:{
-    background:"#e50914",
-    color:"white",
-    border:"none",
-    padding:"12px 20px",
-    cursor:"pointer"
-  },
+button:{
+background:"#e50914",
+color:"white",
+border:"none",
+padding:"12px 20px",
+cursor:"pointer"
+},
 
-  socials:{
-    marginBottom:"30px"
-  },
+socials:{
+marginBottom:"30px"
+},
 
-  icons:{
-    display:"flex",
-    justifyContent:"center",
-    alignItems:"center",
-    gap:"40px",
-    marginTop:"15px"
-  },
+icons:{
+display:"flex",
+justifyContent:"center",
+alignItems:"center",
+gap:"40px",
+marginTop:"15px"
+},
 
-  icon:{
-    color:"#ccc",
-    cursor:"pointer",
-    transition:"0.3s"
-  },
+icon:{
+color:"#ccc",
+cursor:"pointer",
+transition:"0.3s"
+},
 
-  qrContainer:{
-    marginTop:"40px"
-  },
+qrContainer:{
+marginTop:"40px"
+},
 
-  qr:{
-    width:"150px",
-    height:"150px",
-    borderRadius:"6px"
-  },
+qr:{
+width:"150px",
+height:"150px",
+borderRadius:"6px"
+},
 
-  copy:{
-    marginTop:"40px",
-    color:"#666",
-    fontSize:"14px"
-  }
+copy:{
+marginTop:"40px",
+color:"#666",
+fontSize:"14px"
+}
 
 };
 

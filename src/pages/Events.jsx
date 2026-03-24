@@ -1,367 +1,364 @@
 import { useState, useEffect } from "react";
+import React from "react";
 import QRCode from "react-qr-code";
-import poster from "../assets/events/nightwemarried-poster.jpg";
+import fallbackPoster from "../assets/events/nightwemarried-poster.jpg";
+import { supabase } from "../lib/supabase";
 
 function Events() {
+  const [events, setEvents] = useState([]);
+  const [tickets, setTickets] = useState([]);
 
-  /* TICKET STATES */
+  const [ticketType, setTicketType] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
-  const [ticketType,setTicketType] = useState(null);
-  const [showForm,setShowForm] = useState(false);
-  const [showPayment,setShowPayment] = useState(false);
-  const [showTicket,setShowTicket] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [showTicket, setShowTicket] = useState(false);
 
-  /* USER DATA */
-
-  const [user,setUser] = useState({
-    name:"",
-    email:"",
-    phone:""
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    phone: ""
   });
 
-  /* EVENT COUNTDOWN */
+  const [timeLeftMap, setTimeLeftMap] = useState({});
 
-  const eventDate = new Date("April 18, 2026 18:00:00 GMT+0600").getTime();
+  useEffect(() => {
+    let isMounted = true;
 
-  const [timeLeft,setTimeLeft] = useState({
-    days:0,
-    hours:0,
-    minutes:0,
-    seconds:0
-  });
+    async function loadData() {
+      try {
+        const { data: eventsData, error: eventsError } = await supabase
+          .from("events")
+          .select("*")
+          .order("id", { ascending: false });
 
-  useEffect(()=>{
+        if (eventsError) {
+          console.error("EVENT FETCH ERROR:", eventsError.message);
+          return;
+        }
 
-    const timer = setInterval(()=>{
+        const { data: ticketsData, error: ticketsError } = await supabase
+          .from("tickets")
+          .select("*")
+          .order("id", { ascending: true });
 
-      const now = new Date().getTime();
-      const distance = eventDate - now;
+        if (ticketsError) {
+          console.error("TICKET FETCH ERROR:", ticketsError.message);
+          return;
+        }
 
-      if(distance <= 0){
-        clearInterval(timer);
-        return;
+        if (isMounted) {
+          setEvents(eventsData || []);
+          setTickets(ticketsData || []);
+        }
+      } catch (err) {
+        console.error("FETCH ERROR:", err.message);
       }
+    }
 
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    loadData();
 
-      setTimeLeft({days,hours,minutes,seconds});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-    },1000);
+  useEffect(() => {
+    if (!events.length) return;
 
-    return ()=>clearInterval(timer);
+    const timer = setInterval(() => {
+      const updatedTimes = {};
 
-  },[]);
+      events.forEach((event) => {
+        const rawDateTime = `${event.date || ""} ${event.time || ""}`.trim();
+        const eventDate = new Date(rawDateTime).getTime();
 
+        if (!event.date || isNaN(eventDate)) {
+          updatedTimes[event.id] = {
+            days: 0,
+            hours: 0,
+            minutes: 0,
+            seconds: 0
+          };
+          return;
+        }
 
-  /* FUNCTIONS */
+        const now = new Date().getTime();
+        const distance = eventDate - now;
 
-  const selectTicket = (type)=>{
-    setTicketType(type);
+        if (distance <= 0) {
+          updatedTimes[event.id] = {
+            days: 0,
+            hours: 0,
+            minutes: 0,
+            seconds: 0
+          };
+          return;
+        }
+
+        updatedTimes[event.id] = {
+          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((distance % (1000 * 60)) / 1000)
+        };
+      });
+
+      setTimeLeftMap(updatedTimes);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [events]);
+
+  const selectTicket = (event, ticket) => {
+    setSelectedEvent(event);
+    setTicketType(`${ticket.title} — ${formatDisplay(ticket.price)}`);
     setShowForm(true);
+    setShowPayment(false);
+    setShowTicket(false);
   };
 
-  const handleChange = (e)=>{
+  const handleChange = (e) => {
     setUser({
       ...user,
-      [e.target.name]:e.target.value
+      [e.target.name]: e.target.value
     });
   };
 
-  const proceedPayment = ()=>{
+  const proceedPayment = () => {
     setShowForm(false);
     setShowPayment(true);
   };
 
-  const confirmPayment = ()=>{
+  const confirmPayment = () => {
     setShowPayment(false);
     setShowTicket(true);
   };
 
+  const formatDisplay = (price) => {
+    const num = parseFloat(price);
+    return isNaN(num) ? price : `$${num.toFixed(2)}`;
+  };
 
-  return(
+  const getEventTickets = (eventTitle) => {
+    return tickets.filter((ticket) => ticket.event === eventTitle);
+  };
 
+  return (
     <div style={styles.page}>
+      <h1 style={styles.heading}>Upcoming Events</h1>
 
-      <h1 style={styles.heading}>
-        Upcoming Event
-      </h1>
+      {events.map((event) => {
+        const eventTickets = getEventTickets(event.title);
+        const timeLeft = timeLeftMap[event.id] || {
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0
+        };
 
-      <div style={styles.eventContainer}>
+        return (
+          <div key={event.id} style={styles.eventBlock}>
+            <div style={styles.eventContainer}>
+              <img
+                src={event.poster || fallbackPoster}
+                alt={event.title}
+                style={styles.poster}
+              />
 
-        <img
-          src={poster}
-          alt="Event Poster"
-          style={styles.poster}
-        />
+              <div style={styles.info}>
+                <h2>{event.title}</h2>
+                <p>{event.description}</p>
 
-        <div style={styles.info}>
+                <p>
+                  Venue: <strong>{event.venue}</strong>
+                  <br />
+                  Date: <strong>{event.date}</strong>
+                  <br />
+                  Time: <strong>{event.time}</strong>
+                </p>
+              </div>
+            </div>
 
-          <h2>
-            Private Screening: The Night We Married
-          </h2>
+            <div style={styles.countdownBox}>
+              <h2>Private Screening Begins In</h2>
+              <div style={styles.countdown}>
+                <div><h1>{timeLeft.days}</h1><p>Days</p></div>
+                <div><h1>{timeLeft.hours}</h1><p>Hours</p></div>
+                <div><h1>{timeLeft.minutes}</h1><p>Minutes</p></div>
+                <div><h1>{timeLeft.seconds}</h1><p>Seconds</p></div>
+              </div>
+            </div>
 
-          <p>
-            Join us for the exclusive private screening of the short film
-            <strong> The Night We Married</strong>. This special event brings
-            together filmmakers, film lovers, and invited guests for an
-            intimate cinematic experience before the film begins streaming online.
-          </p>
-
-          <p>
-            After the private screening, the film will begin streaming on
-            Vimeo and on the MaiCinema platform, allowing viewers around
-            the world to experience the story.
-          </p>
-
-          <p>
-            Venue: <strong>Astana IT University Theater Hall</strong><br/>
-            Date: <strong>April 18, 2026</strong><br/>
-            Time: <strong>18:00 (Kazakhstan Time GMT+6)</strong>
-          </p>
-
-        </div>
-
-      </div>
-
-
-      {/* COUNTDOWN */}
-
-      <div style={styles.countdownBox}>
-
-        <h2>Private Screening Begins In</h2>
-
-        <div style={styles.countdown}>
-
-          <div>
-            <h1>{timeLeft.days}</h1>
-            <p>Days</p>
+            <div style={styles.ticketSection}>
+              <h2>Purchase Your Tickets</h2>
+              <div style={styles.buttons}>
+                {eventTickets.length > 0 ? (
+                  eventTickets.map((ticket) => (
+                    <button
+                      key={ticket.id}
+                      style={styles.ticketBtn}
+                      onClick={() => selectTicket(event, ticket)}
+                    >
+                      {ticket.title} — {formatDisplay(ticket.price)}
+                    </button>
+                  ))
+                ) : (
+                  <p style={styles.noTickets}>No tickets available for this event yet.</p>
+                )}
+              </div>
+            </div>
           </div>
-
-          <div>
-            <h1>{timeLeft.hours}</h1>
-            <p>Hours</p>
-          </div>
-
-          <div>
-            <h1>{timeLeft.minutes}</h1>
-            <p>Minutes</p>
-          </div>
-
-          <div>
-            <h1>{timeLeft.seconds}</h1>
-            <p>Seconds</p>
-          </div>
-
-        </div>
-
-      </div>
-
-
-      {/* TICKETS */}
-
-      <div style={styles.ticketSection}>
-
-        <h2>Purchase Your Tickets</h2>
-
-        <div style={styles.buttons}>
-
-          <button
-            style={styles.ticketBtn}
-            onClick={()=>selectTicket("Regular Ticket — $2.10")}
-          >
-            Regular Ticket — $2.10
-          </button>
-
-          <button
-            style={styles.ticketBtn}
-            onClick={()=>selectTicket("VIP Ticket — $10.50")}
-          >
-            VIP Ticket — $10.50
-          </button>
-
-          <button
-            style={styles.ticketBtn}
-            onClick={()=>selectTicket("Premium Invitation")}
-          >
-            Premium Invitation — Pay What You Want
-          </button>
-
-        </div>
-
-      </div>
-
-
-      {/* USER FORM */}
+        );
+      })}
 
       {showForm && (
-
         <div style={styles.formBox}>
+          <h3>{selectedEvent?.title}</h3>
+          <h4>{ticketType}</h4>
 
-          <h3>{ticketType}</h3>
-
-          <input name="name" placeholder="Full Name" style={styles.input} onChange={handleChange}/>
-          <input name="email" placeholder="Email Address" style={styles.input} onChange={handleChange}/>
-          <input name="phone" placeholder="Phone Number" style={styles.input} onChange={handleChange}/>
+          <input
+            name="name"
+            placeholder="Full Name"
+            style={styles.input}
+            onChange={handleChange}
+            value={user.name}
+          />
+          <input
+            name="email"
+            placeholder="Email Address"
+            style={styles.input}
+            onChange={handleChange}
+            value={user.email}
+          />
+          <input
+            name="phone"
+            placeholder="Phone Number"
+            style={styles.input}
+            onChange={handleChange}
+            value={user.phone}
+          />
 
           <button style={styles.payBtn} onClick={proceedPayment}>
             Proceed to Payment
           </button>
-
         </div>
-
       )}
 
-
-      {/* PAYMENT */}
-
       {showPayment && (
-
         <div style={styles.formBox}>
-
           <h3>Payment Details</h3>
-
-          <input placeholder="Name on Card" style={styles.input}/>
-          <input placeholder="Card Number" style={styles.input}/>
-          <input placeholder="Expiry Date (MM/YY)" style={styles.input}/>
-          <input placeholder="CVV" style={styles.input}/>
+          <p>{selectedEvent?.title}</p>
+          <p>{ticketType}</p>
 
           <button style={styles.payBtn} onClick={confirmPayment}>
             Confirm Payment
           </button>
-
         </div>
-
       )}
 
-
-      {/* QR TICKET */}
-
       {showTicket && (
-
         <div style={styles.ticketBox}>
-
           <h2>Your Ticket</h2>
-
+          <p>{selectedEvent?.title}</p>
           <p>{user.name}</p>
           <p>{ticketType}</p>
 
           <div style={styles.qr}>
-
             <QRCode
-              value={`${user.name}-${ticketType}`}
+              value={`${selectedEvent?.title}-${user.name}-${ticketType}`}
               size={180}
             />
-
           </div>
-
-          <p>
-            Present this QR code at the entrance for scanning.
-          </p>
-
         </div>
-
       )}
-
     </div>
-
   );
-
 }
 
-
-/* STYLES */
-
-const styles={
-
-  page:{
-    background:"#000",
-    color:"white",
-    padding:"80px"
+const styles = {
+  page: {
+    background: "#000",
+    color: "white",
+    padding: "80px"
   },
-
-  heading:{
-    marginBottom:"40px"
+  heading: {
+    marginBottom: "40px"
   },
-
-  eventContainer:{
-    display:"flex",
-    gap:"40px"
+  eventBlock: {
+    marginBottom: "100px"
   },
-
-  poster:{
-    width:"260px",
-    borderRadius:"8px"
+  eventContainer: {
+    display: "flex",
+    gap: "40px",
+    alignItems: "flex-start"
   },
-
-  info:{
-    maxWidth:"600px",
-    lineHeight:"1.6",
-    color:"#ccc"
+  poster: {
+    width: "260px",
+    borderRadius: "8px",
+    objectFit: "cover"
   },
-
-  countdownBox:{
-    marginTop:"60px",
-    textAlign:"center"
+  info: {
+    maxWidth: "600px",
+    lineHeight: "1.6",
+    color: "#ccc"
   },
-
-  countdown:{
-    display:"flex",
-    justifyContent:"center",
-    gap:"40px",
-    marginTop:"20px"
+  countdownBox: {
+    marginTop: "60px",
+    textAlign: "center"
   },
-
-  ticketSection:{
-    marginTop:"60px"
+  countdown: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "40px",
+    marginTop: "20px",
+    flexWrap: "wrap"
   },
-
-  buttons:{
-    display:"flex",
-    gap:"20px",
-    marginTop:"20px"
+  ticketSection: {
+    marginTop: "60px"
   },
-
-  ticketBtn:{
-    background:"#e50914",
-    border:"none",
-    color:"white",
-    padding:"14px 20px",
-    cursor:"pointer",
-    borderRadius:"4px"
+  buttons: {
+    display: "flex",
+    gap: "20px",
+    marginTop: "20px",
+    flexWrap: "wrap"
   },
-
-  formBox:{
-    marginTop:"40px",
-    display:"flex",
-    flexDirection:"column",
-    gap:"15px",
-    maxWidth:"350px"
+  ticketBtn: {
+    background: "#e50914",
+    border: "none",
+    color: "white",
+    padding: "14px 20px",
+    cursor: "pointer",
+    borderRadius: "4px"
   },
-
-  input:{
-    padding:"12px",
-    border:"none"
+  formBox: {
+    marginTop: "40px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "15px",
+    maxWidth: "350px"
   },
-
-  payBtn:{
-    background:"#00ffae",
-    border:"none",
-    padding:"14px",
-    cursor:"pointer"
+  input: {
+    padding: "12px",
+    border: "none"
   },
-
-  ticketBox:{
-    marginTop:"40px",
-    textAlign:"center"
+  payBtn: {
+    background: "#00ffae",
+    border: "none",
+    padding: "14px",
+    cursor: "pointer"
   },
-
-  qr:{
-    marginTop:"20px"
+  ticketBox: {
+    marginTop: "40px",
+    textAlign: "center"
+  },
+  qr: {
+    marginTop: "20px"
+  },
+  noTickets: {
+    color: "#aaa"
   }
-
 };
 
 export default Events;

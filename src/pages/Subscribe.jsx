@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { SUBSCRIPTION_PRICE } from "../config/pricing";
 
 function Subscribe() {
 
@@ -25,7 +26,7 @@ function Subscribe() {
       <h1>Subscribe to MaiCinema</h1>
 
       <p style={styles.price}>
-        Monthly Subscription: $5
+        Monthly Subscription: ${SUBSCRIPTION_PRICE}
       </p>
 
       <form onSubmit={handleSubscribe} style={styles.form}>
@@ -67,7 +68,7 @@ function Subscribe() {
         />
 
         <button style={styles.button}>
-          Pay $5
+          Pay ${SUBSCRIPTION_PRICE}
         </button>
 
       </form>
@@ -88,7 +89,9 @@ const styles = {
 
   price:{
     color:"#00ffae",
-    marginBottom:"30px"
+    marginBottom:"30px",
+    fontSize:"20px",
+    fontWeight:"bold"
   },
 
   form:{

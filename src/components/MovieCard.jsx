@@ -1,8 +1,8 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { RENT_PRICE } from "../config/pricing";
 
 function MovieCard({ movie }) {
-
   const videoRef = useRef(null);
   const navigate = useNavigate();
 
@@ -30,7 +30,8 @@ function MovieCard({ movie }) {
     navigate("/create-account", {
       state: {
         type: "rent",
-        title: movie.title
+        title: movie.title,
+        price: RENT_PRICE
       }
     });
   };
@@ -48,41 +49,35 @@ function MovieCard({ movie }) {
       }}
       onClick={handleClick}
     >
-
       {movie.video ? (
         <video
           ref={videoRef}
           src={movie.video}
+          poster={movie.poster || movie.image}
           style={styles.image}
           preload="auto"
           playsInline
         />
       ) : (
         <img
-          src={movie.image}
+          src={movie.poster || movie.image}
           alt={movie.title}
           style={styles.image}
         />
       )}
 
       <div style={styles.info}>
-
         <h3 style={styles.title}>{movie.title}</h3>
 
         <p style={styles.meta}>
           {movie.genre} • {movie.rating}
         </p>
 
-        <p style={styles.desc}>
-          {movie.description}
-        </p>
+        <p style={styles.desc}>{movie.description}</p>
 
-        <p style={styles.views}>
-          👁 {movie.views} views
-        </p>
+        <p style={styles.views}>👁 {movie.views} views</p>
 
         <div style={styles.actions}>
-
           <button
             style={styles.watchlist}
             onClick={(e) => {
@@ -93,14 +88,9 @@ function MovieCard({ movie }) {
             + Watchlist
           </button>
 
-          <span style={styles.price}>
-            Rent ${movie.price}
-          </span>
-
+          <span style={styles.price}>Rent ${RENT_PRICE}</span>
         </div>
-
       </div>
-
     </div>
   );
 }
@@ -119,7 +109,8 @@ const styles = {
   image: {
     width: "100%",
     height: "150px",
-    objectFit: "cover"
+    objectFit: "cover",
+    display: "block"
   },
 
   info: {
