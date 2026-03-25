@@ -101,7 +101,7 @@ function MyCinema() {
     const video = videoRef.current;
     const currentFilm = films[currentBanner];
 
-    if (video && currentFilm?.video_url && hasAccess) {
+    if (video && currentFilm?.video_url) {
       video.currentTime = 0;
       video.style.opacity = "1";
       video.play().catch(() => {});
