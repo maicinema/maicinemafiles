@@ -29,6 +29,23 @@ function MyCinema() {
     return () => clearInterval(bannerInterval);
   }, [films.length]);
 
+  // ✅ Unlock sound after user interaction
+  useEffect(() => {
+    const enableSound = () => {
+      const video = videoRef.current;
+      if (video) {
+        video.muted = false;
+        video.volume = 1;
+      }
+    };
+
+    window.addEventListener("click", enableSound);
+
+    return () => {
+      window.removeEventListener("click", enableSound);
+    };
+  }, []);
+
   async function loadFilms() {
     setErrorMessage("");
 
@@ -126,11 +143,11 @@ function MyCinema() {
             backgroundImage: `url(${bannerFilm.poster_url})`
           }}
         >
-          {/* ✅ Banner Video */}
-          {bannerFilm.trailer_url && (
+          {/* ✅ Banner video from film */}
+          {bannerFilm.video_url && (
             <video
               ref={videoRef}
-              src={bannerFilm.trailer_url}
+              src={bannerFilm.video_url}
               style={{ ...styles.bannerVideo, opacity: 1 }}
               autoPlay
               loop
