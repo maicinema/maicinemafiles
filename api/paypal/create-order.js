@@ -1,32 +1,35 @@
-const base =
-  process.env.PAYPAL_ENV === "live"
-    ? "https://api-m.paypal.com"
-    : "https://api-m.sandbox.paypal.com";
-
-async function getAccessToken() {
-  const auth = Buffer.from(
-    `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`
-  ).toString("base64");
-
-  const response = await fetch(`${base}/v1/oauth2/token`, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${auth}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: "grant_type=client_credentials",
-  });
-
-  const data = await response.json();
-  return data.access_token;
-}
-
 export default async function handler(req, res) {
+  // Allow browser GET test
+  if (req.method !== "POST") {
+    return res.status(200).json({ message: "API working" });
+  }
+
   try {
-    const accessToken = await getAccessToken();
+    const { amount } = req.body;
 
-    const amount = "10.00"; // test price
+    const base =
+      process.env.PAYPAL_ENV === "sandbox"
+        ? "https://api-m.sandbox.paypal.com"
+        : "https://api-m.paypal.com";
 
+    // Get access token
+    const auth = await fetch(`${base}/v1/oauth2/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization:
+          "Basic " +
+          Buffer.from(
+            `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`
+          ).toString("base64"),
+      },
+      body: "grant_type=client_credentials",
+    });
+
+    const authData = await auth.json();
+    const accessToken = authData.access_token;
+
+    // Create order
     const orderRes = await fetch(`${base}/v2/checkout/orders`, {
       method: "POST",
       headers: {
@@ -39,7 +42,7 @@ export default async function handler(req, res) {
           {
             amount: {
               currency_code: "USD",
-              value: amount,
+              value: amount || "10.00",
             },
           },
         ],
@@ -49,7 +52,7 @@ export default async function handler(req, res) {
     const orderData = await orderRes.json();
 
     res.status(200).json(orderData);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 }
