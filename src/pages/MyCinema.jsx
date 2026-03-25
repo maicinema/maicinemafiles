@@ -44,9 +44,6 @@ function MyCinema() {
       .eq("status", "live")
       .order("views", { ascending: false });
 
-    console.log("MyCinema films query result:", data);
-    console.log("MyCinema films query error:", error);
-
     if (error) {
       setErrorMessage(error.message || "Failed to load films");
       return;
@@ -86,6 +83,36 @@ function MyCinema() {
     if (video) {
       video.pause();
       video.style.opacity = "0";
+    }
+  };
+
+  // ✅ PAYPAL FUNCTION ADDED
+  const handlePay = async () => {
+    try {
+      const res = await fetch("/api/paypal/create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          amount: "10.00" // later make dynamic
+        })
+      });
+
+      const data = await res.json();
+
+      const approveLink = data.links?.find(
+        (link) => link.rel === "approve"
+      );
+
+      if (approveLink) {
+        window.location.href = approveLink.href;
+      } else {
+        alert("Payment link not found");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Payment failed");
     }
   };
 
@@ -137,6 +164,11 @@ function MyCinema() {
             </p>
 
             <p style={styles.bannerDesc}>{bannerFilm.description}</p>
+
+            {/* ✅ PAY BUTTON ADDED */}
+            <button style={styles.payButton} onClick={handlePay}>
+              Buy Ticket with PayPal
+            </button>
           </div>
         </div>
       )}
@@ -212,6 +244,16 @@ const styles = {
     color: "#aaa",
     marginTop: "10px",
     lineHeight: "1.5"
+  },
+  payButton: {
+    marginTop: "20px",
+    padding: "12px 20px",
+    background: "#ffc439",
+    color: "#000",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "bold",
+    borderRadius: "6px"
   },
   gridSection: {
     padding: "80px"
