@@ -9,10 +9,9 @@ function MovieCard({ movie }) {
   const startPreview = () => {
     const video = videoRef.current;
 
-    if (video && movie.video) {
-      video.currentTime = 14;
-      video.muted = false;
-      video.volume = 1;
+    if (video && movie.video_url) {
+      video.currentTime = 0;
+      video.muted = true; // safer autoplay
       video.play().catch(() => {});
     }
   };
@@ -20,9 +19,9 @@ function MovieCard({ movie }) {
   const stopPreview = () => {
     const video = videoRef.current;
 
-    if (video && movie.video) {
+    if (video && movie.video_url) {
       video.pause();
-      video.currentTime = 14;
+      video.currentTime = 0;
     }
   };
 
@@ -49,18 +48,18 @@ function MovieCard({ movie }) {
       }}
       onClick={handleClick}
     >
-      {movie.video ? (
+      {movie.video_url ? (
         <video
           ref={videoRef}
-          src={movie.video}
-          poster={movie.poster || movie.image}
+          src={movie.video_url}
+          poster={movie.poster_url}
           style={styles.image}
           preload="auto"
           playsInline
         />
       ) : (
         <img
-          src={movie.poster || movie.image}
+          src={movie.poster_url}
           alt={movie.title}
           style={styles.image}
         />

@@ -6,7 +6,7 @@ function MyCinema() {
   const [films, setFilms] = useState([]);
   const [currentBanner, setCurrentBanner] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
-  const [hasAccess, setHasAccess] = useState(false); // ✅ added
+  const [hasAccess, setHasAccess] = useState(false);
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -29,13 +29,6 @@ function MyCinema() {
     return () => clearInterval(bannerInterval);
   }, [films.length]);
 
-  useEffect(() => {
-    if (films.length === 0) return;
-    if (currentBanner > films.length - 1) {
-      setCurrentBanner(0);
-    }
-  }, [films, currentBanner]);
-
   async function loadFilms() {
     setErrorMessage("");
 
@@ -57,15 +50,14 @@ function MyCinema() {
       return new Date(film.contract_expires_at) > now;
     });
 
-    const normalizedFilms = publicFilms.map((film) => ({
-      ...film,
-      image: film.poster
-    }));
+    const fixedFilms = publicFilms.map((film) => ({
+  ...film,
+  image: film.poster_url
+}));
 
-    setFilms(normalizedFilms);
+setFilms(fixedFilms);
   }
 
-  // ✅ CHECK ACCESS FUNCTION
   const checkAccess = async (filmId) => {
     const { data: userData } = await supabase.auth.getUser();
     const user = userData?.user;
@@ -79,15 +71,11 @@ function MyCinema() {
       .eq("film_id", filmId)
       .gt("expires_at", new Date().toISOString());
 
-    if (error) {
-      console.error(error);
-      return false;
-    }
+    if (error) return false;
 
     return data && data.length > 0;
   };
 
-  // ✅ RUN ACCESS CHECK WHEN FILM CHANGES
   useEffect(() => {
     const bannerFilm = films[currentBanner];
     if (!bannerFilm) return;
@@ -104,8 +92,7 @@ function MyCinema() {
     const video = videoRef.current;
     const currentFilm = films[currentBanner];
 
-    // ✅ ONLY PLAY IF USER HAS ACCESS
-    if (video && currentFilm?.video && hasAccess) {
+    if (video && currentFilm?.video_url && hasAccess) {
       video.currentTime = 0;
       video.muted = false;
       video.volume = 1;
@@ -116,14 +103,12 @@ function MyCinema() {
 
   const stopPreview = () => {
     const video = videoRef.current;
-
     if (video) {
       video.pause();
       video.style.opacity = "0";
     }
   };
 
-  // ✅ RENT FUNCTION (still PayPal for now)
   const handleRent = async () => {
     try {
       const res = await fetch("/api/paypal/create-order", {
@@ -132,7 +117,7 @@ function MyCinema() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          amount: "3.00" // your rent price
+          amount: "3.00"
         })
       });
 
@@ -148,7 +133,6 @@ function MyCinema() {
         alert("Payment link not found");
       }
     } catch (err) {
-      console.error(err);
       alert("Payment failed");
     }
   };
@@ -164,29 +148,19 @@ function MyCinema() {
         </div>
       )}
 
-      {!errorMessage && films.length === 0 && (
-        <div style={styles.messageBox}>
-          <h2 style={styles.messageTitle}>No live films found</h2>
-          <p style={styles.messageText}>
-            There are no currently active live films in the database.
-          </p>
-        </div>
-      )}
-
       {bannerFilm && (
         <div
-          key={bannerFilm.id}
           style={{
             ...styles.banner,
-            backgroundImage: `url(${bannerFilm.poster || ""})`
+            backgroundImage: `url(${bannerFilm.poster_url || ""})`
           }}
           onMouseEnter={startPreview}
           onMouseLeave={stopPreview}
         >
-          {bannerFilm.video && (
+          {bannerFilm.video_url && (
             <video
               ref={videoRef}
-              src={bannerFilm.video}
+              src={bannerFilm.video_url}
               style={styles.bannerVideo}
               preload="auto"
               playsInline
@@ -202,14 +176,12 @@ function MyCinema() {
 
             <p style={styles.bannerDesc}>{bannerFilm.description}</p>
 
-            {/* ✅ SHOW RENT BUTTON ONLY IF NO ACCESS */}
             {!hasAccess && (
               <button style={styles.payButton} onClick={handleRent}>
                 Rent Film (48h)
               </button>
             )}
 
-            {/* ✅ OPTIONAL: SHOW MESSAGE IF HAS ACCESS */}
             {hasAccess && (
               <p style={{ color: "#10b981", marginTop: "15px" }}>
                 You have access to this film
