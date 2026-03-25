@@ -1,21 +1,14 @@
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).send("Method not allowed");
-  }
+const base =
+  process.env.PAYPAL_ENV === "live"
+    ? "https://api-m.paypal.com"
+    : "https://api-m.sandbox.paypal.com";
 
-  const { amount } = req.body;
-
-  const base =
-    process.env.PAYPAL_ENV === "live"
-      ? "https://api-m.paypal.com"
-      : "https://api-m.sandbox.paypal.com";
-
-  // Get access token
+async function getAccessToken() {
   const auth = Buffer.from(
     `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`
   ).toString("base64");
 
-  const tokenRes = await fetch(`${base}/v1/oauth2/token`, {
+  const response = await fetch(`${base}/v1/oauth2/token`, {
     method: "POST",
     headers: {
       Authorization: `Basic ${auth}`,
@@ -24,30 +17,39 @@ export default async function handler(req, res) {
     body: "grant_type=client_credentials",
   });
 
-  const tokenData = await tokenRes.json();
-  const accessToken = tokenData.access_token;
+  const data = await response.json();
+  return data.access_token;
+}
 
-  // Create order
-  const orderRes = await fetch(`${base}/v2/checkout/orders`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      intent: "CAPTURE",
-      purchase_units: [
-        {
-          amount: {
-            currency_code: "USD",
-            value: amount,
+export default async function handler(req, res) {
+  try {
+    const accessToken = await getAccessToken();
+
+    const amount = "10.00"; // test price
+
+    const orderRes = await fetch(`${base}/v2/checkout/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        intent: "CAPTURE",
+        purchase_units: [
+          {
+            amount: {
+              currency_code: "USD",
+              value: amount,
+            },
           },
-        },
-      ],
-    }),
-  });
+        ],
+      }),
+    });
 
-  const orderData = await orderRes.json();
+    const orderData = await orderRes.json();
 
-  res.status(200).json(orderData);
+    res.status(200).json(orderData);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 }
