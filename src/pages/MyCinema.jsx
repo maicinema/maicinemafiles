@@ -6,6 +6,7 @@ function MyCinema() {
   const [films, setFilms] = useState([]);
   const [currentBanner, setCurrentBanner] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
+  const [hasAccess, setHasAccess] = useState(false); // ✅ added
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -64,11 +65,47 @@ function MyCinema() {
     setFilms(normalizedFilms);
   }
 
+  // ✅ CHECK ACCESS FUNCTION
+  const checkAccess = async (filmId) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+
+    if (!user) return false;
+
+    const { data, error } = await supabase
+      .from("rentals")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("film_id", filmId)
+      .gt("expires_at", new Date().toISOString());
+
+    if (error) {
+      console.error(error);
+      return false;
+    }
+
+    return data && data.length > 0;
+  };
+
+  // ✅ RUN ACCESS CHECK WHEN FILM CHANGES
+  useEffect(() => {
+    const bannerFilm = films[currentBanner];
+    if (!bannerFilm) return;
+
+    const runCheck = async () => {
+      const access = await checkAccess(bannerFilm.id);
+      setHasAccess(access);
+    };
+
+    runCheck();
+  }, [films, currentBanner]);
+
   const startPreview = () => {
     const video = videoRef.current;
     const currentFilm = films[currentBanner];
 
-    if (video && currentFilm?.video) {
+    // ✅ ONLY PLAY IF USER HAS ACCESS
+    if (video && currentFilm?.video && hasAccess) {
       video.currentTime = 0;
       video.muted = false;
       video.volume = 1;
@@ -86,8 +123,8 @@ function MyCinema() {
     }
   };
 
-  // ✅ PAYPAL FUNCTION ADDED
-  const handlePay = async () => {
+  // ✅ RENT FUNCTION (still PayPal for now)
+  const handleRent = async () => {
     try {
       const res = await fetch("/api/paypal/create-order", {
         method: "POST",
@@ -95,7 +132,7 @@ function MyCinema() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          amount: "10.00" // later make dynamic
+          amount: "3.00" // your rent price
         })
       });
 
@@ -165,10 +202,19 @@ function MyCinema() {
 
             <p style={styles.bannerDesc}>{bannerFilm.description}</p>
 
-            {/* ✅ PAY BUTTON ADDED */}
-            <button style={styles.payButton} onClick={handlePay}>
-              Buy Ticket with PayPal
-            </button>
+            {/* ✅ SHOW RENT BUTTON ONLY IF NO ACCESS */}
+            {!hasAccess && (
+              <button style={styles.payButton} onClick={handleRent}>
+                Rent Film (48h)
+              </button>
+            )}
+
+            {/* ✅ OPTIONAL: SHOW MESSAGE IF HAS ACCESS */}
+            {hasAccess && (
+              <p style={{ color: "#10b981", marginTop: "15px" }}>
+                You have access to this film
+              </p>
+            )}
           </div>
         </div>
       )}

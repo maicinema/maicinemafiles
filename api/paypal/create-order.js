@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     const authData = await auth.json();
     const accessToken = authData.access_token;
 
-    // Create order
+    // Create order WITH redirect URLs
     const orderRes = await fetch(`${base}/v2/checkout/orders`, {
       method: "POST",
       headers: {
@@ -46,6 +46,11 @@ export default async function handler(req, res) {
             },
           },
         ],
+        application_context: {
+          return_url: `${process.env.VITE_APP_URL}/payment-success`,
+          cancel_url: `${process.env.VITE_APP_URL}/payment-cancel`,
+          user_action: "PAY_NOW",
+        },
       }),
     });
 
