@@ -41,7 +41,15 @@ function LeavingSoon() {
       return msLeft > 0 && msLeft <= 7 * 24 * 60 * 60 * 1000;
     });
 
-    setMovies(leavingSoonFilms);
+    // ✅ FIX mapping (same system as others)
+    const mapped = leavingSoonFilms.map((film) => ({
+      ...film,
+      poster: film.poster_url || film.poster,
+      video: film.video_url,
+      image: film.poster_url || film.poster
+    }));
+
+    setMovies(mapped);
   }
 
   return (
@@ -50,13 +58,9 @@ function LeavingSoon() {
 
       <div style={styles.grid}>
         {movies.map((movie) => (
-          <MovieCard
-            key={movie.id}
-            movie={{
-              ...movie,
-              image: movie.poster
-            }}
-          />
+          <div key={movie.id} style={styles.cardWrap}>
+            <MovieCard movie={movie} />
+          </div>
         ))}
       </div>
     </div>
@@ -71,13 +75,21 @@ const styles = {
 
   heading: {
     color: "white",
-    marginBottom: "30px"
+    marginBottom: "20px"
   },
 
   grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: "30px"
+    display: "flex",
+    gap: "16px",
+    overflowX: "auto", // ✅ horizontal scroll
+    overflowY: "hidden",
+    paddingBottom: "10px",
+    scrollBehavior: "smooth"
+  },
+
+  cardWrap: {
+    flex: "0 0 auto",
+    width: "220px"
   }
 };
 
