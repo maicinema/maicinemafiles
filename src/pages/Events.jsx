@@ -281,81 +281,103 @@ const styles = {
   page: {
     background: "#000",
     color: "white",
-    padding: "80px"
+    padding: "clamp(20px, 5vw, 80px)" // ✅ responsive padding
   },
+
   heading: {
-    marginBottom: "40px"
+    marginBottom: "40px",
+    fontSize: "clamp(26px, 5vw, 40px)"
   },
+
   eventBlock: {
-    marginBottom: "100px"
+    marginBottom: "80px"
   },
+
+  /* ✅ FIX MAIN LAYOUT */
   eventContainer: {
     display: "flex",
-    gap: "40px",
+    flexWrap: "wrap", // ✅ allows stacking
+    gap: "20px",
     alignItems: "flex-start"
   },
+
   poster: {
-    width: "260px",
+    width: "100%",
+    maxWidth: "260px",
     borderRadius: "8px",
     objectFit: "cover"
   },
+
   info: {
     maxWidth: "600px",
     lineHeight: "1.6",
-    color: "#ccc"
+    color: "#ccc",
+    fontSize: "clamp(14px, 2.5vw, 16px)"
   },
+
   countdownBox: {
-    marginTop: "60px",
+    marginTop: "40px",
     textAlign: "center"
   },
+
   countdown: {
     display: "flex",
     justifyContent: "center",
-    gap: "40px",
-    marginTop: "20px",
-    flexWrap: "wrap"
-  },
-  ticketSection: {
-    marginTop: "60px"
-  },
-  buttons: {
-    display: "flex",
     gap: "20px",
     marginTop: "20px",
     flexWrap: "wrap"
   },
+
+  ticketSection: {
+    marginTop: "40px"
+  },
+
+  buttons: {
+    display: "flex",
+    gap: "15px",
+    marginTop: "20px",
+    flexWrap: "wrap"
+  },
+
   ticketBtn: {
     background: "#e50914",
     border: "none",
     color: "white",
-    padding: "14px 20px",
+    padding: "12px 16px",
     cursor: "pointer",
-    borderRadius: "4px"
+    borderRadius: "4px",
+    fontSize: "14px"
   },
+
   formBox: {
     marginTop: "40px",
     display: "flex",
     flexDirection: "column",
-    gap: "15px",
+    gap: "12px",
     maxWidth: "350px"
   },
+
   input: {
-    padding: "12px",
+    padding: "10px",
     border: "none"
   },
+
   payBtn: {
     background: "#00ffae",
     border: "none",
-    padding: "14px",
+    padding: "12px",
     cursor: "pointer"
   },
+
   ticketBox: {
     marginTop: "40px",
     textAlign: "center"
   },
+
   qr: {
     marginTop: "20px"
   },
+
   noTickets: {
     color: "#aaa"
   }
