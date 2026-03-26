@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase";
 
 function TrendingNow() {
   const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -17,21 +18,21 @@ function TrendingNow() {
       .eq("status", "live")
       .order("views", { ascending: false });
 
-    const top = (data || []).slice(0, 20).map((film) => ({
+    const top = (data || []).slice(0, 10).map((film) => ({
       ...film,
       poster: film.poster_url,
       video: film.video_url
     }));
 
     setMovies(top);
+    setLoading(false); // ✅ done loading
   }
 
   const scroll = (direction) => {
     if (!scrollRef.current) return;
 
-    const amount = 300;
     scrollRef.current.scrollBy({
-      left: direction === "left" ? -amount : amount,
+      left: direction === "left" ? -300 : 300,
       behavior: "smooth"
     });
   };
@@ -46,11 +47,15 @@ function TrendingNow() {
         </button>
 
         <div style={styles.grid} ref={scrollRef}>
-          {movies.map((movie) => (
-            <div key={movie.id} style={styles.cardWrap}>
-              <MovieCard movie={movie} />
-            </div>
-          ))}
+          {loading
+            ? Array.from({ length: 10 }).map((_, i) => (
+                <div key={i} style={styles.skeleton} />
+              ))
+            : movies.map((movie) => (
+                <div key={movie.id} style={styles.cardWrap}>
+                  <MovieCard movie={movie} />
+                </div>
+              ))}
         </div>
 
         <button style={styles.arrowRight} onClick={() => scroll("right")}>
@@ -81,13 +86,21 @@ const styles = {
   grid: {
     display: "flex",
     gap: "16px",
-    overflowX: "auto",
-    scrollBehavior: "smooth"
+    overflowX: "auto"
   },
 
   cardWrap: {
     flex: "0 0 auto",
     width: "220px"
+  },
+
+  /* ✅ SKELETON */
+  skeleton: {
+    width: "220px",
+    height: "150px",
+    background: "#222",
+    borderRadius: "6px",
+    animation: "pulse 1.5s infinite"
   },
 
   arrowLeft: {
@@ -97,10 +110,9 @@ const styles = {
     background: "rgba(0,0,0,0.6)",
     color: "white",
     border: "none",
-    fontSize: "20px",
-    cursor: "pointer",
     height: "100%",
-    width: "40px"
+    width: "40px",
+    cursor: "pointer"
   },
 
   arrowRight: {
@@ -110,10 +122,9 @@ const styles = {
     background: "rgba(0,0,0,0.6)",
     color: "white",
     border: "none",
-    fontSize: "20px",
-    cursor: "pointer",
     height: "100%",
-    width: "40px"
+    width: "40px",
+    cursor: "pointer"
   }
 };
 

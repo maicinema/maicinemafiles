@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
+import "./App.css";
 
 import EventMonitor from "./pages/EventMonitor";
 import EventControl from "./pages/EventControl";
