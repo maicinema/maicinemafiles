@@ -10,7 +10,7 @@ function ComingSoonFilms() {
 
     const interval = setInterval(() => {
       loadComingSoon();
-    }, 1000);
+    }, 5000); // ✅ not too fast
 
     return () => clearInterval(interval);
   }, []);
@@ -27,7 +27,14 @@ function ComingSoonFilms() {
       return;
     }
 
-    setMovies(data || []);
+    const mapped = (data || []).map((film) => ({
+      ...film,
+      poster: film.poster_url,
+      video: film.video_url,
+      image: film.poster_url
+    }));
+
+    setMovies(mapped);
   }
 
   return (
@@ -36,13 +43,9 @@ function ComingSoonFilms() {
 
       <div style={styles.grid}>
         {movies.map((movie) => (
-          <MovieCard
-            key={movie.id}
-            movie={{
-              ...movie,
-              image: movie.poster
-            }}
-          />
+          <div key={movie.id} style={styles.cardWrap}>
+            <MovieCard movie={movie} />
+          </div>
         ))}
       </div>
     </div>
@@ -54,14 +57,24 @@ const styles = {
     background: "black",
     padding: "20px"
   },
+
   heading: {
     color: "white",
-    marginBottom: "30px"
+    marginBottom: "20px"
   },
+
   grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: "30px"
+    display: "flex",
+    gap: "16px",
+    overflowX: "auto", // ✅ horizontal scroll
+    overflowY: "hidden",
+    paddingBottom: "10px",
+    scrollBehavior: "smooth"
+  },
+
+  cardWrap: {
+    flex: "0 0 auto",
+    width: "220px"
   }
 };
 
