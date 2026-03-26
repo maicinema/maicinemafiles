@@ -7,7 +7,9 @@ function MyCinema() {
   const [rows, setRows] = useState([]);
   const [currentBanner, setCurrentBanner] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
+
   const videoRef = useRef(null);
+  const rowRefs = useRef([]); // ✅ FIX
 
   useEffect(() => {
     loadFilms();
@@ -62,10 +64,11 @@ function MyCinema() {
 
   const bannerFilm = films[currentBanner];
 
-  const scroll = (ref, direction) => {
-    if (!ref.current) return;
+  const scroll = (index, direction) => {
+    const ref = rowRefs.current[index];
+    if (!ref) return;
 
-    ref.current.scrollBy({
+    ref.scrollBy({
       left: direction === "left" ? -300 : 300,
       behavior: "smooth"
     });
@@ -125,41 +128,40 @@ function MyCinema() {
       <div style={styles.gridSection}>
         <h2 style={styles.heading}>MyCinema</h2>
 
-        {rows.map((row, index) => {
-          const rowRef = useRef(null);
+        {rows.map((row, index) => (
+          <div key={index} style={styles.wrapper}>
+            <button
+              style={styles.arrowLeft}
+              onClick={() => scroll(index, "left")}
+            >
+              ◀
+            </button>
 
-          return (
-            <div key={index} style={styles.wrapper}>
-              <button
-                style={styles.arrowLeft}
-                onClick={() => scroll(rowRef, "left")}
-              >
-                ◀
-              </button>
-
-              <div style={styles.row} ref={rowRef}>
-                {row.map((movie) => (
-                  <div key={movie.id} style={styles.cardWrap}>
-                    <MovieCard
-                      movie={{
-                        ...movie,
-                        video: movie.video_url,
-                        poster: movie.poster_url
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              <button
-                style={styles.arrowRight}
-                onClick={() => scroll(rowRef, "right")}
-              >
-                ▶
-              </button>
+            <div
+              style={styles.row}
+              ref={(el) => (rowRefs.current[index] = el)} // ✅ FIX
+            >
+              {row.map((movie) => (
+                <div key={movie.id} style={styles.cardWrap}>
+                  <MovieCard
+                    movie={{
+                      ...movie,
+                      video: movie.video_url,
+                      poster: movie.poster_url
+                    }}
+                  />
+                </div>
+              ))}
             </div>
-          );
-        })}
+
+            <button
+              style={styles.arrowRight}
+              onClick={() => scroll(index, "right")}
+            >
+              ▶
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
