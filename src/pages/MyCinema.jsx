@@ -34,9 +34,9 @@ function MyCinema() {
 
   async function loadFilms() {
     const { data, error } = await supabase
-      .from("films")
-      .select("*")
-      .eq("status", "live");
+  .from("films")
+  .select("id,title,poster_url,video_url,genre,rating,description,views")
+  .eq("status", "live");
 
     if (error) {
       setErrorMessage(error.message);
@@ -99,7 +99,6 @@ function MyCinema() {
             if (video) {
               video.pause();
               video.currentTime = 0;
-              video.load();
             }
           }}
         >
