@@ -29,6 +29,13 @@ function MyCinema() {
     return () => clearInterval(bannerInterval);
   }, [films.length]);
 
+  useEffect(() => {
+    if (films.length === 0) return;
+    if (currentBanner > films.length - 1) {
+      setCurrentBanner(0);
+    }
+  }, [films, currentBanner]);
+
   async function loadFilms() {
     setErrorMessage("");
 
@@ -50,12 +57,12 @@ function MyCinema() {
       return new Date(film.contract_expires_at) > now;
     });
 
-    const fixedFilms = publicFilms.map((film) => ({
-  ...film,
-  image: film.poster_url
-}));
+    const normalizedFilms = publicFilms.map((film) => ({
+      ...film,
+      image: film.poster
+    }));
 
-setFilms(fixedFilms);
+    setFilms(normalizedFilms);
   }
 
   const checkAccess = async (filmId) => {
@@ -92,7 +99,7 @@ setFilms(fixedFilms);
     const video = videoRef.current;
     const currentFilm = films[currentBanner];
 
-    if (video && currentFilm?.video_url && hasAccess) {
+    if (video && currentFilm?.video && hasAccess) {
       video.currentTime = 0;
       video.muted = false;
       video.volume = 1;
@@ -103,6 +110,7 @@ setFilms(fixedFilms);
 
   const stopPreview = () => {
     const video = videoRef.current;
+
     if (video) {
       video.pause();
       video.style.opacity = "0";
@@ -132,7 +140,7 @@ setFilms(fixedFilms);
       } else {
         alert("Payment link not found");
       }
-    } catch (err) {
+    } catch {
       alert("Payment failed");
     }
   };
@@ -148,19 +156,29 @@ setFilms(fixedFilms);
         </div>
       )}
 
+      {!errorMessage && films.length === 0 && (
+        <div style={styles.messageBox}>
+          <h2 style={styles.messageTitle}>No live films found</h2>
+          <p style={styles.messageText}>
+            There are no currently active live films in the database.
+          </p>
+        </div>
+      )}
+
       {bannerFilm && (
         <div
+          key={bannerFilm.id}
           style={{
             ...styles.banner,
-            backgroundImage: `url(${bannerFilm.poster_url || ""})`
+            backgroundImage: `url(${bannerFilm.poster || ""})`
           }}
           onMouseEnter={startPreview}
           onMouseLeave={stopPreview}
         >
-          {bannerFilm.video_url && (
+          {bannerFilm.video && (
             <video
               ref={videoRef}
-              src={bannerFilm.video_url}
+              src={bannerFilm.video}
               style={styles.bannerVideo}
               preload="auto"
               playsInline

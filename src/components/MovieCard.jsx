@@ -1,109 +1,17 @@
-import { useState, useEffect, useRef } from "react";
-import MovieCard from "../components/MovieCard";
-import { supabase } from "../lib/supabase";
+import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { RENT_PRICE } from "../config/pricing";
 
-function MyCinema() {
-  const [films, setFilms] = useState([]);
-  const [currentBanner, setCurrentBanner] = useState(0);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [hasAccess, setHasAccess] = useState(false);
+function MovieCard({ movie }) {
   const videoRef = useRef(null);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    loadFilms();
-
-    const refreshInterval = setInterval(() => {
-      loadFilms();
-    }, 5000);
-
-    return () => clearInterval(refreshInterval);
-  }, []);
-
-  useEffect(() => {
-    if (films.length < 2) return;
-
-    const bannerInterval = setInterval(() => {
-      setCurrentBanner((prev) => (prev + 1) % films.length);
-    }, 10000);
-
-    return () => clearInterval(bannerInterval);
-  }, [films.length]);
-
-  useEffect(() => {
-    if (films.length === 0) return;
-    if (currentBanner > films.length - 1) {
-      setCurrentBanner(0);
-    }
-  }, [films, currentBanner]);
-
-  async function loadFilms() {
-    setErrorMessage("");
-
-    const { data, error } = await supabase
-      .from("films")
-      .select("*")
-      .eq("status", "live")
-      .order("views", { ascending: false });
-
-    if (error) {
-      setErrorMessage(error.message || "Failed to load films");
-      return;
-    }
-
-    const now = new Date();
-
-    const publicFilms = (data || []).filter((film) => {
-      if (!film.contract_expires_at) return true;
-      return new Date(film.contract_expires_at) > now;
-    });
-
-    // ✅ KEEP YOUR STRUCTURE (only add image mapping)
-    const normalizedFilms = publicFilms.map((film) => ({
-      ...film,
-      image: film.poster_url
-    }));
-
-    setFilms(normalizedFilms);
-  }
-
-  const checkAccess = async (filmId) => {
-    const { data: userData } = await supabase.auth.getUser();
-    const user = userData?.user;
-
-    if (!user) return false;
-
-    const { data, error } = await supabase
-      .from("rentals")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("film_id", filmId)
-      .gt("expires_at", new Date().toISOString());
-
-    if (error) return false;
-
-    return data && data.length > 0;
-  };
-
-  useEffect(() => {
-    const bannerFilm = films[currentBanner];
-    if (!bannerFilm) return;
-
-    const runCheck = async () => {
-      const access = await checkAccess(bannerFilm.id);
-      setHasAccess(access);
-    };
-
-    runCheck();
-  }, [films, currentBanner]);
-
-  // ✅ FIXED: banner video play
   const startPreview = () => {
     const video = videoRef.current;
-    const currentFilm = films[currentBanner];
 
-    if (video && currentFilm?.video_url) {
+    if (video && movie.video_url) {
       video.currentTime = 0;
-      video.style.opacity = "1";
+      video.muted = true;
       video.play().catch(() => {});
     }
   };
@@ -111,199 +19,130 @@ function MyCinema() {
   const stopPreview = () => {
     const video = videoRef.current;
 
-    if (video) {
+    if (video && movie.video_url) {
       video.pause();
-      video.style.opacity = "0";
+      video.currentTime = 0;
     }
   };
 
-  const handleRent = async () => {
-    try {
-      const res = await fetch("/api/paypal/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          amount: "3.00"
-        })
-      });
-
-      const data = await res.json();
-
-      const approveLink = data.links?.find(
-        (link) => link.rel === "approve"
-      );
-
-      if (approveLink) {
-        window.location.href = approveLink.href;
-      } else {
-        alert("Payment link not found");
+  const handleClick = () => {
+    navigate("/create-account", {
+      state: {
+        type: "rent",
+        title: movie.title,
+        price: RENT_PRICE
       }
-    } catch {
-      alert("Payment failed");
-    }
+    });
   };
-
-  const bannerFilm = films[currentBanner] || null;
 
   return (
-    <div style={styles.page}>
-      {errorMessage && (
-        <div style={styles.messageBox}>
-          <h2 style={styles.messageTitle}>Supabase Error</h2>
-          <p style={styles.messageText}>{errorMessage}</p>
-        </div>
+    <div
+      style={styles.card}
+      onMouseEnter={startPreview}
+      onMouseLeave={stopPreview}
+      onClick={handleClick}
+    >
+      {movie.video_url ? (
+        <video
+          ref={videoRef}
+          src={movie.video_url}
+          poster={movie.poster_url}
+          style={styles.image}
+          muted
+          playsInline
+        />
+      ) : (
+        <img
+          src={movie.poster_url}
+          alt={movie.title}
+          style={styles.image}
+        />
       )}
 
-      {!errorMessage && films.length === 0 && (
-        <div style={styles.messageBox}>
-          <h2 style={styles.messageTitle}>No live films found</h2>
-          <p style={styles.messageText}>
-            There are no currently active live films in the database.
-          </p>
+      <div style={styles.info}>
+        <h3 style={styles.title}>{movie.title}</h3>
+
+        <p style={styles.meta}>
+          {movie.genre} • {movie.rating}
+        </p>
+
+        <p style={styles.views}>👁 {movie.views} views</p>
+
+        <div style={styles.actions}>
+          <button
+            style={styles.watchlist}
+            onClick={(e) => {
+              e.stopPropagation();
+              alert("Added to Watchlist");
+            }}
+          >
+            + Watchlist
+          </button>
+
+          <span style={styles.price}>Rent ${RENT_PRICE}</span>
         </div>
-      )}
-
-      {bannerFilm && (
-        <div
-          key={bannerFilm.id}
-          style={{
-            ...styles.banner,
-            backgroundImage: `url(${bannerFilm.poster_url || ""})`
-          }}
-          onMouseEnter={startPreview}
-          onMouseLeave={stopPreview}
-        >
-          {/* ✅ FIXED: correct field */}
-          {bannerFilm.video_url && (
-            <video
-              ref={videoRef}
-              src={bannerFilm.video_url}
-              style={styles.bannerVideo}
-              preload="auto"
-              playsInline
-              muted
-            />
-          )}
-
-          <div style={styles.bannerOverlay}>
-            <h1 style={styles.bannerTitle}>{bannerFilm.title}</h1>
-
-            <p style={styles.bannerMeta}>
-              {bannerFilm.genre} • {bannerFilm.rating}
-            </p>
-
-            <p style={styles.bannerDesc}>{bannerFilm.description}</p>
-
-            {!hasAccess && (
-              <button style={styles.payButton} onClick={handleRent}>
-                Rent Film (48h)
-              </button>
-            )}
-
-            {hasAccess && (
-              <p style={{ color: "#10b981", marginTop: "15px" }}>
-                You have access to this film
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {films.length > 0 && (
-        <div style={styles.gridSection}>
-          <h2 style={styles.heading}>MyCinema</h2>
-
-          <div style={styles.grid}>
-            {films.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
 
 const styles = {
-  page: {
-    background: "#000",
-    color: "white",
-    minHeight: "100vh"
-  },
-  messageBox: {
-    paddingTop: "160px",
-    paddingLeft: "80px",
-    paddingRight: "80px"
-  },
-  messageTitle: {
-    fontSize: "48px",
-    marginBottom: "20px"
-  },
-  messageText: {
-    fontSize: "18px",
-    color: "#ccc"
-  },
-  banner: {
-    height: "500px",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    position: "relative",
-    display: "flex",
-    alignItems: "center"
-  },
-  bannerVideo: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    opacity: 0,
-    transition: "opacity 0.4s"
-  },
-  bannerOverlay: {
-    position: "relative",
-    paddingLeft: "80px",
-    maxWidth: "600px",
-    zIndex: 2
-  },
-  bannerTitle: {
-    fontSize: "48px",
-    margin: 0
-  },
-  bannerMeta: {
-    color: "#ccc",
-    fontSize: "16px",
-    marginTop: "10px"
-  },
-  bannerDesc: {
-    color: "#aaa",
-    marginTop: "10px",
-    lineHeight: "1.5"
-  },
-  payButton: {
-    marginTop: "20px",
-    padding: "12px 20px",
-    background: "#ffc439",
-    color: "#000",
-    border: "none",
+  card: {
+    width: "220px", // ✅ FIXED SIZE
+    background: "#111",
+    borderRadius: "6px",
+    overflow: "hidden",
     cursor: "pointer",
+    transition: "transform 0.2s ease"
+  },
+
+  image: {
+    width: "100%",
+    height: "130px", // ✅ SMALLER HEIGHT
+    objectFit: "cover",
+    display: "block"
+  },
+
+  info: {
+    padding: "10px"
+  },
+
+  title: {
+    color: "white",
+    fontSize: "16px",
+    margin: "0 0 5px 0"
+  },
+
+  meta: {
+    color: "#bbb",
+    fontSize: "12px"
+  },
+
+  views: {
+    color: "#888",
+    fontSize: "11px"
+  },
+
+  actions: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginTop: "8px"
+  },
+
+  watchlist: {
+    background: "transparent",
+    border: "1px solid #e50914",
+    color: "#e50914",
+    padding: "3px 8px",
+    fontSize: "11px",
+    cursor: "pointer"
+  },
+
+  price: {
+    color: "#00ffae",
     fontWeight: "bold",
-    borderRadius: "6px"
-  },
-  gridSection: {
-    padding: "80px"
-  },
-  heading: {
-    marginBottom: "30px"
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: "30px"
+    fontSize: "12px"
   }
 };
 
-export default MyCinema;
+export default MovieCard;
