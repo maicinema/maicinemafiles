@@ -25,7 +25,11 @@ function TrendingNow() {
     }));
 
     setMovies(top);
-    setLoading(false); // ✅ done loading
+
+// ✅ ensure skeleton shows for at least 1 second
+setTimeout(() => {
+  setLoading(false);
+}, 800);
   }
 
   const scroll = (direction) => {
