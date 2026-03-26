@@ -22,7 +22,10 @@ function MovieCard({ movie }) {
 
     if (video && movie.video) {
       video.pause();
-      video.currentTime = 14;
+      video.currentTime = 0;
+
+      // ✅ FORCE POSTER BACK
+      video.load();
     }
   };
 
@@ -53,14 +56,14 @@ function MovieCard({ movie }) {
         <video
           ref={videoRef}
           src={movie.video}
-          poster={movie.poster || movie.image}
+          poster={movie.poster}
           style={styles.image}
           preload="auto"
           playsInline
         />
       ) : (
         <img
-          src={movie.poster || movie.image}
+          src={movie.poster}
           alt={movie.title}
           style={styles.image}
         />
@@ -105,44 +108,36 @@ const styles = {
     transition: "transform 0.3s",
     position: "relative"
   },
-
   image: {
     width: "100%",
     height: "150px",
     objectFit: "cover",
     display: "block"
   },
-
   info: {
     padding: "12px"
   },
-
   title: {
     color: "white",
     margin: "0"
   },
-
   meta: {
     color: "#bbb",
     fontSize: "13px"
   },
-
   desc: {
     color: "#888",
     fontSize: "13px"
   },
-
   views: {
     color: "#aaa",
     fontSize: "12px"
   },
-
   actions: {
     display: "flex",
     justifyContent: "space-between",
     marginTop: "10px"
   },
-
   watchlist: {
     background: "transparent",
     border: "1px solid #e50914",
@@ -150,7 +145,6 @@ const styles = {
     padding: "4px 10px",
     cursor: "pointer"
   },
-
   price: {
     color: "#00ffae",
     fontWeight: "bold"

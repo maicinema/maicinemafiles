@@ -6,7 +6,6 @@ function MyCinema() {
   const [films, setFilms] = useState([]);
   const [currentBanner, setCurrentBanner] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
-  const [hasAccess, setHasAccess] = useState(false);
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -38,19 +37,6 @@ function MyCinema() {
     setFilms(data || []);
   }
 
-  // ✅ SAME PREVIEW TIMING AS CARD (14s)
-  useEffect(() => {
-    const video = videoRef.current;
-    const film = films[currentBanner];
-
-    if (video && film?.video_url) {
-      video.currentTime = 14;
-      video.muted = false;
-      video.volume = 1;
-      video.play().catch(() => {});
-    }
-  }, [currentBanner, films]);
-
   const bannerFilm = films[currentBanner];
 
   return (
@@ -63,11 +49,29 @@ function MyCinema() {
             ...styles.banner,
             backgroundImage: `url(${bannerFilm.poster_url || ""})`
           }}
+          onMouseEnter={() => {
+            const video = videoRef.current;
+            if (video && bannerFilm.video_url) {
+              video.currentTime = 14;
+              video.muted = false;
+              video.volume = 1;
+              video.play().catch(() => {});
+            }
+          }}
+          onMouseLeave={() => {
+            const video = videoRef.current;
+            if (video) {
+              video.pause();
+              video.currentTime = 0;
+              video.load(); // restore poster
+            }
+          }}
         >
           {bannerFilm.video_url && (
             <video
               ref={videoRef}
               src={bannerFilm.video_url}
+              poster={bannerFilm.poster_url}
               style={styles.bannerVideo}
               loop
               playsInline
