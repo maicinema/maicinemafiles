@@ -16,7 +16,7 @@ function MyCinema() {
   useEffect(() => {
     if (films.length > 0) {
       const shuffled = shuffleArray([...films]);
-      setRows(chunkArray(shuffled, 10)); // ✅ 10 per row
+      setRows(chunkArray(shuffled, 10));
     }
   }, [films]);
 
@@ -44,7 +44,6 @@ function MyCinema() {
     setFilms(data || []);
   }
 
-  // ✅ SHUFFLE FUNCTION
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -53,7 +52,6 @@ function MyCinema() {
     return array;
   }
 
-  // ✅ SPLIT INTO ROWS
   function chunkArray(array, size) {
     const result = [];
     for (let i = 0; i < array.length; i += size) {
@@ -64,11 +62,20 @@ function MyCinema() {
 
   const bannerFilm = films[currentBanner];
 
+  const scroll = (ref, direction) => {
+    if (!ref.current) return;
+
+    ref.current.scrollBy({
+      left: direction === "left" ? -300 : 300,
+      behavior: "smooth"
+    });
+  };
+
   return (
     <div style={styles.page}>
       {errorMessage && <p>{errorMessage}</p>}
 
-      {/* ✅ BANNER (UNCHANGED) */}
+      {/* BANNER */}
       {bannerFilm && (
         <div
           style={{
@@ -114,25 +121,45 @@ function MyCinema() {
         </div>
       )}
 
-      {/* ✅ MULTI ROW SYSTEM */}
+      {/* ROWS WITH ARROWS */}
       <div style={styles.gridSection}>
         <h2 style={styles.heading}>MyCinema</h2>
 
-        {rows.map((row, index) => (
-          <div key={index} style={styles.row}>
-            {row.map((movie) => (
-              <div key={movie.id} style={styles.cardWrap}>
-                <MovieCard
-                  movie={{
-                    ...movie,
-                    video: movie.video_url,
-                    poster: movie.poster_url
-                  }}
-                />
+        {rows.map((row, index) => {
+          const rowRef = useRef(null);
+
+          return (
+            <div key={index} style={styles.wrapper}>
+              <button
+                style={styles.arrowLeft}
+                onClick={() => scroll(rowRef, "left")}
+              >
+                ◀
+              </button>
+
+              <div style={styles.row} ref={rowRef}>
+                {row.map((movie) => (
+                  <div key={movie.id} style={styles.cardWrap}>
+                    <MovieCard
+                      movie={{
+                        ...movie,
+                        video: movie.video_url,
+                        poster: movie.poster_url
+                      }}
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        ))}
+
+              <button
+                style={styles.arrowRight}
+                onClick={() => scroll(rowRef, "right")}
+              >
+                ▶
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -169,18 +196,7 @@ const styles = {
   },
 
   bannerTitle: {
-    fontSize: "48px",
-    margin: 0
-  },
-
-  bannerMeta: {
-    color: "#ccc",
-    marginTop: "10px"
-  },
-
-  bannerDesc: {
-    color: "#aaa",
-    marginTop: "10px"
+    fontSize: "48px"
   },
 
   gridSection: {
@@ -191,16 +207,46 @@ const styles = {
     marginBottom: "20px"
   },
 
+  wrapper: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    marginBottom: "20px"
+  },
+
   row: {
     display: "flex",
     gap: "16px",
-    overflowX: "auto",
-    marginBottom: "20px"
+    overflowX: "auto"
   },
 
   cardWrap: {
     flex: "0 0 auto",
     width: "220px"
+  },
+
+  arrowLeft: {
+    position: "absolute",
+    left: 0,
+    zIndex: 10,
+    background: "rgba(0,0,0,0.6)",
+    color: "white",
+    border: "none",
+    height: "100%",
+    width: "40px",
+    cursor: "pointer"
+  },
+
+  arrowRight: {
+    position: "absolute",
+    right: 0,
+    zIndex: 10,
+    background: "rgba(0,0,0,0.6)",
+    color: "white",
+    border: "none",
+    height: "100%",
+    width: "40px",
+    cursor: "pointer"
   }
 };
 
