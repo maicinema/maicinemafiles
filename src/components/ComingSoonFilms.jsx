@@ -12,10 +12,10 @@ function ComingSoonFilms() {
 
   async function loadComingSoon() {
     const { data } = await supabase
-      .from("films")
-      .select("*")
-      .eq("status", "coming_soon")
-      .order("id", { ascending: false });
+  .from("films")
+  .select("id,title,poster_url,video_url,genre,rating,description,views")
+  .eq("status", "coming_soon")
+  .order("id", { ascending: false });
 
     const formatted = (data || []).map((film) => ({
       ...film,
