@@ -15,20 +15,51 @@ function Navbar() {
 
   return (
     <nav style={styles.nav}>
-      <Link to="/" style={styles.logoWrap}>
+      <Link
+        to="/"
+        style={styles.logoWrap}
+        onMouseEnter={(e) => {
+          if (window.innerWidth > 768) {
+            const img = e.currentTarget.querySelector("img");
+            if (img) img.style.transform = "scale(1.12)";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (window.innerWidth > 768) {
+            const img = e.currentTarget.querySelector("img");
+            if (img) img.style.transform = "scale(1)";
+          }
+        }}
+      >
         <img src={logo} alt="MaiCinema" style={styles.logo} />
       </Link>
 
       {/* ✅ Desktop Links */}
       <div style={styles.linksDesktop}>
         {navItems.map((item) => (
-          <Link key={item.name} to={item.path} style={styles.link}>
+          <Link
+            key={item.name}
+            to={item.path}
+            style={styles.link}
+            onMouseEnter={(e) => {
+              if (window.innerWidth > 768) {
+                e.target.style.color = "red";
+                e.target.style.transform = "scale(1.12)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (window.innerWidth > 768) {
+                e.target.style.color = "white";
+                e.target.style.transform = "scale(1)";
+              }
+            }}
+          >
             {item.name}
           </Link>
         ))}
       </div>
 
-      {/* ✅ Hamburger Button */}
+      {/* ✅ Hamburger */}
       <div style={styles.hamburger} onClick={() => setMenuOpen(!menuOpen)}>
         ☰
       </div>
@@ -71,10 +102,10 @@ const styles = {
   },
 
   logo: {
-    height: "clamp(50px, 8vw, 110px)"
+    height: "clamp(50px, 8vw, 110px)",
+    transition: "transform 0.3s ease"
   },
 
-  /* ✅ DESKTOP */
   linksDesktop: {
     display: "flex",
     gap: "30px"
@@ -83,12 +114,13 @@ const styles = {
   link: {
     color: "white",
     textDecoration: "none",
-    fontSize: "16px"
+    fontSize: "16px",
+    transition: "all 0.3s ease",
+    display: "inline-block"
   },
 
-  /* ✅ MOBILE */
   hamburger: {
-    display: "none",
+    display: window.innerWidth < 768 ? "block" : "none",
     fontSize: "28px",
     cursor: "pointer"
   },
@@ -111,11 +143,5 @@ const styles = {
     fontSize: "16px"
   }
 };
-
-/* ✅ RESPONSIVE LOGIC (important) */
-if (window.innerWidth < 768) {
-  styles.linksDesktop.display = "none";
-  styles.hamburger.display = "block";
-}
 
 export default Navbar;
