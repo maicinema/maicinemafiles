@@ -1,5 +1,4 @@
 import banner from "../assets/cinema-banner.jpg";
-import Navbar from "../components/Navbar";
 import SubscribeSection from "../components/SubscribeSection";
 import TrendingNow from "../components/TrendingNow";
 import LeavingSoon from "../components/LeavingSoon";
@@ -19,7 +18,7 @@ function Home() {
           overflow: "hidden"
         }}
       >
-        <Navbar />
+        {/* ❌ Navbar REMOVED from here */}
 
         <div
           style={{
@@ -38,7 +37,7 @@ function Home() {
             height: "100%",
             display: "flex",
             alignItems: "center",
-            paddingLeft: "20px", // ✅ smaller padding for mobile
+            paddingLeft: "20px",
             paddingRight: "20px"
           }}
         >
@@ -49,7 +48,7 @@ function Home() {
           >
             <h1
               style={{
-                fontSize: "clamp(28px, 6vw, 64px)", // ✅ responsive text
+                fontSize: "clamp(28px, 6vw, 64px)",
                 margin: "0"
               }}
             >
