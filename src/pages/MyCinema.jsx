@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase";
 
 function MyCinema() {
   const [films, setFilms] = useState([]);
+  const [rows, setRows] = useState([]);
   const [currentBanner, setCurrentBanner] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
   const videoRef = useRef(null);
@@ -11,6 +12,13 @@ function MyCinema() {
   useEffect(() => {
     loadFilms();
   }, []);
+
+  useEffect(() => {
+    if (films.length > 0) {
+      const shuffled = shuffleArray([...films]);
+      setRows(chunkArray(shuffled, 10)); // ✅ 10 per row
+    }
+  }, [films]);
 
   useEffect(() => {
     if (films.length < 2) return;
@@ -26,8 +34,7 @@ function MyCinema() {
     const { data, error } = await supabase
       .from("films")
       .select("*")
-      .eq("status", "live")
-      .order("views", { ascending: false });
+      .eq("status", "live");
 
     if (error) {
       setErrorMessage(error.message);
@@ -35,6 +42,24 @@ function MyCinema() {
     }
 
     setFilms(data || []);
+  }
+
+  // ✅ SHUFFLE FUNCTION
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  // ✅ SPLIT INTO ROWS
+  function chunkArray(array, size) {
+    const result = [];
+    for (let i = 0; i < array.length; i += size) {
+      result.push(array.slice(i, i + size));
+    }
+    return result;
   }
 
   const bannerFilm = films[currentBanner];
@@ -81,33 +106,33 @@ function MyCinema() {
 
           <div style={styles.bannerOverlay}>
             <h1 style={styles.bannerTitle}>{bannerFilm.title}</h1>
-
             <p style={styles.bannerMeta}>
               {bannerFilm.genre} • {bannerFilm.rating}
             </p>
-
             <p style={styles.bannerDesc}>{bannerFilm.description}</p>
           </div>
         </div>
       )}
 
-      {/* ✅ FILM ROW (FIXED) */}
+      {/* ✅ MULTI ROW SYSTEM */}
       <div style={styles.gridSection}>
         <h2 style={styles.heading}>MyCinema</h2>
 
-        <div style={styles.row}>
-          {films.map((movie) => (
-            <div key={movie.id} style={styles.cardWrap}>
-              <MovieCard
-                movie={{
-                  ...movie,
-                  video: movie.video_url,
-                  poster: movie.poster_url
-                }}
-              />
-            </div>
-          ))}
-        </div>
+        {rows.map((row, index) => (
+          <div key={index} style={styles.row}>
+            {row.map((movie) => (
+              <div key={movie.id} style={styles.cardWrap}>
+                <MovieCard
+                  movie={{
+                    ...movie,
+                    video: movie.video_url,
+                    poster: movie.poster_url
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -131,8 +156,6 @@ const styles = {
 
   bannerVideo: {
     position: "absolute",
-    top: 0,
-    left: 0,
     width: "100%",
     height: "100%",
     objectFit: "cover"
@@ -152,32 +175,27 @@ const styles = {
 
   bannerMeta: {
     color: "#ccc",
-    fontSize: "16px",
     marginTop: "10px"
   },
 
   bannerDesc: {
     color: "#aaa",
-    marginTop: "10px",
-    lineHeight: "1.5"
+    marginTop: "10px"
   },
 
   gridSection: {
-    padding: "20px" // ✅ fixed
+    padding: "20px"
   },
 
   heading: {
     marginBottom: "20px"
   },
 
-  /* ✅ NETFLIX ROW */
   row: {
     display: "flex",
     gap: "16px",
     overflowX: "auto",
-    overflowY: "hidden",
-    paddingBottom: "10px",
-    scrollBehavior: "smooth"
+    marginBottom: "20px"
   },
 
   cardWrap: {
