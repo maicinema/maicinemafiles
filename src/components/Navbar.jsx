@@ -34,7 +34,7 @@ function Navbar() {
         <img src={logo} alt="MaiCinema" style={styles.logo} />
       </Link>
 
-      {/* ✅ Desktop Links */}
+      {/* Desktop Links */}
       <div style={styles.linksDesktop}>
         {navItems.map((item) => (
           <Link
@@ -59,12 +59,12 @@ function Navbar() {
         ))}
       </div>
 
-      {/* ✅ Hamburger */}
+      {/* Hamburger */}
       <div style={styles.hamburger} onClick={() => setMenuOpen(!menuOpen)}>
         ☰
       </div>
 
-      {/* ✅ Mobile Menu */}
+      {/* Mobile Menu */}
       {menuOpen && (
         <div style={styles.mobileMenu}>
           {navItems.map((item) => (
@@ -107,7 +107,7 @@ const styles = {
   },
 
   linksDesktop: {
-    display: "flex",
+    display: window.innerWidth < 768 ? "none" : "flex",
     gap: "30px"
   },
 
@@ -121,8 +121,9 @@ const styles = {
 
   hamburger: {
     display: window.innerWidth < 768 ? "block" : "none",
-    fontSize: "28px",
-    cursor: "pointer"
+    fontSize: "26px",
+    cursor: "pointer",
+    color: "white"
   },
 
   mobileMenu: {
