@@ -334,80 +334,94 @@ voices and connect filmmakers with global audiences.
 }   // ✅ FIX 2: THIS IS THE MISSING BRACKET
 
 
-const styles={
+const styles = {
 
-page:{background:"#000",color:"white"},
+page:{
+  background:"#000",
+  color:"white"
+},
 
 banner:{
-height:"420px",
-position:"relative",
-overflow:"hidden",
-display:"flex",
-alignItems:"center"
+  height:"420px",
+  position:"relative",
+  overflow:"hidden",
+  display:"flex",
+  alignItems:"center"
 },
 
 bannerVideo:{
-position:"absolute",
-top:0,
-left:0,
-width:"100%",
-height:"100%",
-objectFit:"cover"
+  position:"absolute",
+  top:0,
+  left:0,
+  width:"100%",
+  height:"100%",
+  objectFit:"cover"
 },
 
 bannerOverlay:{
-position:"relative",
-paddingLeft:"80px"
+  position:"relative",
+  paddingLeft:"clamp(20px, 5vw, 80px)" // ✅ responsive
 },
 
-bannerTitle:{fontSize:"48px"},
+bannerTitle:{
+  fontSize:"clamp(28px, 6vw, 48px)" // ✅ responsive text
+},
 
-section:{padding:"80px"},
+section:{
+  padding:"clamp(20px, 5vw, 80px)" // ✅ fixes mobile overflow
+},
 
 text:{
-color:"#ccc",
-lineHeight:"1.7",
-maxWidth:"900px"
+  color:"#ccc",
+  lineHeight:"1.7",
+  maxWidth:"900px",
+  fontSize:"clamp(14px, 2.5vw, 16px)"
 },
 
 mainImage:{
-width:"100%",
-maxWidth:"800px",
-borderRadius:"10px",
-marginBottom:"30px"
+  width:"100%",
+  maxWidth:"800px",
+  borderRadius:"10px",
+  marginBottom:"20px"
 },
 
+/* ✅ FOUNDER FIX */
 founderCard:{
-display:"flex",
-gap:"40px",
-alignItems:"center",
-marginTop:"30px"
+  display:"flex",
+  flexWrap:"wrap", // ✅ allows stacking on mobile
+  gap:"20px",
+  alignItems:"center",
+  marginTop:"30px"
 },
 
 founderImage:{
-width:"250px",
-borderRadius:"10px"
+  width:"100%",
+  maxWidth:"250px",
+  borderRadius:"10px"
 },
 
+/* ✅ TEAM FIX */
 teamGrid:{
-display:"grid",
-gridTemplateColumns:"repeat(5,1fr)",
-gap:"30px",
-marginTop:"40px"
+  display:"grid",
+  gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))", // ✅ responsive grid
+  gap:"20px",
+  marginTop:"40px"
 },
 
-teamCard:{textAlign:"center"},
+teamCard:{
+  textAlign:"center"
+},
 
 teamImage:{
-width:"120px",
-height:"120px",
-borderRadius:"8px",
-objectFit:"cover"
+  width:"100px",
+  height:"100px",
+  borderRadius:"8px",
+  objectFit:"cover"
 },
 
 role:{
-color:"#aaa",
-fontSize:"14px"
+  color:"#aaa",
+  fontSize:"14px"
 }
 
 };
