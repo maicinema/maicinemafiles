@@ -43,6 +43,7 @@ function MyCinema() {
     <div style={styles.page}>
       {errorMessage && <p>{errorMessage}</p>}
 
+      {/* ✅ BANNER (UNCHANGED) */}
       {bannerFilm && (
         <div
           style={{
@@ -63,7 +64,7 @@ function MyCinema() {
             if (video) {
               video.pause();
               video.currentTime = 0;
-              video.load(); // restore poster
+              video.load();
             }
           }}
         >
@@ -90,19 +91,21 @@ function MyCinema() {
         </div>
       )}
 
+      {/* ✅ FILM ROW (FIXED) */}
       <div style={styles.gridSection}>
         <h2 style={styles.heading}>MyCinema</h2>
 
-        <div style={styles.grid}>
+        <div style={styles.row}>
           {films.map((movie) => (
-            <MovieCard
-              key={movie.id}
-              movie={{
-                ...movie,
-                video: movie.video_url,
-                poster: movie.poster_url
-              }}
-            />
+            <div key={movie.id} style={styles.cardWrap}>
+              <MovieCard
+                movie={{
+                  ...movie,
+                  video: movie.video_url,
+                  poster: movie.poster_url
+                }}
+              />
+            </div>
           ))}
         </div>
       </div>
@@ -160,17 +163,26 @@ const styles = {
   },
 
   gridSection: {
-    padding: "80px"
+    padding: "20px" // ✅ fixed
   },
 
   heading: {
-    marginBottom: "30px"
+    marginBottom: "20px"
   },
 
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: "30px"
+  /* ✅ NETFLIX ROW */
+  row: {
+    display: "flex",
+    gap: "16px",
+    overflowX: "auto",
+    overflowY: "hidden",
+    paddingBottom: "10px",
+    scrollBehavior: "smooth"
+  },
+
+  cardWrap: {
+    flex: "0 0 auto",
+    width: "220px"
   }
 };
 
