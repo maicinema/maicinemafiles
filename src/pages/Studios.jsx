@@ -64,12 +64,13 @@ return(
 <div style={styles.banner}>
 
   <video
-    autoPlay
-    loop
-    muted
-    playsInline
-    style={styles.bannerVideo}
-  />
+  src="https://qrujwmcbobhthwzqmmjp.supabase.co/storage/v1/object/public/banners/studiointro.MP4"
+  autoPlay
+  loop
+  muted
+  playsInline
+  style={styles.bannerVideo}
+/>
 
   <div style={styles.bannerOverlay}>
     <h1 style={styles.bannerTitle}>
