@@ -12,10 +12,10 @@ function TrendingNow() {
 
   async function loadTrending() {
     const { data } = await supabase
-      .from("films")
-      .select("*")
-      .eq("status", "live")
-      .order("views", { ascending: false });
+  .from("films")
+  .select("id,title,poster_url,video_url,genre,rating,description,views")
+  .eq("status", "live")
+  .order("views", { ascending: false });
 
     const top = (data || []).slice(0, 10).map((film) => ({
       ...film,
