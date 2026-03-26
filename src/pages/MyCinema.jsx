@@ -11,12 +11,6 @@ function MyCinema() {
 
   useEffect(() => {
     loadFilms();
-
-    const refreshInterval = setInterval(() => {
-      loadFilms();
-    }, 5000);
-
-    return () => clearInterval(refreshInterval);
   }, []);
 
   useEffect(() => {
@@ -27,11 +21,9 @@ function MyCinema() {
     }, 10000);
 
     return () => clearInterval(bannerInterval);
-  }, [films.length]);
+  }, [films]);
 
   async function loadFilms() {
-    setErrorMessage("");
-
     const { data, error } = await supabase
       .from("films")
       .select("*")
@@ -39,116 +31,43 @@ function MyCinema() {
       .order("views", { ascending: false });
 
     if (error) {
-      setErrorMessage(error.message || "Failed to load films");
+      setErrorMessage(error.message);
       return;
     }
 
-    const now = new Date();
-
-    const publicFilms = (data || []).filter((film) => {
-      if (!film.contract_expires_at) return true;
-      return new Date(film.contract_expires_at) > now;
-    });
-
-    const normalizedFilms = publicFilms.map((film) => ({
-      ...film,
-      image: film.poster,
-      video: film.video
-    }));
-
-    setFilms(normalizedFilms);
+    setFilms(data || []);
   }
 
-  const checkAccess = async (filmId) => {
-    const { data: userData } = await supabase.auth.getUser();
-    const user = userData?.user;
-
-    if (!user) return false;
-
-    const { data } = await supabase
-      .from("rentals")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("film_id", filmId)
-      .gt("expires_at", new Date().toISOString());
-
-    return data && data.length > 0;
-  };
-
-  useEffect(() => {
-    const bannerFilm = films[currentBanner];
-    if (!bannerFilm) return;
-
-    const runCheck = async () => {
-      const access = await checkAccess(bannerFilm.id);
-      setHasAccess(access);
-    };
-
-    runCheck();
-  }, [films, currentBanner]);
-
-  // ✅ APPLY SAME TIMING AS CARD (14s)
+  // ✅ SAME PREVIEW TIMING AS CARD (14s)
   useEffect(() => {
     const video = videoRef.current;
+    const film = films[currentBanner];
 
-    if (video) {
-      video.currentTime = 14; // 👈 SAME AS CARD
+    if (video && film?.video_url) {
+      video.currentTime = 14;
       video.muted = false;
       video.volume = 1;
       video.play().catch(() => {});
     }
-  }, [currentBanner]);
+  }, [currentBanner, films]);
 
-  const handleRent = async () => {
-    try {
-      const res = await fetch("/api/paypal/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          amount: "3.00"
-        })
-      });
-
-      const data = await res.json();
-
-      const approveLink = data.links?.find(
-        (link) => link.rel === "approve"
-      );
-
-      if (approveLink) {
-        window.location.href = approveLink.href;
-      } else {
-        alert("Payment link not found");
-      }
-    } catch {
-      alert("Payment failed");
-    }
-  };
-
-  const bannerFilm = films[currentBanner] || null;
+  const bannerFilm = films[currentBanner];
 
   return (
     <div style={styles.page}>
-      {errorMessage && (
-        <div style={styles.messageBox}>
-          <h2 style={styles.messageTitle}>Supabase Error</h2>
-          <p style={styles.messageText}>{errorMessage}</p>
-        </div>
-      )}
+      {errorMessage && <p>{errorMessage}</p>}
 
       {bannerFilm && (
         <div
           style={{
             ...styles.banner,
-            backgroundImage: `url(${bannerFilm.poster || ""})`
+            backgroundImage: `url(${bannerFilm.poster_url || ""})`
           }}
         >
-          {bannerFilm.video && (
+          {bannerFilm.video_url && (
             <video
               ref={videoRef}
-              src={bannerFilm.video}
+              src={bannerFilm.video_url}
               style={styles.bannerVideo}
               loop
               playsInline
@@ -163,33 +82,26 @@ function MyCinema() {
             </p>
 
             <p style={styles.bannerDesc}>{bannerFilm.description}</p>
-
-            {!hasAccess && (
-              <button style={styles.payButton} onClick={handleRent}>
-                Rent Film (48h)
-              </button>
-            )}
-
-            {hasAccess && (
-              <p style={{ color: "#10b981", marginTop: "15px" }}>
-                You have access to this film
-              </p>
-            )}
           </div>
         </div>
       )}
 
-      {films.length > 0 && (
-        <div style={styles.gridSection}>
-          <h2 style={styles.heading}>MyCinema</h2>
+      <div style={styles.gridSection}>
+        <h2 style={styles.heading}>MyCinema</h2>
 
-          <div style={styles.grid}>
-            {films.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
-            ))}
-          </div>
+        <div style={styles.grid}>
+          {films.map((movie) => (
+            <MovieCard
+              key={movie.id}
+              movie={{
+                ...movie,
+                video: movie.video_url,
+                poster: movie.poster_url
+              }}
+            />
+          ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -200,19 +112,7 @@ const styles = {
     color: "white",
     minHeight: "100vh"
   },
-  messageBox: {
-    paddingTop: "160px",
-    paddingLeft: "80px",
-    paddingRight: "80px"
-  },
-  messageTitle: {
-    fontSize: "48px",
-    marginBottom: "20px"
-  },
-  messageText: {
-    fontSize: "18px",
-    color: "#ccc"
-  },
+
   banner: {
     height: "500px",
     backgroundSize: "cover",
@@ -221,6 +121,7 @@ const styles = {
     display: "flex",
     alignItems: "center"
   },
+
   bannerVideo: {
     position: "absolute",
     top: 0,
@@ -229,45 +130,44 @@ const styles = {
     height: "100%",
     objectFit: "cover"
   },
+
   bannerOverlay: {
     position: "relative",
     paddingLeft: "80px",
     maxWidth: "600px",
     zIndex: 2
   },
+
   bannerTitle: {
     fontSize: "48px",
     margin: 0
   },
+
   bannerMeta: {
     color: "#ccc",
     fontSize: "16px",
     marginTop: "10px"
   },
+
   bannerDesc: {
     color: "#aaa",
     marginTop: "10px",
     lineHeight: "1.5"
   },
-  payButton: {
-    marginTop: "20px",
-    padding: "12px 20px",
-    background: "#ffc439",
-    color: "#000",
-    border: "none",
-    cursor: "pointer",
-    fontWeight: "bold",
-    borderRadius: "6px"
-  },
+
   gridSection: {
     padding: "80px"
   },
+
   heading: {
     marginBottom: "30px"
   },
+
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",
     gap: "30px"
   }
 };
+
+export default MyCinema;
