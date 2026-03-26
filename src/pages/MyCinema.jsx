@@ -9,7 +9,7 @@ function MyCinema() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const videoRef = useRef(null);
-  const rowRefs = useRef([]); // ✅ FIX
+  const rowRefs = useRef([]);
 
   useEffect(() => {
     loadFilms();
@@ -124,7 +124,7 @@ function MyCinema() {
         </div>
       )}
 
-      {/* ROWS WITH ARROWS */}
+      {/* ROWS */}
       <div style={styles.gridSection}>
         <h2 style={styles.heading}>MyCinema</h2>
 
@@ -139,19 +139,25 @@ function MyCinema() {
 
             <div
               style={styles.row}
-              ref={(el) => (rowRefs.current[index] = el)} // ✅ FIX
+              ref={(el) => (rowRefs.current[index] = el)}
             >
-              {row.map((movie) => (
-                <div key={movie.id} style={styles.cardWrap}>
-                  <MovieCard
-                    movie={{
-                      ...movie,
-                      video: movie.video_url,
-                      poster: movie.poster_url
-                    }}
-                  />
-                </div>
-              ))}
+              {Array.from({ length: 10 }).map((_, i) => {
+                const movie = row[i];
+
+                return movie ? (
+                  <div key={movie.id} style={styles.cardWrap}>
+                    <MovieCard
+                      movie={{
+                        ...movie,
+                        video: movie.video_url,
+                        poster: movie.poster_url
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div key={i} style={styles.skeleton} />
+                );
+              })}
             </div>
 
             <button
@@ -225,6 +231,13 @@ const styles = {
   cardWrap: {
     flex: "0 0 auto",
     width: "220px"
+  },
+
+  skeleton: {
+    width: "220px",
+    height: "150px",
+    background: "#222",
+    borderRadius: "6px"
   },
 
   arrowLeft: {
