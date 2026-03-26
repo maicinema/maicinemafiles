@@ -8,7 +8,6 @@ function MovieCard({ movie }) {
 
   const startPreview = () => {
     const video = videoRef.current;
-
     if (video && movie.video) {
       video.currentTime = 14;
       video.muted = false;
@@ -19,13 +18,10 @@ function MovieCard({ movie }) {
 
   const stopPreview = () => {
     const video = videoRef.current;
-
-    if (video && movie.video) {
+    if (video) {
       video.pause();
       video.currentTime = 0;
-
-      // ✅ FORCE POSTER BACK
-      video.load();
+      video.load(); // restore poster
     }
   };
 
@@ -42,14 +38,8 @@ function MovieCard({ movie }) {
   return (
     <div
       style={styles.card}
-      onMouseEnter={(e) => {
-        startPreview();
-        e.currentTarget.style.transform = "scale(1.15)";
-      }}
-      onMouseLeave={(e) => {
-        stopPreview();
-        e.currentTarget.style.transform = "scale(1)";
-      }}
+      onMouseEnter={startPreview}
+      onMouseLeave={stopPreview}
       onClick={handleClick}
     >
       {movie.video ? (
@@ -58,15 +48,10 @@ function MovieCard({ movie }) {
           src={movie.video}
           poster={movie.poster}
           style={styles.image}
-          preload="auto"
           playsInline
         />
       ) : (
-        <img
-          src={movie.poster}
-          alt={movie.title}
-          style={styles.image}
-        />
+        <img src={movie.poster} alt={movie.title} style={styles.image} />
       )}
 
       <div style={styles.info}>
@@ -81,16 +66,7 @@ function MovieCard({ movie }) {
         <p style={styles.views}>👁 {movie.views} views</p>
 
         <div style={styles.actions}>
-          <button
-            style={styles.watchlist}
-            onClick={(e) => {
-              e.stopPropagation();
-              alert("Added to Watchlist");
-            }}
-          >
-            + Watchlist
-          </button>
-
+          <button style={styles.watchlist}>+ Watchlist</button>
           <span style={styles.price}>Rent ${RENT_PRICE}</span>
         </div>
       </div>
@@ -100,7 +76,8 @@ function MovieCard({ movie }) {
 
 const styles = {
   card: {
-    width: "260px",
+    width: "100%", // ✅ KEY FIX
+    maxWidth: "300px", // ✅ prevents overflow
     background: "#111",
     borderRadius: "8px",
     overflow: "hidden",
@@ -108,36 +85,44 @@ const styles = {
     transition: "transform 0.3s",
     position: "relative"
   },
+
   image: {
     width: "100%",
-    height: "150px",
-    objectFit: "cover",
-    display: "block"
+    height: "160px",
+    objectFit: "cover"
   },
+
   info: {
     padding: "12px"
   },
+
   title: {
     color: "white",
-    margin: "0"
+    margin: 0,
+    fontSize: "16px"
   },
+
   meta: {
     color: "#bbb",
     fontSize: "13px"
   },
+
   desc: {
     color: "#888",
     fontSize: "13px"
   },
+
   views: {
     color: "#aaa",
     fontSize: "12px"
   },
+
   actions: {
     display: "flex",
     justifyContent: "space-between",
     marginTop: "10px"
   },
+
   watchlist: {
     background: "transparent",
     border: "1px solid #e50914",
@@ -145,6 +130,7 @@ const styles = {
     padding: "4px 10px",
     cursor: "pointer"
   },
+
   price: {
     color: "#00ffae",
     fontWeight: "bold"

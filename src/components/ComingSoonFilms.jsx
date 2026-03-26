@@ -52,7 +52,7 @@ function ComingSoonFilms() {
 const styles = {
   section: {
     background: "black",
-    padding: "80px"
+    padding: "20px"
   },
   heading: {
     color: "white",
