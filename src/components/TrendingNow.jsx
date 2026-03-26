@@ -36,8 +36,6 @@ function TrendingNow() {
 
     const topFive = publicFilms.slice(0, 5).map((film) => ({
       ...film,
-
-      // ✅ FIXED (THIS IS THE ONLY CHANGE)
       poster: film.poster_url,
       video: film.video_url,
       image: film.poster_url
@@ -70,18 +68,20 @@ const styles = {
 
   heading: {
     color: "white",
-    marginBottom: "30px"
+    marginBottom: "20px"
   },
 
   grid: {
     display: "flex",
-    flexWrap: "wrap",
-    gap: "30px",
-    alignItems: "flex-start"
+    gap: "16px",
+    overflowX: "auto",
+    paddingBottom: "10px",
+    scrollBehavior: "smooth"
   },
 
   cardWrap: {
-    flex: "0 0 auto"
+    flex: "0 0 auto",
+    width: "220px"
   }
 };
 
