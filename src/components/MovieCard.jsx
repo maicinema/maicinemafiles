@@ -21,7 +21,7 @@ function MovieCard({ movie }) {
     if (video) {
       video.pause();
       video.currentTime = 0;
-      video.load(); // restore poster
+      // ❌ removed video.load() (performance fix)
     }
   };
 
@@ -44,20 +44,20 @@ function MovieCard({ movie }) {
     >
       {movie.video ? (
         <video
-  ref={videoRef}
-  src={movie.video}
-  poster={movie.poster || movie.image}
-  style={styles.image}
-  preload="metadata" // ✅ FIX (huge performance gain)
-  playsInline
-/>
+          ref={videoRef}
+          src={movie.video}
+          poster={movie.poster || movie.image}
+          style={styles.image}
+          preload="metadata" // ✅ optimized
+          playsInline
+        />
       ) : (
         <img
-  src={movie.poster || movie.image}
-  alt={movie.title}
-  style={styles.image}
-  loading="lazy" // ✅ important
-/>
+          src={movie.poster || movie.image}
+          alt={movie.title}
+          style={styles.image}
+          loading="lazy" // ✅ optimized
+        />
       )}
 
       <div style={styles.info}>
@@ -82,8 +82,8 @@ function MovieCard({ movie }) {
 
 const styles = {
   card: {
-    width: "100%", // ✅ KEY FIX
-    maxWidth: "300px", // ✅ prevents overflow
+    width: "100%",
+    maxWidth: "300px",
     background: "#111",
     borderRadius: "8px",
     overflow: "hidden",
