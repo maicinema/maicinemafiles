@@ -9,9 +9,10 @@ function MovieCard({ movie }) {
   const startPreview = () => {
     const video = videoRef.current;
 
-    if (video && movie.video_url) {
-      video.currentTime = 0;
-      video.muted = true;
+    if (video && movie.video) {
+      video.currentTime = 14;
+      video.muted = false;
+      video.volume = 1;
       video.play().catch(() => {});
     }
   };
@@ -19,9 +20,9 @@ function MovieCard({ movie }) {
   const stopPreview = () => {
     const video = videoRef.current;
 
-    if (video && movie.video_url) {
+    if (video && movie.video) {
       video.pause();
-      video.currentTime = 0;
+      video.currentTime = 14;
     }
   };
 
@@ -38,22 +39,28 @@ function MovieCard({ movie }) {
   return (
     <div
       style={styles.card}
-      onMouseEnter={startPreview}
-      onMouseLeave={stopPreview}
+      onMouseEnter={(e) => {
+        startPreview();
+        e.currentTarget.style.transform = "scale(1.15)";
+      }}
+      onMouseLeave={(e) => {
+        stopPreview();
+        e.currentTarget.style.transform = "scale(1)";
+      }}
       onClick={handleClick}
     >
-      {movie.video_url ? (
+      {movie.video ? (
         <video
           ref={videoRef}
-          src={movie.video_url}
-          poster={movie.poster_url}
+          src={movie.video}
+          poster={movie.poster || movie.image}
           style={styles.image}
-          muted
+          preload="auto"
           playsInline
         />
       ) : (
         <img
-          src={movie.poster_url}
+          src={movie.poster || movie.image}
           alt={movie.title}
           style={styles.image}
         />
@@ -65,6 +72,8 @@ function MovieCard({ movie }) {
         <p style={styles.meta}>
           {movie.genre} • {movie.rating}
         </p>
+
+        <p style={styles.desc}>{movie.description}</p>
 
         <p style={styles.views}>👁 {movie.views} views</p>
 
@@ -88,60 +97,63 @@ function MovieCard({ movie }) {
 
 const styles = {
   card: {
-    width: "220px", // ✅ FIXED SIZE
+    width: "260px",
     background: "#111",
-    borderRadius: "6px",
+    borderRadius: "8px",
     overflow: "hidden",
     cursor: "pointer",
-    transition: "transform 0.2s ease"
+    transition: "transform 0.3s",
+    position: "relative"
   },
 
   image: {
     width: "100%",
-    height: "130px", // ✅ SMALLER HEIGHT
+    height: "150px",
     objectFit: "cover",
     display: "block"
   },
 
   info: {
-    padding: "10px"
+    padding: "12px"
   },
 
   title: {
     color: "white",
-    fontSize: "16px",
-    margin: "0 0 5px 0"
+    margin: "0"
   },
 
   meta: {
     color: "#bbb",
-    fontSize: "12px"
+    fontSize: "13px"
+  },
+
+  desc: {
+    color: "#888",
+    fontSize: "13px"
   },
 
   views: {
-    color: "#888",
-    fontSize: "11px"
+    color: "#aaa",
+    fontSize: "12px"
   },
 
   actions: {
     display: "flex",
     justifyContent: "space-between",
-    marginTop: "8px"
+    marginTop: "10px"
   },
 
   watchlist: {
     background: "transparent",
     border: "1px solid #e50914",
     color: "#e50914",
-    padding: "3px 8px",
-    fontSize: "11px",
+    padding: "4px 10px",
     cursor: "pointer"
   },
 
   price: {
     color: "#00ffae",
-    fontWeight: "bold",
-    fontSize: "12px"
+    fontWeight: "bold"
   }
 };
 

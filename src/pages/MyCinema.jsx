@@ -59,7 +59,8 @@ function MyCinema() {
 
     const normalizedFilms = publicFilms.map((film) => ({
       ...film,
-      image: film.poster
+      image: film.poster_url,
+      video: film.video_url
     }));
 
     setFilms(normalizedFilms);
@@ -71,14 +72,12 @@ function MyCinema() {
 
     if (!user) return false;
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("rentals")
       .select("*")
       .eq("user_id", user.id)
       .eq("film_id", filmId)
       .gt("expires_at", new Date().toISOString());
-
-    if (error) return false;
 
     return data && data.length > 0;
   };
@@ -95,27 +94,15 @@ function MyCinema() {
     runCheck();
   }, [films, currentBanner]);
 
-  const startPreview = () => {
-    const video = videoRef.current;
-    const currentFilm = films[currentBanner];
-
-    if (video && currentFilm?.video && hasAccess) {
-      video.currentTime = 0;
-      video.muted = false;
-      video.volume = 1;
-      video.style.opacity = "1";
-      video.play().catch(() => {});
-    }
-  };
-
-  const stopPreview = () => {
+  // ✅ FORCE VIDEO PLAY (this is the fix)
+  useEffect(() => {
     const video = videoRef.current;
 
     if (video) {
-      video.pause();
-      video.style.opacity = "0";
+      video.muted = true;
+      video.play().catch(() => {});
     }
-  };
+  }, [currentBanner]);
 
   const handleRent = async () => {
     try {
@@ -172,15 +159,13 @@ function MyCinema() {
             ...styles.banner,
             backgroundImage: `url(${bannerFilm.poster || ""})`
           }}
-          onMouseEnter={startPreview}
-          onMouseLeave={stopPreview}
         >
           {bannerFilm.video && (
             <video
               ref={videoRef}
               src={bannerFilm.video}
               style={styles.bannerVideo}
-              preload="auto"
+              loop
               playsInline
             />
           )}
@@ -258,8 +243,7 @@ const styles = {
     width: "100%",
     height: "100%",
     objectFit: "cover",
-    opacity: 0,
-    transition: "opacity 0.4s"
+    opacity: 1
   },
   bannerOverlay: {
     position: "relative",
