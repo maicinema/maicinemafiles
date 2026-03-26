@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logo from "../assets/logo.png"; // keep your correct logo file here
+import logo from "../assets/logo.png";
 
 function Navbar() {
   const navItems = [
@@ -17,15 +17,11 @@ function Navbar() {
         style={styles.logoWrap}
         onMouseEnter={(e) => {
           const img = e.currentTarget.querySelector("img");
-          if (img) {
-            img.style.transform = "scale(1.12)";
-          }
+          if (img) img.style.transform = "scale(1.12)";
         }}
         onMouseLeave={(e) => {
           const img = e.currentTarget.querySelector("img");
-          if (img) {
-            img.style.transform = "scale(1)";
-          }
+          if (img) img.style.transform = "scale(1)";
         }}
       >
         <img src={logo} alt="MaiCinema" style={styles.logo} />
@@ -60,7 +56,7 @@ const styles = {
     top: 0,
     left: 0,
     width: "100%",
-    padding: "25px 60px",
+    padding: "12px 20px", // ✅ FIXED (was 25px 60px)
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -74,7 +70,7 @@ const styles = {
   },
 
   logo: {
-    height: "110px",
+    height: "clamp(50px, 8vw, 110px)", // ✅ responsive logo
     width: "auto",
     display: "block",
     transition: "transform 0.3s ease"
@@ -82,14 +78,17 @@ const styles = {
 
   links: {
     display: "flex",
-    gap: "40px",
-    alignItems: "center"
+    gap: "clamp(10px, 3vw, 40px)", // ✅ responsive spacing
+    alignItems: "center",
+    flexWrap: "wrap", // ✅ prevents overflow on mobile
+    justifyContent: "flex-end",
+    maxWidth: "70%"
   },
 
   link: {
     color: "white",
     textDecoration: "none",
-    fontSize: "18px",
+    fontSize: "clamp(12px, 2.5vw, 18px)", // ✅ responsive text
     fontWeight: "500",
     transition: "all 0.3s ease",
     display: "inline-block"
