@@ -24,10 +24,6 @@ function TrendingNow() {
     }));
 
     setMovies(top);
-
-// ✅ ensure skeleton shows for at least 1 second
-setTimeout(() => {
-}, 800);
   }
 
   const scroll = (direction) => {

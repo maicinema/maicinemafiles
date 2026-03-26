@@ -44,14 +44,20 @@ function MovieCard({ movie }) {
     >
       {movie.video ? (
         <video
-          ref={videoRef}
-          src={movie.video}
-          poster={movie.poster}
-          style={styles.image}
-          playsInline
-        />
+  ref={videoRef}
+  src={movie.video}
+  poster={movie.poster || movie.image}
+  style={styles.image}
+  preload="metadata" // ✅ FIX (huge performance gain)
+  playsInline
+/>
       ) : (
-        <img src={movie.poster} alt={movie.title} style={styles.image} />
+        <img
+  src={movie.poster || movie.image}
+  alt={movie.title}
+  style={styles.image}
+  loading="lazy" // ✅ important
+/>
       )}
 
       <div style={styles.info}>
