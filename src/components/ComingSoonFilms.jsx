@@ -29,9 +29,8 @@ function ComingSoonFilms() {
   const scroll = (direction) => {
     if (!scrollRef.current) return;
 
-    const amount = 300;
     scrollRef.current.scrollBy({
-      left: direction === "left" ? -amount : amount,
+      left: direction === "left" ? -300 : 300,
       behavior: "smooth"
     });
   };
@@ -46,11 +45,17 @@ function ComingSoonFilms() {
         </button>
 
         <div style={styles.grid} ref={scrollRef}>
-          {movies.map((movie) => (
-            <div key={movie.id} style={styles.cardWrap}>
-              <MovieCard movie={movie} />
-            </div>
-          ))}
+          {Array.from({ length: 10 }).map((_, i) => {
+            const movie = movies[i];
+
+            return movie ? (
+              <div key={movie.id} style={styles.cardWrap}>
+                <MovieCard movie={movie} />
+              </div>
+            ) : (
+              <div key={i} style={styles.skeleton} />
+            );
+          })}
         </div>
 
         <button style={styles.arrowRight} onClick={() => scroll("right")}>
@@ -88,6 +93,13 @@ const styles = {
   cardWrap: {
     flex: "0 0 auto",
     width: "220px"
+  },
+
+  skeleton: {
+    width: "220px",
+    height: "150px",
+    background: "#222",
+    borderRadius: "6px"
   },
 
   arrowLeft: {
