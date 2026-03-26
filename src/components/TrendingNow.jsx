@@ -36,7 +36,11 @@ function TrendingNow() {
 
     const topFive = publicFilms.slice(0, 5).map((film) => ({
       ...film,
-      image: film.poster
+
+      // ✅ FIXED (THIS IS THE ONLY CHANGE)
+      poster: film.poster_url,
+      video: film.video_url,
+      image: film.poster_url
     }));
 
     console.log("Trending top films:", topFive);
