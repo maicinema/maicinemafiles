@@ -4,7 +4,6 @@ import { supabase } from "../lib/supabase";
 
 function TrendingNow() {
   const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -28,7 +27,6 @@ function TrendingNow() {
 
 // ✅ ensure skeleton shows for at least 1 second
 setTimeout(() => {
-  setLoading(false);
 }, 800);
   }
 
@@ -51,15 +49,17 @@ setTimeout(() => {
         </button>
 
         <div style={styles.grid} ref={scrollRef}>
-          {loading
-            ? Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} style={styles.skeleton} />
-              ))
-            : movies.map((movie) => (
-                <div key={movie.id} style={styles.cardWrap}>
-                  <MovieCard movie={movie} />
-                </div>
-              ))}
+          {Array.from({ length: 10 }).map((_, i) => {
+  const movie = movies[i];
+
+  return movie ? (
+    <div key={movie.id} style={styles.cardWrap}>
+      <MovieCard movie={movie} />
+    </div>
+  ) : (
+    <div key={i} style={styles.skeleton} />
+  );
+})}
         </div>
 
         <button style={styles.arrowRight} onClick={() => scroll("right")}>
