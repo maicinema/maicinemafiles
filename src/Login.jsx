@@ -3,20 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "./lib/supabase";
 import { logAdminAction } from "./utils/adminLogger";
 
-export default function Login(){
+function Login(){
 
 const [email,setEmail] = useState("");
 const [password,setPassword] = useState("");
 const [message,setMessage] = useState("");
 const [showPassword,setShowPassword] = useState(false);
-
-/* ✅ NEW (ADDED ONLY) */
 const [loading,setLoading] = useState(false);
+const [resetMode,setResetMode] = useState(false);
 
 const navigate = useNavigate();
 
+/* LOGIN */
 async function handleLogin(e){
-
 e.preventDefault();
 
 setLoading(true);
@@ -27,7 +26,6 @@ password
 });
 
 if (error) {
-  console.error(error);
   setMessage(error.message);
 } else {
   setMessage("Login successful");
@@ -38,9 +36,8 @@ if (error) {
 setLoading(false);
 }
 
-/* ✅ FORGOT PASSWORD (ADDED ONLY) */
-async function handleForgotPassword(){
-
+/* FORGOT PASSWORD */
+async function handleResetPassword(){
 if(!email){
   setMessage("Enter your email first");
   return;
@@ -48,14 +45,14 @@ if(!email){
 
 setLoading(true);
 
-const { error } = await supabase.auth.resetPasswordForEmail(email, {
-  redirectTo: window.location.origin + "/reset-password"
+const { error } = await supabase.auth.resetPasswordForEmail(email,{
+  redirectTo: "https://maicinemafiles.pages.dev/reset-password"
 });
 
 if(error){
   setMessage(error.message);
 }else{
-  setMessage("Password reset email sent. Check your inbox.");
+  setMessage("✅ Password reset email sent");
 }
 
 setLoading(false);
@@ -63,103 +60,73 @@ setLoading(false);
 
 return(
 
-<div style={{
-height:"100vh",
-display:"flex",
-justifyContent:"center",
-alignItems:"center",
-background:"#000",
-color:"white"
-}}>
+<div style={styles.page}>
 
-<div style={{
-width:"320px",
-padding:"40px",
-background:"#111",
-borderRadius:"8px"
-}}>
+<div style={styles.box}>
 
-<h2 style={{marginBottom:"20px"}}>Admin Login</h2>
+<h2 style={{marginBottom:"20px"}}>
+{resetMode ? "Reset Password" : "Admin Login"}
+</h2>
 
-<form onSubmit={handleLogin} autoComplete="on">
+<form onSubmit={handleLogin}>
 
 <input
-type="email"
-name="email"
-autoComplete="email"
 placeholder="Email"
 value={email}
 onChange={(e)=>setEmail(e.target.value)}
-style={{
-display:"block",
-marginBottom:"12px",
-padding:"10px",
-width:"100%"
-}}
+style={styles.input}
 />
 
+{/* PASSWORD ONLY IN LOGIN MODE */}
+{!resetMode && (
 <div style={{position:"relative"}}>
 
 <input
 type={showPassword ? "text" : "password"}
-name="password"
-autoComplete="current-password"
 placeholder="Password"
 value={password}
 onChange={(e)=>setPassword(e.target.value)}
-style={{
-display:"block",
-marginBottom:"12px",
-padding:"10px",
-width:"100%"
-}}
+style={styles.input}
 />
 
 <span
 onClick={()=>setShowPassword(!showPassword)}
-style={{
-position:"absolute",
-right:"10px",
-top:"10px",
-cursor:"pointer",
-fontSize:"16px"
-}}
+style={styles.eye}
 >
 👁
 </span>
 
 </div>
+)}
 
-{/* ✅ FORGOT PASSWORD BUTTON */}
-<p
-onClick={handleForgotPassword}
-style={{
-cursor:"pointer",
-fontSize:"13px",
-marginBottom:"12px",
-color:"#aaa",
-textDecoration:"underline"
-}}
->
-Forgot password?
-</p>
-
-<button
-type="submit"
-disabled={loading}
-style={{
-width:"100%",
-padding:"10px",
-background:"#e50914",
-color:"white",
-border:"none",
-cursor:"pointer"
-}}
->
-{loading ? "Please wait..." : "Login"}
+{/* LOGIN BUTTON */}
+{!resetMode && (
+<button type="submit" style={styles.button} disabled={loading}>
+{loading ? "Logging in..." : "Login"}
 </button>
+)}
+
+{/* RESET BUTTON */}
+{resetMode && (
+<button
+type="button"
+style={styles.button}
+onClick={handleResetPassword}
+disabled={loading}
+>
+{loading ? "Sending..." : "Send Reset Email"}
+</button>
+)}
 
 </form>
+
+{/* TOGGLE */}
+<p
+style={styles.link}
+onClick={()=>setResetMode(!resetMode)}
+>
+{resetMode ? "Back to Login" : "Forgot Password?"}
+</p>
 
 <p style={{marginTop:"10px"}}>{message}</p>
 
@@ -170,3 +137,56 @@ cursor:"pointer"
 );
 
 }
+
+const styles = {
+
+page:{
+height:"100vh",
+display:"flex",
+justifyContent:"center",
+alignItems:"center",
+background:"#000",
+color:"white"
+},
+
+box:{
+width:"320px",
+padding:"40px",
+background:"#111",
+borderRadius:"8px"
+},
+
+input:{
+display:"block",
+marginBottom:"12px",
+padding:"10px",
+width:"100%"
+},
+
+button:{
+width:"100%",
+padding:"10px",
+background:"#e50914",
+color:"white",
+border:"none",
+cursor:"pointer"
+},
+
+eye:{
+position:"absolute",
+right:"10px",
+top:"10px",
+cursor:"pointer"
+},
+
+link:{
+marginTop:"10px",
+fontSize:"14px",
+color:"#ccc",
+cursor:"pointer",
+textAlign:"center"
+}
+
+};
+
+export default Login;

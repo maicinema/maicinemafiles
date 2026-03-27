@@ -10,31 +10,34 @@ function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
 
   async function handleReset(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (password !== confirmPassword) {
-      setMessage("Passwords do not match");
-      return;
-    }
-
-    setLoading(true);
-
-    const { error } = await supabase.auth.updateUser({
-      password: password
-    });
-
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setMessage("✅ Password updated successfully");
-
-      // ✅ CLEAR FORM AFTER SUCCESS
-      setPassword("");
-      setConfirmPassword("");
-    }
-
-    setLoading(false);
+  if (password !== confirmPassword) {
+    setMessage("Passwords do not match");
+    return;
   }
+
+  setLoading(true);
+
+  const { error } = await supabase.auth.updateUser({
+    password: password
+  });
+
+  if (error) {
+    setMessage(error.message);
+  } else {
+    setMessage("✅ Password updated successfully");
+
+    // ✅ FORCE FULL RESET
+    setPassword("");
+    setConfirmPassword("");
+
+    // ✅ EXTRA: clear browser autofill
+    document.querySelectorAll("input").forEach(input => input.value = "");
+  }
+
+  setLoading(false);
+}
 
   return (
     <div style={styles.page}>
