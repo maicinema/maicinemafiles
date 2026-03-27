@@ -21,18 +21,13 @@ email,
 password
 });
 
-if(error){
-
-setMessage("Login failed");
-
-}else{
-
-setMessage("Login successful");
-
-await logAdminAction("Admin logged in");
-
-navigate("/admin");
-
+if (error) {
+  console.error(error);
+  setMessage(error.message);
+} else {
+  setMessage("Login successful");
+  await logAdminAction("Admin logged in");
+  navigate("/admin");
 }
 
 }
