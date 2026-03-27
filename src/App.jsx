@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
 import "./App.css";
+import FilmDetails from "./pages/FilmDetails";
 
 import EventMonitor from "./pages/EventMonitor";
 import EventControl from "./pages/EventControl";
@@ -92,6 +93,7 @@ function Layout() {
         <Routes>
           {/* PUBLIC ROUTES */}
           <Route path="/" element={<Home />} />
+          <Route path="/film/:id" element={<FilmDetails />} />
           <Route path="/mycinema" element={<MyCinema />} />
           <Route path="/comingsoon" element={<ComingSoon />} />
           <Route path="/studios" element={<Studios />} />

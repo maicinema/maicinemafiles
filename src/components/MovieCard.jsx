@@ -26,14 +26,24 @@ function MovieCard({ movie }) {
   };
 
   const handleClick = () => {
-    navigate("/create-account", {
-      state: {
-        type: "rent",
-        title: movie.title,
-        price: RENT_PRICE
-      }
-    });
+    const handleClick = () => {
+  navigate(`/film/${movie.id}`);
+};
   };
+
+  const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "Movie",
+  "name": movie.title,
+  "image": movie.poster || movie.image,
+  "description": movie.description,
+  "genre": movie.genre,
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": movie.rating || "4.5",
+    "reviewCount": movie.views || "100"
+  }
+};
 
   return (
     <div
@@ -42,6 +52,11 @@ function MovieCard({ movie }) {
       onMouseLeave={stopPreview}
       onClick={handleClick}
     >
+
+      <script type="application/ld+json">
+  {JSON.stringify(structuredData)}
+</script>
+
       {movie.video ? (
         <video
           ref={videoRef}
