@@ -28,6 +28,7 @@ import ManageEvents from "./admin/ManageEvents";
 import ReviewSubmissions from "./admin/ReviewSubmissions";
 import ManageStudios from "./admin/ManageStudios";
 import TicketAdmin from "./admin/TicketAdmin";
+import ResetPassword from "./pages/ResetPassword";
 
 /* COMPONENTS */
 import Navbar from "./components/Navbar";
@@ -66,9 +67,9 @@ function PageWrapper({ children }) {
     <div
       style={{
         width: "100%",
-        maxWidth: "1400px", // desktop limit
+        maxWidth: "1400px",
         margin: "0 auto",
-        padding: "0 16px", // mobile padding
+        padding: "0 16px",
         boxSizing: "border-box"
       }}
     >
@@ -83,12 +84,21 @@ function Layout() {
   const isAdminRoute = location.pathname.startsWith("/admin");
   const hideLayout = isAdminRoute || location.pathname === "/admin/login";
 
+  /* ✅ ADDED: handle Supabase reset session */
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes("access_token")) {
+      supabase.auth.getSession().then(() => {
+        window.location.href = "/reset-password";
+      });
+    }
+  }, []);
+
   return (
     <>
       {!hideLayout && <Navbar />}
       {!hideLayout && <NavigationArrows />}
 
-      {/* ✅ GLOBAL WRAPPER APPLIED HERE */}
       <PageWrapper>
         <Routes>
           {/* PUBLIC ROUTES */}
@@ -112,6 +122,9 @@ function Layout() {
 
           {/* LOGIN */}
           <Route path="/admin/login" element={<Login />} />
+
+          {/* ✅ RESET PASSWORD (NOW WORKS) */}
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* ADMIN */}
           <Route path="/admin" element={<ProtectedAdmin><AdminDashboard /></ProtectedAdmin>} />
