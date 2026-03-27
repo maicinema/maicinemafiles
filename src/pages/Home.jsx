@@ -18,8 +18,6 @@ function Home() {
           overflow: "hidden"
         }}
       >
-        {/* ❌ Navbar REMOVED from here */}
-
         <div
           style={{
             position: "absolute",
@@ -41,17 +39,18 @@ function Home() {
             paddingRight: "20px"
           }}
         >
+          {/* ✅ WRAPPER MOVES EVERYTHING */}
           <div
             style={{
-              maxWidth: "800px"
+              maxWidth: "800px",
+              whiteSpace: "nowrap",
+              animation: "heroSlide 20s linear infinite"
             }}
           >
             <h1
               style={{
                 fontSize: "clamp(28px, 6vw, 64px)",
-                margin: "0",
-                whiteSpace: "nowrap",
-                animation: "slideHero 8s linear infinite"
+                margin: "0"
               }}
             >
               Welcome to <span style={{ color: "red" }}>MaiCinema</span>
@@ -70,10 +69,10 @@ function Home() {
         </div>
       </div>
 
-      {/* ✅ ADDED ONLY (animation styles) */}
+      {/* ✅ ANIMATION */}
       <style>
         {`
-        @keyframes slideHero {
+        @keyframes heroSlide {
           0% {
             transform: translateX(100%);
             opacity: 0;
@@ -81,11 +80,17 @@ function Home() {
           10% {
             opacity: 1;
           }
-          50% {
+          40% {
             transform: translateX(0%);
+            opacity: 1;
+          }
+          70% {
+            transform: translateX(0%);
+            opacity: 1;
           }
           90% {
-            opacity: 1;
+            transform: translateX(-100%);
+            opacity: 0;
           }
           100% {
             transform: translateX(-100%);
