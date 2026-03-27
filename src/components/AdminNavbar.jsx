@@ -1,52 +1,52 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
 import logo from "../assets/logo.png";
 
 function AdminNavbar() {
 
   const [locked, setLocked] = useState(false);
   const [password, setPassword] = useState("");
-  const [input, setInput] = useState("");
   const [error, setError] = useState("");
 
-  /* LOAD LOCK STATE ON REFRESH */
+  /* LOAD LOCK STATE */
   useEffect(() => {
-    const lockState = localStorage.getItem("admin_locked");
-    const savedPassword = localStorage.getItem("admin_lock_password");
-
-    if (lockState === "true") {
+    const isLocked = localStorage.getItem("admin_locked");
+    if (isLocked === "true") {
       setLocked(true);
-    }
-
-    if (savedPassword) {
-      setPassword(savedPassword);
     }
   }, []);
 
-  /* LOCK SCREEN */
+  /* LOCK (NO PASSWORD ASKED) */
   function handleLock() {
-    const newPassword = prompt("Set lock password:");
-
-    if (!newPassword) return;
-
     localStorage.setItem("admin_locked", "true");
-    localStorage.setItem("admin_lock_password", newPassword);
-
-    setPassword(newPassword);
     setLocked(true);
-    setInput("");
-    setError("");
   }
 
-  /* UNLOCK */
-  function handleUnlock() {
-    if (input === password) {
+  /* UNLOCK USING REAL ADMIN PASSWORD */
+  async function handleUnlock() {
+    setError("");
+
+    const { data } = await supabase.auth.getUser();
+
+    if (!data.user) {
+      setError("Session expired. Please login again.");
+      return;
+    }
+
+    const email = data.user.email;
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      setError("Wrong password");
+    } else {
       localStorage.setItem("admin_locked", "false");
       setLocked(false);
-      setInput("");
-      setError("");
-    } else {
-      setError("Wrong password");
+      setPassword("");
     }
   }
 
@@ -72,7 +72,7 @@ function AdminNavbar() {
         </div>
       </nav>
 
-      {/* 🔐 LOCK SCREEN OVERLAY */}
+      {/* 🔐 LOCK OVERLAY */}
       {locked && (
         <div style={styles.overlay}>
           <div style={styles.lockBox}>
@@ -80,9 +80,9 @@ function AdminNavbar() {
 
             <input
               type="password"
-              placeholder="Enter password"
-              value={input}
-              onChange={(e)=>setInput(e.target.value)}
+              placeholder="Enter admin password"
+              value={password}
+              onChange={(e)=>setPassword(e.target.value)}
               style={styles.input}
             />
 
@@ -154,7 +154,7 @@ top:0,
 left:0,
 width:"100%",
 height:"100%",
-background:"rgba(0,0,0,0.95)",
+background:"rgba(0,0,0,0.97)",
 display:"flex",
 justifyContent:"center",
 alignItems:"center",
@@ -165,7 +165,8 @@ lockBox:{
 background:"#111",
 padding:"40px",
 borderRadius:"8px",
-textAlign:"center"
+textAlign:"center",
+width:"300px"
 },
 
 input:{
@@ -180,7 +181,8 @@ padding:"10px",
 background:"#e50914",
 color:"white",
 border:"none",
-cursor:"pointer"
+cursor:"pointer",
+width:"100%"
 }
 
 };
