@@ -1,42 +1,54 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logo from "../assets/logo.png";
-import { supabase } from "../lib/supabase";
 
 function AdminNavbar() {
 
-  /* ✅ ADDED (lock system) */
-  const [locked,setLocked] = useState(false);
-  const [password,setPassword] = useState("");
+  const [locked, setLocked] = useState(false);
+  const [password, setPassword] = useState("");
+  const [input, setInput] = useState("");
+  const [error, setError] = useState("");
 
-  const ADMIN_PASSWORD = "admin123"; // 🔒 change later
+  /* LOAD LOCK STATE ON REFRESH */
+  useEffect(() => {
+    const lockState = localStorage.getItem("admin_locked");
+    const savedPassword = localStorage.getItem("admin_lock_password");
 
-  async function handleUnlock(){
+    if (lockState === "true") {
+      setLocked(true);
+    }
 
-  if(!password){
-    alert("Enter password");
-    return;
+    if (savedPassword) {
+      setPassword(savedPassword);
+    }
+  }, []);
+
+  /* LOCK SCREEN */
+  function handleLock() {
+    const newPassword = prompt("Set lock password:");
+
+    if (!newPassword) return;
+
+    localStorage.setItem("admin_locked", "true");
+    localStorage.setItem("admin_lock_password", newPassword);
+
+    setPassword(newPassword);
+    setLocked(true);
+    setInput("");
+    setError("");
   }
 
-  const user = await supabase.auth.getUser();
-
-  if(!user.data.user){
-    alert("Session expired. Login again.");
-    return;
+  /* UNLOCK */
+  function handleUnlock() {
+    if (input === password) {
+      localStorage.setItem("admin_locked", "false");
+      setLocked(false);
+      setInput("");
+      setError("");
+    } else {
+      setError("Wrong password");
+    }
   }
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email: user.data.user.email,
-    password
-  });
-
-  if(error){
-    alert("Wrong password");
-  } else {
-    setLocked(false);
-    setPassword("");
-  }
-}
 
   return (
     <>
@@ -53,37 +65,32 @@ function AdminNavbar() {
           <Link to="/admin/submissions" style={styles.link}>Submissions</Link>
           <Link to="/admin/studios" style={styles.link}>Studios</Link>
 
-          {/* 🔒 LOCK BUTTON (ADDED) */}
-          <span
-            onClick={()=>setLocked(true)}
-            style={{cursor:"pointer", fontSize:"20px"}}
-            title="Lock screen"
-          >
+          {/* 🔒 LOCK BUTTON */}
+          <button onClick={handleLock} style={styles.lockBtn}>
             🔒
-          </span>
+          </button>
         </div>
       </nav>
 
-      {/* 🔒 LOCK SCREEN OVERLAY (ADDED) */}
+      {/* 🔐 LOCK SCREEN OVERLAY */}
       {locked && (
-        <div style={styles.lockOverlay}>
+        <div style={styles.overlay}>
           <div style={styles.lockBox}>
-            <h2>Admin Locked</h2>
+            <h2>🔒 Screen Locked</h2>
 
             <input
               type="password"
               placeholder="Enter password"
-              value={password}
-              onChange={(e)=>setPassword(e.target.value)}
+              value={input}
+              onChange={(e)=>setInput(e.target.value)}
               style={styles.input}
             />
 
-            <button
-              onClick={handleUnlock}
-              style={styles.unlockBtn}
-            >
+            <button onClick={handleUnlock} style={styles.unlockBtn}>
               Unlock
             </button>
+
+            <p style={{color:"red"}}>{error}</p>
           </div>
         </div>
       )}
@@ -92,84 +99,90 @@ function AdminNavbar() {
 }
 
 const styles = {
-  nav: {
-    width: "100%",
-    background: "#000",
-    borderBottom: "1px solid #222",
-    padding: "20px 40px",
-    boxSizing: "border-box",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    position: "sticky",
-    top: 0,
-    zIndex: 1000
-  },
-  left: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px"
-  },
-  logo: {
-    height: "60px",
-    width: "auto",
-    display: "block"
-  },
-  adminText: {
-    color: "#e50914",
-    fontSize: "20px",
-    fontWeight: "700"
-  },
-  links: {
-    display: "flex",
-    gap: "28px",
-    alignItems: "center"
-  },
-  link: {
-    color: "white",
-    textDecoration: "none",
-    fontSize: "16px",
-    fontWeight: "500"
-  },
 
-  /* 🔒 NEW STYLES */
-  lockOverlay:{
-    position:"fixed",
-    top:0,
-    left:0,
-    width:"100%",
-    height:"100%",
-    background:"rgba(0,0,0,0.95)",
-    display:"flex",
-    justifyContent:"center",
-    alignItems:"center",
-    zIndex:9999
-  },
+nav:{
+width:"100%",
+background:"#000",
+borderBottom:"1px solid #222",
+padding:"20px 40px",
+display:"flex",
+justifyContent:"space-between",
+alignItems:"center",
+position:"sticky",
+top:0,
+zIndex:1000
+},
 
-  lockBox:{
-    background:"#111",
-    padding:"30px",
-    borderRadius:"8px",
-    textAlign:"center",
-    width:"300px"
-  },
+left:{
+display:"flex",
+alignItems:"center",
+gap:"12px"
+},
 
-  input:{
-    width:"100%",
-    padding:"10px",
-    marginTop:"15px",
-    marginBottom:"15px",
-    border:"none"
-  },
+logo:{
+height:"60px"
+},
 
-  unlockBtn:{
-    width:"100%",
-    padding:"10px",
-    background:"#e50914",
-    border:"none",
-    color:"white",
-    cursor:"pointer"
-  }
+adminText:{
+color:"#e50914",
+fontSize:"20px",
+fontWeight:"700"
+},
+
+links:{
+display:"flex",
+gap:"20px",
+alignItems:"center"
+},
+
+link:{
+color:"white",
+textDecoration:"none"
+},
+
+lockBtn:{
+background:"#e50914",
+color:"white",
+border:"none",
+padding:"6px 10px",
+cursor:"pointer"
+},
+
+overlay:{
+position:"fixed",
+top:0,
+left:0,
+width:"100%",
+height:"100%",
+background:"rgba(0,0,0,0.95)",
+display:"flex",
+justifyContent:"center",
+alignItems:"center",
+zIndex:9999
+},
+
+lockBox:{
+background:"#111",
+padding:"40px",
+borderRadius:"8px",
+textAlign:"center"
+},
+
+input:{
+marginTop:"15px",
+padding:"10px",
+width:"100%"
+},
+
+unlockBtn:{
+marginTop:"15px",
+padding:"10px",
+background:"#e50914",
+color:"white",
+border:"none",
+cursor:"pointer"
+}
+
 };
 
 export default AdminNavbar;
