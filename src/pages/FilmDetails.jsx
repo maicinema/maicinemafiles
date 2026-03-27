@@ -6,6 +6,7 @@ function FilmDetails() {
   const { id } = useParams();
   const [film, setFilm] = useState(null);
 
+  // ✅ Load film
   useEffect(() => {
     loadFilm();
   }, [id]);
@@ -20,9 +21,31 @@ function FilmDetails() {
     setFilm(data);
   }
 
+  // ✅ SEO: Dynamic Title
+  useEffect(() => {
+    if (film) {
+      document.title = `${film.title} | MaiCinema`;
+    }
+  }, [film]);
+
+  // ✅ SEO: Dynamic Description
+  useEffect(() => {
+    if (film) {
+      let meta = document.querySelector("meta[name='description']");
+
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.name = "description";
+        document.head.appendChild(meta);
+      }
+
+      meta.setAttribute("content", film.description || "Watch films on MaiCinema");
+    }
+  }, [film]);
+
   if (!film) return <div style={{ color: "white" }}>Loading...</div>;
 
-  /* 🎬 STRUCTURED DATA (POWER MOVE) */
+  /* 🎬 STRUCTURED DATA */
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Movie",
@@ -39,8 +62,8 @@ function FilmDetails() {
 
   return (
     <div style={{ background: "#000", color: "white", padding: "40px" }}>
-
-      {/* ✅ GOOGLE WILL READ THIS */}
+      
+      {/* ✅ Google reads this */}
       <script type="application/ld+json">
         {JSON.stringify(structuredData)}
       </script>
