@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import logo from "../assets/logo.png";
+import { supabase } from "../lib/supabase";
 
 function AdminNavbar() {
 
@@ -10,14 +11,32 @@ function AdminNavbar() {
 
   const ADMIN_PASSWORD = "admin123"; // 🔒 change later
 
-  function handleUnlock(){
-    if(password === ADMIN_PASSWORD){
-      setLocked(false);
-      setPassword("");
-    } else {
-      alert("Wrong password");
-    }
+  async function handleUnlock(){
+
+  if(!password){
+    alert("Enter password");
+    return;
   }
+
+  const user = await supabase.auth.getUser();
+
+  if(!user.data.user){
+    alert("Session expired. Login again.");
+    return;
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email: user.data.user.email,
+    password
+  });
+
+  if(error){
+    alert("Wrong password");
+  } else {
+    setLocked(false);
+    setPassword("");
+  }
+}
 
   return (
     <>
