@@ -107,7 +107,11 @@ function ManageFilms() {
       poster: updatedPoster,
       video: updatedVideo,
       status: film.status || "live",
-      contract_expires_at: film.contract_expires_at || null
+      contract_expires_at: film.contract_expires_at || null,
+
+      // ✅ ADDED (preview)
+      preview_start: Number(film.preview_start) || 0,
+      preview_duration: Number(film.preview_duration) || 10
     };
 
     const { error } = await supabase
@@ -250,6 +254,27 @@ function ManageFilms() {
                           handleChange(film.id, "description", e.target.value)
                         }
                         placeholder="Description"
+                      />
+
+                      {/* ✅ ADDED PREVIEW INPUTS */}
+                      <input
+                        style={styles.input}
+                        type="number"
+                        value={film.preview_start || 0}
+                        onChange={(e) =>
+                          handleChange(film.id, "preview_start", e.target.value)
+                        }
+                        placeholder="Preview Start (seconds)"
+                      />
+
+                      <input
+                        style={styles.input}
+                        type="number"
+                        value={film.preview_duration || 10}
+                        onChange={(e) =>
+                          handleChange(film.id, "preview_duration", e.target.value)
+                        }
+                        placeholder="Preview Duration (seconds)"
                       />
 
                       <select
