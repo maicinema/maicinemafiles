@@ -49,7 +49,9 @@ function Home() {
             <h1
               style={{
                 fontSize: "clamp(28px, 6vw, 64px)",
-                margin: "0"
+                margin: "0",
+                whiteSpace: "nowrap",
+                animation: "slideHero 8s linear infinite"
               }}
             >
               Welcome to <span style={{ color: "red" }}>MaiCinema</span>
@@ -67,6 +69,31 @@ function Home() {
           </div>
         </div>
       </div>
+
+      {/* ✅ ADDED ONLY (animation styles) */}
+      <style>
+        {`
+        @keyframes slideHero {
+          0% {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          50% {
+            transform: translateX(0%);
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+        }
+        `}
+      </style>
 
       <SubscribeSection />
       <TrendingNow />
