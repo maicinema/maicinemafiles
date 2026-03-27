@@ -39,12 +39,10 @@ function Home() {
             paddingRight: "20px"
           }}
         >
-          {/* ✅ WRAPPER MOVES EVERYTHING */}
           <div
             style={{
               maxWidth: "800px",
-              whiteSpace: "nowrap",
-              animation: "heroSlide 20s linear infinite"
+              animation: "heroMove 25s linear infinite"
             }}
           >
             <h1
@@ -69,32 +67,36 @@ function Home() {
         </div>
       </div>
 
-      {/* ✅ ANIMATION */}
       <style>
         {`
-        @keyframes heroSlide {
+        @keyframes heroMove {
           0% {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          40% {
             transform: translateX(0%);
             opacity: 1;
           }
-          70% {
+
+          /* stay in center (20 seconds approx) */
+          80% {
             transform: translateX(0%);
             opacity: 1;
           }
+
+          /* move to right and disappear */
           90% {
-            transform: translateX(-100%);
+            transform: translateX(120%);
             opacity: 0;
           }
-          100% {
-            transform: translateX(-100%);
+
+          /* instantly jump to left */
+          91% {
+            transform: translateX(-120%);
             opacity: 0;
+          }
+
+          /* come back to center */
+          100% {
+            transform: translateX(0%);
+            opacity: 1;
           }
         }
         `}
