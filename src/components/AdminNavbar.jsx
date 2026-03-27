@@ -9,35 +9,73 @@ function AdminNavbar() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  let inactivityTimer;
+
   /* LOAD LOCK STATE */
   useEffect(() => {
-    const isLocked = localStorage.getItem("admin_locked");
-    if (isLocked === "true") {
-      setLocked(true);
-    }
-  }, []);
+  const isLocked = localStorage.getItem("admin_locked");
+  if (isLocked === "true") {
+    setLocked(true);
+  }
 
-  /* LOCK (NO PASSWORD ASKED) */
+  let timeout;
+
+  const resetTimer = () => {
+    clearTimeout(timeout);
+
+    timeout = setTimeout(() => {
+      localStorage.setItem("admin_locked", "true");
+      setLocked(true);
+    }, 180000); // 3 minutes
+  };
+
+  // start immediately
+  resetTimer();
+
+  window.addEventListener("mousemove", resetTimer);
+  window.addEventListener("keydown", resetTimer);
+  window.addEventListener("click", resetTimer);
+
+  return () => {
+    clearTimeout(timeout);
+    window.removeEventListener("mousemove", resetTimer);
+    window.removeEventListener("keydown", resetTimer);
+    window.removeEventListener("click", resetTimer);
+  };
+}, []);
+
+  /* AUTO LOCK AFTER 2 MINUTES */
+  function startInactivityTimer() {
+    inactivityTimer = setTimeout(() => {
+      localStorage.setItem("admin_locked", "true");
+      setLocked(true);
+    }, 120000); // 2 minutes
+  }
+
+  function resetTimer() {
+    clearTimeout(inactivityTimer);
+    startInactivityTimer();
+  }
+
+  /* MANUAL LOCK */
   function handleLock() {
     localStorage.setItem("admin_locked", "true");
     setLocked(true);
   }
 
-  /* UNLOCK USING REAL ADMIN PASSWORD */
+  /* UNLOCK */
   async function handleUnlock() {
     setError("");
 
     const { data } = await supabase.auth.getUser();
 
     if (!data.user) {
-      setError("Session expired. Please login again.");
+      setError("Session expired");
       return;
     }
 
-    const email = data.user.email;
-
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: data.user.email,
       password
     });
 
@@ -47,6 +85,7 @@ function AdminNavbar() {
       localStorage.setItem("admin_locked", "false");
       setLocked(false);
       setPassword("");
+      resetTimer(); // restart timer
     }
   }
 
@@ -65,14 +104,12 @@ function AdminNavbar() {
           <Link to="/admin/submissions" style={styles.link}>Submissions</Link>
           <Link to="/admin/studios" style={styles.link}>Studios</Link>
 
-          {/* 🔒 LOCK BUTTON */}
           <button onClick={handleLock} style={styles.lockBtn}>
             🔒
           </button>
         </div>
       </nav>
 
-      {/* 🔐 LOCK OVERLAY */}
       {locked && (
         <div style={styles.overlay}>
           <div style={styles.lockBox}>
@@ -99,92 +136,17 @@ function AdminNavbar() {
 }
 
 const styles = {
-
-nav:{
-width:"100%",
-background:"#000",
-borderBottom:"1px solid #222",
-padding:"20px 40px",
-display:"flex",
-justifyContent:"space-between",
-alignItems:"center",
-position:"sticky",
-top:0,
-zIndex:1000
-},
-
-left:{
-display:"flex",
-alignItems:"center",
-gap:"12px"
-},
-
-logo:{
-height:"60px"
-},
-
-adminText:{
-color:"#e50914",
-fontSize:"20px",
-fontWeight:"700"
-},
-
-links:{
-display:"flex",
-gap:"20px",
-alignItems:"center"
-},
-
-link:{
-color:"white",
-textDecoration:"none"
-},
-
-lockBtn:{
-background:"#e50914",
-color:"white",
-border:"none",
-padding:"6px 10px",
-cursor:"pointer"
-},
-
-overlay:{
-position:"fixed",
-top:0,
-left:0,
-width:"100%",
-height:"100%",
-background:"rgba(0,0,0,0.97)",
-display:"flex",
-justifyContent:"center",
-alignItems:"center",
-zIndex:9999
-},
-
-lockBox:{
-background:"#111",
-padding:"40px",
-borderRadius:"8px",
-textAlign:"center",
-width:"300px"
-},
-
-input:{
-marginTop:"15px",
-padding:"10px",
-width:"100%"
-},
-
-unlockBtn:{
-marginTop:"15px",
-padding:"10px",
-background:"#e50914",
-color:"white",
-border:"none",
-cursor:"pointer",
-width:"100%"
-}
-
+  nav:{width:"100%",background:"#000",padding:"20px 40px",display:"flex",justifyContent:"space-between",alignItems:"center"},
+  left:{display:"flex",alignItems:"center",gap:"12px"},
+  logo:{height:"60px"},
+  adminText:{color:"#e50914",fontSize:"20px",fontWeight:"700"},
+  links:{display:"flex",gap:"20px",alignItems:"center"},
+  link:{color:"white",textDecoration:"none"},
+  lockBtn:{background:"#e50914",color:"white",border:"none",padding:"6px 10px",cursor:"pointer"},
+  overlay:{position:"fixed",top:0,left:0,width:"100%",height:"100%",background:"rgba(0,0,0,0.97)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999},
+  lockBox:{background:"#111",padding:"40px",borderRadius:"8px",textAlign:"center",width:"300px"},
+  input:{marginTop:"15px",padding:"10px",width:"100%"},
+  unlockBtn:{marginTop:"15px",padding:"10px",background:"#e50914",color:"white",border:"none",cursor:"pointer",width:"100%"}
 };
 
 export default AdminNavbar;
