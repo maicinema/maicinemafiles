@@ -482,13 +482,13 @@ function ReviewSubmissions() {
 
           <input
   name="duration"
-  type="number"
+  type="text"
   placeholder="Duration in minutes"
   value={adminFilm.duration}
   onChange={handleAdminChange}
   style={styles.input}
 />
-{adminFilm.duration !== "" && (
+{adminFilm.duration && !isNaN(adminFilm.duration) && (
   <p style={{ color: "#00ffae", fontSize: "14px", marginTop: "5px" }}>
     Preview: {formatDuration(adminFilm.duration)}
   </p>
