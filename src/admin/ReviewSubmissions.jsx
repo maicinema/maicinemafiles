@@ -8,6 +8,7 @@ function ReviewSubmissions() {
   const [loading, setLoading] = useState(true);
   const [reviewNotes, setReviewNotes] = useState({});
   const [submittingAdminFilm, setSubmittingAdminFilm] = useState(false);
+const [uploadProgress, setUploadProgress] = useState(0);
 
   const [adminFilm, setAdminFilm] = useState({
     title: "",
@@ -101,23 +102,6 @@ previewEnd: "",
     }
 
     const { data } = supabase.storage.from("posters").getPublicUrl(fileName);
-    return data?.publicUrl || "";
-  }
-
-  async function uploadVideo(file, prefix = "submission") {
-    if (!file) return "";
-
-    const fileName = `${prefix}-video-${Date.now()}-${file.name}`;
-
-    const { error } = await supabase.storage
-      .from("films")
-      .upload(fileName, file, { upsert: true });
-
-    if (error) {
-      throw new Error(error.message || "Film upload failed");
-    }
-
-    const { data } = supabase.storage.from("films").getPublicUrl(fileName);
     return data?.publicUrl || "";
   }
 
@@ -275,8 +259,7 @@ previewEnd: "",
       setSubmittingAdminFilm(true);
 
       const posterUrl = await uploadPoster(adminFilm.poster, "admin");
-      const videoUrl = await uploadVideo(adminFilm.film, "admin");
-
+      const videoUrl = await uploadVideo(adminFilm.film, "admin", setUploadProgress);
       const now = new Date();
       const releaseStatus = goLiveAt <= now ? "live" : "coming_soon";
 
@@ -395,6 +378,12 @@ preview_end: adminFilm.previewEnd,
                   <button style={styles.watch} onClick={() => watchFilm(film)}>
                     Watch
                   </button>
+
+{uploadProgress > 0 && (
+  <p style={{ color: "lime", marginBottom: "10px" }}>
+    Uploading: {uploadProgress}%
+  </p>
+)}
 
                   <button style={styles.approve} onClick={() => approveFilm(film)}>
                     Approve

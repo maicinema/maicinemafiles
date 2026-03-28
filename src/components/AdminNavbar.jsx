@@ -44,14 +44,6 @@ function AdminNavbar() {
   };
 }, []);
 
-  /* AUTO LOCK AFTER 2 MINUTES */
-  function startInactivityTimer() {
-    inactivityTimer = setTimeout(() => {
-      localStorage.setItem("admin_locked", "true");
-      setLocked(true);
-    }, 120000); // 2 minutes
-  }
-
   function resetTimer() {
     clearTimeout(inactivityTimer);
     startInactivityTimer();
@@ -116,12 +108,14 @@ function AdminNavbar() {
             <h2>🔒 Screen Locked</h2>
 
             <input
-              type="password"
-              placeholder="Enter admin password"
-              value={password}
-              onChange={(e)=>setPassword(e.target.value)}
-              style={styles.input}
-            />
+  type="password"
+  placeholder="Enter admin password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter") unlockScreen();
+  }}
+/>
 
             <button onClick={handleUnlock} style={styles.unlockBtn}>
               Unlock
