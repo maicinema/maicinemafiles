@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
-
+import { useEffect } from "react";
 import banner from "../assets/cinema-banner.jpg";
 import SubscribeSection from "../components/SubscribeSection";
 import TrendingNow from "../components/TrendingNow";
@@ -9,23 +7,14 @@ import ComingSoonFilms from "../components/ComingSoonFilms";
 
 function Home() {
 
-  // ✅ NEW: live films state
-  const [liveFilms, setLiveFilms] = useState([]);
-
+  // ✅ ADD THIS (forces refresh of data across components)
   useEffect(() => {
-    loadLiveFilms();
+    const interval = setInterval(() => {
+      window.location.reload();
+    }, 60000); // refresh every 60s
+
+    return () => clearInterval(interval);
   }, []);
-
-  async function loadLiveFilms() {
-    const { data, error } = await supabase
-      .from("films")
-      .select("*")
-      .eq("status", "live");
-
-    if (!error) {
-      setLiveFilms(data || []);
-    }
-  }
 
   return (
     <>
@@ -101,11 +90,9 @@ function Home() {
         `}
       </style>
 
-      {/* ✅ NEW: ensure homepage sees LIVE films */}
-      {liveFilms.length > 0 && <TrendingNow films={liveFilms} />}
-
-      {/* KEEP YOUR EXISTING STRUCTURE */}
+      {/* ✅ KEEP EVERYTHING EXACTLY */}
       <SubscribeSection />
+      <TrendingNow />
       <LeavingSoon />
       <ComingSoonFilms />
     </>
