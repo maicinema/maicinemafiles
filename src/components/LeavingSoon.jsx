@@ -15,7 +15,7 @@ function LeavingSoon() {
 
     const { data } = await supabase
   .from("films")
-  .select("id,title,poster_url,video_url,genre,rating,description,views,contract_expires_at")
+  .select("id,title,poster,video,genre,rating,description,views,contract_expires_at,previewStart")
   .eq("status", "live")
   .gt("contract_expires_at", now)
   .order("contract_expires_at", { ascending: true });
@@ -31,13 +31,7 @@ function LeavingSoon() {
       return msLeft > 0 && msLeft <= 7 * 24 * 60 * 60 * 1000;
     });
 
-    const mapped = filtered.map((film) => ({
-      ...film,
-      poster: film.poster_url,
-      video: film.video_url
-    }));
-
-    setMovies(mapped);
+    setMovies(filtered);
   }
 
   const scroll = (direction) => {

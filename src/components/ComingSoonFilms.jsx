@@ -13,17 +13,11 @@ function ComingSoonFilms() {
   async function loadComingSoon() {
     const { data } = await supabase
   .from("films")
-  .select("id,title,poster_url,video_url,genre,rating,description,views")
+  .select("id,title,poster,video,genre,rating,description,views,previewStart")
   .eq("status", "coming_soon")
   .order("id", { ascending: false });
 
-    const formatted = (data || []).map((film) => ({
-      ...film,
-      poster: film.poster_url,
-      video: film.video_url
-    }));
-
-    setMovies(formatted);
+    setMovies(data || []);
   }
 
   const scroll = (direction) => {

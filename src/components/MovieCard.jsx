@@ -4,46 +4,54 @@ import { RENT_PRICE } from "../config/pricing";
 
 function MovieCard({ movie }) {
   const videoRef = useRef(null);
+  const hoverTimeout = useRef(null);
   const navigate = useNavigate();
 
   const startPreview = () => {
     const video = videoRef.current;
-    if (video && movie.video) {
-      video.currentTime = 14;
-      video.muted = false;
-      video.volume = 1;
+    if (!video || !movie.video) return;
+
+    hoverTimeout.current = setTimeout(() => {
+      video.currentTime = movie.previewStart || 0;
+      video.muted = true; // ✅ required for autoplay
       video.play().catch(() => {});
-    }
+    }, 500); // 🎬 Netflix-style delay
   };
 
   const stopPreview = () => {
     const video = videoRef.current;
+
+    // cancel delayed play if user leaves early
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+    }
+
     if (video) {
       video.pause();
       video.currentTime = 0;
-      // ❌ removed video.load() (performance fix)
+
+      // 🔥 FORCE POSTER BACK (fix black frame)
+      video.load();
     }
   };
 
   const handleClick = () => {
-    const handleClick = () => {
-  navigate(`/film/${movie.id}`);
-};
+    navigate(`/film/${movie.id}`);
   };
 
   const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "Movie",
-  "name": movie.title,
-  "image": movie.poster || movie.image,
-  "description": movie.description,
-  "genre": movie.genre,
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": movie.rating || "4.5",
-    "reviewCount": movie.views || "100"
-  }
-};
+    "@context": "https://schema.org",
+    "@type": "Movie",
+    name: movie.title,
+    image: movie.poster,
+    description: movie.description,
+    genre: movie.genre,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: movie.rating || "4.5",
+      reviewCount: movie.views || "100"
+    }
+  };
 
   return (
     <div
@@ -52,26 +60,26 @@ function MovieCard({ movie }) {
       onMouseLeave={stopPreview}
       onClick={handleClick}
     >
-
       <script type="application/ld+json">
-  {JSON.stringify(structuredData)}
-</script>
+        {JSON.stringify(structuredData)}
+      </script>
 
       {movie.video ? (
         <video
           ref={videoRef}
           src={movie.video}
-          poster={movie.poster || movie.image}
+          poster={movie.poster}
           style={styles.image}
-          preload="metadata" // ✅ optimized
+          preload="metadata"
           playsInline
+          muted
         />
       ) : (
         <img
-          src={movie.poster || movie.image}
+          src={movie.poster}
           alt={movie.title}
           style={styles.image}
-          loading="lazy" // ✅ optimized
+          loading="lazy"
         />
       )}
 
@@ -94,7 +102,6 @@ function MovieCard({ movie }) {
     </div>
   );
 }
-
 const styles = {
   card: {
     width: "100%",
