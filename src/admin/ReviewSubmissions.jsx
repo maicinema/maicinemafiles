@@ -52,7 +52,6 @@ function ReviewSubmissions() {
 
     if (error) {
       alert(error.message);
-      setLoading(false);
       return;
     }
 
@@ -72,10 +71,6 @@ function ReviewSubmissions() {
     }
   }
 
-  function setReviewNote(id, value) {
-    setReviewNotes((prev) => ({ ...prev, [id]: value }));
-  }
-
   async function uploadPoster(file, prefix = "submission") {
     if (!file) return "";
 
@@ -91,7 +86,6 @@ function ReviewSubmissions() {
     return data.publicUrl;
   }
 
-  // ✅ FIXED: uploadVideo now exists
   async function uploadVideo(file, prefix = "submission", onProgress) {
     if (!file) return "";
 
@@ -118,9 +112,10 @@ function ReviewSubmissions() {
   function formatDuration(minutes) {
     const total = parseInt(minutes, 10);
     if (isNaN(total)) return "";
+
     const h = Math.floor(total / 60);
     const m = total % 60;
-    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    return h ? `${h}h ${m}m` : `${m}m`;
   }
 
   async function approveAdminFilm(e) {
@@ -138,54 +133,30 @@ function ReviewSubmissions() {
       );
 
       const goLiveAt = new Date(`${adminFilm.goLiveDate}T${adminFilm.goLiveTime}`);
-      const releaseStatus =
-        goLiveAt <= new Date() ? "live" : "coming_soon";
+      const releaseStatus = goLiveAt <= new Date() ? "live" : "coming_soon";
 
       const payload = {
         title: adminFilm.title,
         director: adminFilm.director,
         genre: adminFilm.genre,
-        rating: adminFilm.rating,
-        language: adminFilm.language,
-        year: adminFilm.year,
         duration: parseInt(adminFilm.duration) || 0,
         description: adminFilm.description,
         poster: posterUrl,
         video: videoUrl,
         preview_start: adminFilm.previewStart,
         preview_end: adminFilm.previewEnd,
-        views: 0,
-        price: 3,
         status: releaseStatus,
         go_live_at: goLiveAt.toISOString()
       };
 
-      await supabase.from("films").insert(payload);
+      const { error } = await supabase.from("films").insert(payload);
+      if (error) throw new Error(error.message);
 
-      alert("Upload successful");
-
-      setAdminFilm({
-        title: "",
-        director: "",
-        producer: "",
-        cinematographer: "",
-        actors: "",
-        genre: "",
-        rating: "",
-        language: "",
-        year: "",
-        duration: "",
-        description: "",
-        previewStart: "",
-        previewEnd: "",
-        email: "",
-        goLiveDate: "",
-        goLiveTime: "",
-        poster: null,
-        film: null
-      });
+      alert("Uploaded successfully");
 
       setUploadProgress(0);
+      setAdminFilm({ ...adminFilm, title: "", film: null, poster: null });
+
     } catch (err) {
       alert(err.message);
     } finally {
@@ -194,34 +165,32 @@ function ReviewSubmissions() {
   }
 
   return (
-    <div style={{ background: "#000", minHeight: "100vh" }}>
+    <div style={styles.page}>
       <AdminNavbar />
       <NavigationArrows />
 
-      <div style={{ padding: "120px 80px", color: "#fff" }}>
+      <div style={styles.container}>
         <h1>Upload Personal Film</h1>
 
-        <form onSubmit={approveAdminFilm} style={{ maxWidth: "500px" }}>
-          <input name="title" placeholder="Film Title" onChange={handleAdminChange} />
-          <input name="director" placeholder="Director" onChange={handleAdminChange} />
-          <input name="genre" placeholder="Genre" onChange={handleAdminChange} />
-          <input name="duration" placeholder="Duration" onChange={handleAdminChange} />
+        <form onSubmit={approveAdminFilm} style={styles.form}>
+          <input name="title" placeholder="Film Title" value={adminFilm.title} onChange={handleAdminChange} style={styles.input} />
+          <input name="duration" placeholder="Duration in minutes" value={adminFilm.duration} onChange={handleAdminChange} style={styles.input} />
 
-          <input
-            name="previewStart"
-            placeholder="Preview Start (00:30)"
-            onChange={handleAdminChange}
-          />
-          <input
-            name="previewEnd"
-            placeholder="Preview End (01:30)"
-            onChange={handleAdminChange}
-          />
+          <label>Preview Start</label>
+          <input name="previewStart" value={adminFilm.previewStart} onChange={handleAdminChange} style={styles.input} />
+
+          <label>Preview End</label>
+          <input name="previewEnd" value={adminFilm.previewEnd} onChange={handleAdminChange} style={styles.input} />
+
+          {adminFilm.duration && (
+            <p style={{ color: "#00ffae" }}>
+              Preview: {formatDuration(adminFilm.duration)}
+            </p>
+          )}
 
           <input type="file" name="poster" onChange={handleAdminFile} />
           <input type="file" name="film" onChange={handleAdminFile} />
 
-          {/* ✅ CORRECT PLACE */}
           {uploadProgress > 0 && (
             <p style={{ color: "#00ffae" }}>
               Uploading: {uploadProgress}%
@@ -229,12 +198,19 @@ function ReviewSubmissions() {
           )}
 
           <button disabled={submittingAdminFilm}>
-            {submittingAdminFilm ? "Uploading..." : "Approve & Send"}
+            {submittingAdminFilm ? "Uploading..." : "Submit"}
           </button>
         </form>
       </div>
     </div>
   );
 }
+
+const styles = {
+  page: { background: "#000", minHeight: "100vh" },
+  container: { padding: "80px", color: "#fff" },
+  form: { display: "flex", flexDirection: "column", gap: "10px" },
+  input: { padding: "10px" }
+};
 
 export default ReviewSubmissions;
