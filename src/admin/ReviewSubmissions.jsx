@@ -21,6 +21,8 @@ function ReviewSubmissions() {
     year: "",
     duration: "",
     description: "",
+    previewStart: "",
+previewEnd: "",
     email: "",
     goLiveDate: "",
     goLiveTime: "",
@@ -289,6 +291,8 @@ function ReviewSubmissions() {
         description: adminFilm.description.trim(),
         poster: posterUrl,
         video: videoUrl,
+        preview_start: adminFilm.previewStart,
+preview_end: adminFilm.previewEnd,
         views: 0,
         price: 3,
         status: releaseStatus,
@@ -485,6 +489,23 @@ function ReviewSubmissions() {
   type="text"
   placeholder="Duration in minutes"
   value={adminFilm.duration}
+  onChange={handleAdminChange}
+  style={styles.input}
+/>
+<label style={styles.label}>Preview Start Time (mm:ss)</label>
+<input
+  name="previewStart"
+  placeholder="e.g. 00:30"
+  value={adminFilm.previewStart}
+  onChange={handleAdminChange}
+  style={styles.input}
+/>
+
+<label style={styles.label}>Preview End Time (mm:ss)</label>
+<input
+  name="previewEnd"
+  placeholder="e.g. 01:45"
+  value={adminFilm.previewEnd}
   onChange={handleAdminChange}
   style={styles.input}
 />
