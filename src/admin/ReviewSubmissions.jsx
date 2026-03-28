@@ -119,6 +119,19 @@ function ReviewSubmissions() {
     return data?.publicUrl || "";
   }
 
+  function formatDuration(minutes) {
+  if (!minutes) return "";
+
+  const total = parseInt(minutes, 10);
+  if (isNaN(total)) return "";
+
+  const hours = Math.floor(total / 60);
+  const mins = total % 60;
+
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
+}
+
   function copyShareLink() {
     const link = `${window.location.origin}/submit-film`;
 
@@ -475,6 +488,11 @@ function ReviewSubmissions() {
   onChange={handleAdminChange}
   style={styles.input}
 />
+{adminFilm.duration && (
+  <p style={{ color: "#00ffae", fontSize: "14px", marginTop: "-5px" }}>
+    Preview: {formatDuration(adminFilm.duration)}
+  </p>
+)}
 
           <input
             name="email"
