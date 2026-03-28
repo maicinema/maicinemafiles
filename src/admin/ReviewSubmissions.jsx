@@ -105,6 +105,34 @@ previewEnd: "",
     return data?.publicUrl || "";
   }
 
+  async function uploadVideo(file, prefix = "submission", onProgress) {
+  if (!file) return "";
+
+  const fileName = `${prefix}-video-${Date.now()}-${file.name}`;
+
+  const { error } = await supabase.storage
+    .from("films")
+    .upload(fileName, file, {
+      upsert: true,
+      onUploadProgress: (progress) => {
+        if (onProgress) {
+          const percent = Math.round((progress.loaded / progress.total) * 100);
+          onProgress(percent);
+        }
+      }
+    });
+
+  if (error) {
+    throw new Error(error.message || "Film upload failed");
+  }
+
+  const { data } = supabase.storage
+    .from("films")
+    .getPublicUrl(fileName);
+
+  return data?.publicUrl || "";
+}
+
   function formatDuration(minutes) {
   if (!minutes) return "";
 
@@ -250,11 +278,6 @@ previewEnd: "",
     minDateTime.setDate(minDateTime.getDate() + 14);
     minDateTime.setHours(0, 0, 0, 0);
 
-    if (goLiveAt < minDateTime) {
-      alert("Go live date must be at least 14 days from today.");
-      return;
-    }
-
     try {
       setSubmittingAdminFilm(true);
 
@@ -378,12 +401,6 @@ preview_end: adminFilm.previewEnd,
                   <button style={styles.watch} onClick={() => watchFilm(film)}>
                     Watch
                   </button>
-
-{uploadProgress > 0 && (
-  <p style={{ color: "lime", marginBottom: "10px" }}>
-    Uploading: {uploadProgress}%
-  </p>
-)}
 
                   <button style={styles.approve} onClick={() => approveFilm(film)}>
                     Approve
@@ -556,6 +573,27 @@ preview_end: adminFilm.previewEnd,
             onChange={handleAdminFile}
             style={styles.input}
           />
+
+<label style={styles.label}>Film File</label>
+<input
+  type="file"
+  name="film"
+  accept="video/*"
+  onChange={handleAdminFile}
+  style={styles.input}
+/>
+
+{uploadProgress > 0 && (
+  <p style={{ color: "#00ffae", marginBottom: "10px" }}>
+    Uploading: {uploadProgress}%
+  </p>
+)}
+
+<button style={styles.approve} disabled={submittingAdminFilm}>
+  {submittingAdminFilm
+    ? "Uploading..."
+    : "Approve & Send to Coming Soon"}
+</button>
 
           <button style={styles.approve} disabled={submittingAdminFilm}>
             {submittingAdminFilm
