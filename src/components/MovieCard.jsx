@@ -4,34 +4,23 @@ import { RENT_PRICE } from "../config/pricing";
 
 function MovieCard({ movie }) {
   const videoRef = useRef(null);
-  const hoverTimeout = useRef(null);
   const navigate = useNavigate();
 
   const startPreview = () => {
     const video = videoRef.current;
     if (!video || !movie.video) return;
 
-    hoverTimeout.current = setTimeout(() => {
-      video.currentTime = movie.previewStart || 0;
-      video.muted = true; // ✅ required for autoplay
-      video.play().catch(() => {});
-    }, 500); // 🎬 Netflix-style delay
+    video.currentTime = movie.previewStart || 0;
+    video.play().catch(() => {});
   };
 
   const stopPreview = () => {
     const video = videoRef.current;
 
-    // cancel delayed play if user leaves early
-    if (hoverTimeout.current) {
-      clearTimeout(hoverTimeout.current);
-    }
-
     if (video) {
       video.pause();
       video.currentTime = 0;
-
-      // 🔥 FORCE POSTER BACK (fix black frame)
-      video.load();
+      video.load(); // ensures poster comes back (no black frame)
     }
   };
 
@@ -72,7 +61,6 @@ function MovieCard({ movie }) {
           style={styles.image}
           preload="metadata"
           playsInline
-          muted
         />
       ) : (
         <img
@@ -102,6 +90,7 @@ function MovieCard({ movie }) {
     </div>
   );
 }
+
 const styles = {
   card: {
     width: "100%",

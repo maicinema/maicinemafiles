@@ -15,7 +15,7 @@ function FilmDetails() {
     const { data } = await supabase
       .from("films")
       .select("*")
-      .eq("id", id)
+      .eq("id", Number(id)) // safe fix
       .single();
 
     setFilm(data);
@@ -39,31 +39,33 @@ function FilmDetails() {
         document.head.appendChild(meta);
       }
 
-      meta.setAttribute("content", film.description || "Watch films on MaiCinema");
+      meta.setAttribute(
+        "content",
+        film.description || "Watch films on MaiCinema"
+      );
     }
   }, [film]);
 
   if (!film) return <div style={{ color: "white" }}>Loading...</div>;
 
-  /* 🎬 STRUCTURED DATA */
+  // 🎬 STRUCTURED DATA
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Movie",
-    "name": film.title,
-    "image": film.poster_url,
-    "description": film.description,
-    "genre": film.genre,
-    "aggregateRating": {
+    name: film.title,
+    image: film.poster,
+    description: film.description,
+    genre: film.genre,
+    aggregateRating: {
       "@type": "AggregateRating",
-      "ratingValue": film.rating || "4.5",
-      "reviewCount": film.views || "100"
+      ratingValue: film.rating || "4.5",
+      reviewCount: film.views || "100"
     }
   };
 
   return (
     <div style={{ background: "#000", color: "white", padding: "40px" }}>
       
-      {/* ✅ Google reads this */}
       <script type="application/ld+json">
         {JSON.stringify(structuredData)}
       </script>
@@ -71,7 +73,7 @@ function FilmDetails() {
       <h1>{film.title}</h1>
 
       <img
-        src={film.poster_url}
+        src={film.poster}
         alt={film.title}
         style={{ width: "300px", borderRadius: "8px" }}
       />
