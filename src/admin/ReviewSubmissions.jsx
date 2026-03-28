@@ -488,8 +488,8 @@ function ReviewSubmissions() {
   onChange={handleAdminChange}
   style={styles.input}
 />
-{adminFilm.duration && (
-  <p style={{ color: "#00ffae", fontSize: "14px", marginTop: "-5px" }}>
+{adminFilm.duration !== "" && (
+  <p style={{ color: "#00ffae", fontSize: "14px", marginTop: "5px" }}>
     Preview: {formatDuration(adminFilm.duration)}
   </p>
 )}
