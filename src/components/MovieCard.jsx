@@ -11,6 +11,8 @@ function MovieCard({ movie }) {
     if (!video || !movie.video) return;
 
     video.currentTime = movie.previewStart || 0;
+
+    video.muted = true; // ✅ REQUIRED for autoplay
     video.play().catch(() => {});
   };
 
@@ -20,7 +22,7 @@ function MovieCard({ movie }) {
     if (video) {
       video.pause();
       video.currentTime = 0;
-      video.load(); // ensures poster comes back (no black frame)
+      // ❌ removed video.load() (was causing lag)
     }
   };
 
@@ -45,7 +47,7 @@ function MovieCard({ movie }) {
   return (
     <div
       style={styles.card}
-      onMouseEnter={startPreview}
+      onMouseOver={startPreview}   // ✅ faster than onMouseEnter
       onMouseLeave={stopPreview}
       onClick={handleClick}
     >
@@ -61,6 +63,7 @@ function MovieCard({ movie }) {
           style={styles.image}
           preload="metadata"
           playsInline
+          muted   // ✅ MUST be here
         />
       ) : (
         <img
