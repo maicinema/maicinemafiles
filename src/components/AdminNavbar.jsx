@@ -4,52 +4,19 @@ import { supabase } from "../lib/supabase";
 import logo from "../assets/logo.png";
 
 function AdminNavbar() {
-
   const [locked, setLocked] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  let inactivityTimer;
-
-  /* LOAD LOCK STATE */
+  /* LOAD LOCK STATE ONLY (NO AUTO LOCK) */
   useEffect(() => {
-  const isLocked = localStorage.getItem("admin_locked");
-  if (isLocked === "true") {
-    setLocked(true);
-  }
-
-  let timeout;
-
-  const resetTimer = () => {
-    clearTimeout(timeout);
-
-    timeout = setTimeout(() => {
-      localStorage.setItem("admin_locked", "true");
+    const isLocked = localStorage.getItem("admin_locked");
+    if (isLocked === "true") {
       setLocked(true);
-    }, 180000); // 3 minutes
-  };
+    }
+  }, []);
 
-  // start immediately
-  resetTimer();
-
-  window.addEventListener("mousemove", resetTimer);
-  window.addEventListener("keydown", resetTimer);
-  window.addEventListener("click", resetTimer);
-
-  return () => {
-    clearTimeout(timeout);
-    window.removeEventListener("mousemove", resetTimer);
-    window.removeEventListener("keydown", resetTimer);
-    window.removeEventListener("click", resetTimer);
-  };
-}, []);
-
-  function resetTimer() {
-    clearTimeout(inactivityTimer);
-    startInactivityTimer();
-  }
-
-  /* MANUAL LOCK */
+  /* MANUAL LOCK ONLY */
   function handleLock() {
     localStorage.setItem("admin_locked", "true");
     setLocked(true);
@@ -77,7 +44,6 @@ function AdminNavbar() {
       localStorage.setItem("admin_locked", "false");
       setLocked(false);
       setPassword("");
-      resetTimer(); // restart timer
     }
   }
 
@@ -108,20 +74,21 @@ function AdminNavbar() {
             <h2>🔒 Screen Locked</h2>
 
             <input
-  type="password"
-  placeholder="Enter admin password"
-  value={password}
-  onChange={(e) => setPassword(e.target.value)}
-  onKeyDown={(e) => {
-    if (e.key === "Enter") unlockScreen();
-  }}
-/>
+              type="password"
+              placeholder="Enter admin password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleUnlock();
+              }}
+              style={styles.input}
+            />
 
             <button onClick={handleUnlock} style={styles.unlockBtn}>
               Unlock
             </button>
 
-            <p style={{color:"red"}}>{error}</p>
+            <p style={{ color: "red" }}>{error}</p>
           </div>
         </div>
       )}
@@ -130,17 +97,76 @@ function AdminNavbar() {
 }
 
 const styles = {
-  nav:{width:"100%",background:"#000",padding:"20px 40px",display:"flex",justifyContent:"space-between",alignItems:"center"},
-  left:{display:"flex",alignItems:"center",gap:"12px"},
-  logo:{height:"60px"},
-  adminText:{color:"#e50914",fontSize:"20px",fontWeight:"700"},
-  links:{display:"flex",gap:"20px",alignItems:"center"},
-  link:{color:"white",textDecoration:"none"},
-  lockBtn:{background:"#e50914",color:"white",border:"none",padding:"6px 10px",cursor:"pointer"},
-  overlay:{position:"fixed",top:0,left:0,width:"100%",height:"100%",background:"rgba(0,0,0,0.97)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999},
-  lockBox:{background:"#111",padding:"40px",borderRadius:"8px",textAlign:"center",width:"300px"},
-  input:{marginTop:"15px",padding:"10px",width:"100%"},
-  unlockBtn:{marginTop:"15px",padding:"10px",background:"#e50914",color:"white",border:"none",cursor:"pointer",width:"100%"}
+  nav: {
+    width: "100%",
+    background: "#000",
+    padding: "20px 40px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  left: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px"
+  },
+  logo: {
+    height: "60px"
+  },
+  adminText: {
+    color: "#e50914",
+    fontSize: "20px",
+    fontWeight: "700"
+  },
+  links: {
+    display: "flex",
+    gap: "20px",
+    alignItems: "center"
+  },
+  link: {
+    color: "white",
+    textDecoration: "none"
+  },
+  lockBtn: {
+    background: "#e50914",
+    color: "white",
+    border: "none",
+    padding: "6px 10px",
+    cursor: "pointer"
+  },
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.97)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999
+  },
+  lockBox: {
+    background: "#111",
+    padding: "40px",
+    borderRadius: "8px",
+    textAlign: "center",
+    width: "300px"
+  },
+  input: {
+    marginTop: "15px",
+    padding: "10px",
+    width: "100%"
+  },
+  unlockBtn: {
+    marginTop: "15px",
+    padding: "10px",
+    background: "#e50914",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+    width: "100%"
+  }
 };
 
 export default AdminNavbar;

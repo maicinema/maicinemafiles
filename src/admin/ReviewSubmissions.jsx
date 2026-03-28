@@ -110,17 +110,20 @@ previewEnd: "",
 
   const fileName = `${prefix}-video-${Date.now()}-${file.name}`;
 
+  // FAKE PROGRESS (for UI feedback)
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += 10;
+    if (onProgress) onProgress(progress);
+    if (progress >= 90) clearInterval(interval);
+  }, 500);
+
   const { error } = await supabase.storage
     .from("films")
-    .upload(fileName, file, {
-      upsert: true,
-      onUploadProgress: (progress) => {
-        if (onProgress) {
-          const percent = Math.round((progress.loaded / progress.total) * 100);
-          onProgress(percent);
-        }
-      }
-    });
+    .upload(fileName, file, { upsert: true });
+
+  clearInterval(interval);
+  if (onProgress) onProgress(100);
 
   if (error) {
     throw new Error(error.message || "Film upload failed");
@@ -273,10 +276,6 @@ previewEnd: "",
       alert("Invalid go live date or time.");
       return;
     }
-
-    const minDateTime = new Date();
-    minDateTime.setDate(minDateTime.getDate() + 14);
-    minDateTime.setHours(0, 0, 0, 0);
 
     try {
       setSubmittingAdminFilm(true);
@@ -534,7 +533,6 @@ preview_end: adminFilm.previewEnd,
             type="date"
             name="goLiveDate"
             value={adminFilm.goLiveDate}
-            min={minGoLiveDate}
             onChange={handleAdminChange}
             style={styles.input}
           />
