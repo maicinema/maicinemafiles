@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
+
 import banner from "../assets/cinema-banner.jpg";
 import SubscribeSection from "../components/SubscribeSection";
 import TrendingNow from "../components/TrendingNow";
@@ -5,6 +8,25 @@ import LeavingSoon from "../components/LeavingSoon";
 import ComingSoonFilms from "../components/ComingSoonFilms";
 
 function Home() {
+
+  // ✅ NEW: live films state
+  const [liveFilms, setLiveFilms] = useState([]);
+
+  useEffect(() => {
+    loadLiveFilms();
+  }, []);
+
+  async function loadLiveFilms() {
+    const { data, error } = await supabase
+      .from("films")
+      .select("*")
+      .eq("status", "live");
+
+    if (!error) {
+      setLiveFilms(data || []);
+    }
+  }
+
   return (
     <>
       <div
@@ -70,40 +92,20 @@ function Home() {
       <style>
         {`
         @keyframes heroMove {
-          0% {
-            transform: translateX(0%);
-            opacity: 1;
-          }
-
-          /* stay in center (20 seconds approx) */
-          80% {
-            transform: translateX(0%);
-            opacity: 1;
-          }
-
-          /* move to right and disappear */
-          90% {
-            transform: translateX(120%);
-            opacity: 0;
-          }
-
-          /* instantly jump to left */
-          91% {
-            transform: translateX(-120%);
-            opacity: 0;
-          }
-
-          /* come back to center */
-          100% {
-            transform: translateX(0%);
-            opacity: 1;
-          }
+          0% { transform: translateX(0%); opacity: 1; }
+          80% { transform: translateX(0%); opacity: 1; }
+          90% { transform: translateX(120%); opacity: 0; }
+          91% { transform: translateX(-120%); opacity: 0; }
+          100% { transform: translateX(0%); opacity: 1; }
         }
         `}
       </style>
 
+      {/* ✅ NEW: ensure homepage sees LIVE films */}
+      {liveFilms.length > 0 && <TrendingNow films={liveFilms} />}
+
+      {/* KEEP YOUR EXISTING STRUCTURE */}
       <SubscribeSection />
-      <TrendingNow />
       <LeavingSoon />
       <ComingSoonFilms />
     </>
