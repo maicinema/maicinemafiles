@@ -34,9 +34,9 @@ function MyCinema() {
 
   async function loadFilms() {
     const { data, error } = await supabase
-  .from("films")
-  .select("id,title,poster_url,video_url,genre,rating,description,views")
-  .eq("status", "live");
+      .from("films")
+      .select("*") // ✅ FIXED
+      .eq("status", "live");
 
     if (error) {
       setErrorMessage(error.message);
@@ -83,11 +83,11 @@ function MyCinema() {
         <div
           style={{
             ...styles.banner,
-            backgroundImage: `url(${bannerFilm.poster_url || ""})`
+            backgroundImage: `url(${bannerFilm.poster || ""})` // ✅ FIXED
           }}
           onMouseEnter={() => {
             const video = videoRef.current;
-            if (video && bannerFilm.video_url) {
+            if (video && bannerFilm.video) { // ✅ FIXED
               video.currentTime = 14;
               video.muted = false;
               video.volume = 1;
@@ -102,11 +102,11 @@ function MyCinema() {
             }
           }}
         >
-          {bannerFilm.video_url && (
+          {bannerFilm.video && ( // ✅ FIXED
             <video
               ref={videoRef}
-              src={bannerFilm.video_url}
-              poster={bannerFilm.poster_url}
+              src={bannerFilm.video} // ✅ FIXED
+              poster={bannerFilm.poster} // ✅ FIXED
               style={styles.bannerVideo}
               loop
               playsInline
@@ -148,8 +148,8 @@ function MyCinema() {
                     <MovieCard
                       movie={{
                         ...movie,
-                        video: movie.video_url,
-                        poster: movie.poster_url
+                        video: movie.video,   // ✅ FIXED
+                        poster: movie.poster  // ✅ FIXED
                       }}
                     />
                   </div>
