@@ -70,9 +70,11 @@ description,
 genre,
 rating,
 runtime,
-poster_url: posterUrl,
-video_url: filmUrl,
-release_year: releaseYear
+poster: posterUrl,
+video: filmUrl,
+release_year: releaseYear,
+status: "coming_soon",     // 🔥 IMPORTANT
+views: 0                   // 🔥 IMPORTANT
 })
 
 if(dbError){

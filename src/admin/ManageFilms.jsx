@@ -110,8 +110,8 @@ function ManageFilms() {
       contract_expires_at: film.contract_expires_at || null,
 
       // ✅ ADDED (preview)
-      preview_start: Number(film.preview_start) || 0,
-      preview_duration: Number(film.preview_duration) || 10
+      previewStart: Number(film.preview_start) || 0,
+previewDuration: Number(film.preview_duration) || 10
     };
 
     const { error } = await supabase
@@ -152,36 +152,37 @@ function ManageFilms() {
   }
 
   async function goLiveFilm(film) {
-    const now = new Date();
-    const currentExpiry = film.contract_expires_at
-      ? new Date(film.contract_expires_at)
-      : null;
+  const now = new Date();
+  const currentExpiry = film.contract_expires_at
+    ? new Date(film.contract_expires_at)
+    : null;
 
-    let nextExpiry = film.contract_expires_at;
+  let nextExpiry = film.contract_expires_at;
 
-    if (!currentExpiry || currentExpiry <= now) {
-      const renewed = new Date();
-      renewed.setMonth(renewed.getMonth() + 3);
-      nextExpiry = renewed.toISOString();
-    }
-
-    const { error } = await supabase
-      .from("films")
-      .update({
-        status: "live",
-        contract_expires_at: nextExpiry
-      })
-      .eq("id", film.id);
-
-    if (error) {
-      console.log("Go live error:", error);
-      alert("Failed to return film to live");
-      return;
-    }
-
-    await loadFilms();
-    alert("Film is live again");
+  if (!currentExpiry || currentExpiry <= now) {
+    const renewed = new Date();
+    renewed.setMonth(renewed.getMonth() + 3);
+    nextExpiry = renewed.toISOString();
   }
+
+  const { error } = await supabase
+    .from("films")
+    .update({
+      status: "live",                 // ✅ critical
+      contract_expires_at: nextExpiry,
+      updated_at: new Date().toISOString() // 🔥 forces realtime trigger
+    })
+    .eq("id", film.id);
+
+  if (error) {
+    console.log("Go live error:", error);
+    alert("Failed to return film to live");
+    return;
+  }
+
+  await loadFilms();
+  alert("Film is now LIVE on public page");
+}
 
   return (
     <div style={styles.page}>
