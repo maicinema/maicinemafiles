@@ -99,20 +99,23 @@ function ManageFilms() {
     }
 
     const payload = {
-      title: film.title || "",
-      description: film.description || "",
-      genre: film.genre || "",
-      rating: film.rating || "",
-      views: Number(film.views) || 0,
-      poster: updatedPoster,
-      video: updatedVideo,
-      status: film.status || "live",
-      contract_expires_at: film.contract_expires_at || null,
+  title: film.title || "",
+  description: film.description || "",
+  genre: film.genre || "",
+  rating: film.rating || "",
+  views: Number(film.views) || 0,
 
-      // ✅ ADDED (preview)
-     previewStart: Number(film.previewStart) || 0,
-previewDuration: Number(film.previewDuration) || 10
-    };
+  // ✅ IMPORTANT: match your DB
+  poster_url: updatedPoster,
+  video_url: updatedVideo,
+
+  status: film.status || "live",
+  contract_expires_at: film.contract_expires_at || null,
+
+  // ✅ preview fields (we test both safely)
+  previewStart: film.previewStart || "00:00",
+previewDuration: film.previewDuration || "00:10"
+};
 
     const { error } = await supabase
       .from("films")
@@ -259,24 +262,24 @@ previewDuration: Number(film.previewDuration) || 10
 
                       {/* ✅ ADDED PREVIEW INPUTS */}
                       <input
-                        style={styles.input}
-                        type="number"
-                        value={film.previewStart || 0}
-                        onChange={(e) =>
-                         handleChange(film.id, "previewStart", e.target.value)
-                        }
-                        placeholder="Preview Start (seconds)"
-                      />
+  style={styles.input}
+  type="text"
+  placeholder="00:30"
+  value={film.previewStart || ""}
+  onChange={(e) =>
+    handleChange(film.id, "previewStart", e.target.value)
+  }
+/>
 
                       <input
-                        style={styles.input}
-                        type="number"
-                        value={film.previewDuration || 10}
-                        onChange={(e) =>
-                          handleChange(film.id, "previewDuration", e.target.value)
-                        }
-                        placeholder="Preview Duration (seconds)"
-                      />
+  style={styles.input}
+  type="text"
+  placeholder="01:45"
+  value={film.previewDuration || ""}
+  onChange={(e) =>
+    handleChange(film.id, "previewDuration", e.target.value)
+  }
+/>
 
                       <select
                         style={styles.input}
