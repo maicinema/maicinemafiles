@@ -99,6 +99,13 @@ useEffect(() => {
   }
 
   const bannerFilm = films[currentBanner];
+useEffect(() => {
+  if (!bannerFilm || !bannerFilm.video) return;
+
+  const video = document.createElement("video");
+  video.src = bannerFilm.video;
+  video.preload = "metadata";
+}, [bannerFilm]);
 
   const scroll = (index, direction) => {
     const ref = rowRefs.current[index];
@@ -141,12 +148,11 @@ useEffect(() => {
   onMouseEnter={() => {
   const video = videoRef.current;
   if (video && bannerFilm.video) {
-    video.currentTime = bannerFilm.previewStart || 0;
-
+    video.currentTime = Number(bannerFilm.previewStart) || 0;
     video.muted = false; // 🔥 direct audio
     video.volume = 1;
 
-    video.play().catch(() => {});
+video.play().catch(() => {});
   }
 }}
   onMouseLeave={() => {
@@ -171,7 +177,7 @@ useEffect(() => {
   loop
   playsInline
   muted
-  preload="auto"   // 🔥 THIS FIXES LAG
+  preload="metadata"   // 🔥 THIS FIXES LAG
 />
           )}
 

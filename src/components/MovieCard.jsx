@@ -10,12 +10,13 @@ function MovieCard({ movie }) {
   const video = videoRef.current;
   if (!video || !movie.video) return;
 
-  video.currentTime = movie.previewStart || 0;
+  video.currentTime = Number(movie.previewStart) || 0;
 
   video.muted = false; // 🔥 enable audio
   video.volume = 1;
 
-  video.play().catch(() => {});
+  video.playbackRate = 1;
+video.play().catch(() => {});
 };
 
   const stopPreview = () => {
@@ -79,7 +80,7 @@ function MovieCard({ movie }) {
   data-src={movie.video}
   poster={movie.poster}
   style={styles.image}
-  preload="auto"
+  preload="metadata"
   playsInline
 />
       ) : (
