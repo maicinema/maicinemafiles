@@ -110,8 +110,8 @@ function ManageFilms() {
       contract_expires_at: film.contract_expires_at || null,
 
       // ✅ ADDED (preview)
-      previewStart: Number(film.preview_start) || 0,
-previewDuration: Number(film.preview_duration) || 10
+     previewStart: Number(film.previewStart) || 0,
+previewDuration: Number(film.previewDuration) || 10
     };
 
     const { error } = await supabase
@@ -261,9 +261,9 @@ previewDuration: Number(film.preview_duration) || 10
                       <input
                         style={styles.input}
                         type="number"
-                        value={film.preview_start || 0}
+                        value={film.previewStart || 0}
                         onChange={(e) =>
-                          handleChange(film.id, "preview_start", e.target.value)
+                         handleChange(film.id, "previewStart", e.target.value)
                         }
                         placeholder="Preview Start (seconds)"
                       />
@@ -271,9 +271,9 @@ previewDuration: Number(film.preview_duration) || 10
                       <input
                         style={styles.input}
                         type="number"
-                        value={film.preview_duration || 10}
+                        value={film.previewDuration || 10}
                         onChange={(e) =>
-                          handleChange(film.id, "preview_duration", e.target.value)
+                          handleChange(film.id, "previewDuration", e.target.value)
                         }
                         placeholder="Preview Duration (seconds)"
                       />
