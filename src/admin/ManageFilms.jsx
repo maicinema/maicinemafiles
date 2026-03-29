@@ -120,10 +120,10 @@ previewDuration: Number(film.previewDuration) || 10
       .eq("id", id);
 
     if (error) {
-      console.log("Save film error:", error);
-      alert("Failed to update film");
-      return;
-    }
+  console.log("🔥 FULL ERROR:", error);
+  alert(error.message || "Failed to update film");
+  return;
+}
 
     setEditingId(null);
     setPosterFile(null);
