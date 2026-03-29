@@ -7,8 +7,27 @@ function TrendingNow() {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    loadTrending();
-  }, []);
+  loadTrending();
+
+  const channel = supabase
+    .channel("films-realtime-trending")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "films"
+      },
+      () => {
+        loadTrending(); // 🔥 auto refresh instantly
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, []);
 
   async function loadTrending() {
     const { data } = await supabase

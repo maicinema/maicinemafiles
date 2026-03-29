@@ -27,8 +27,21 @@ function MovieCard({ movie }) {
   };
 
   const handleClick = () => {
-    navigate(`/film/${movie.id}`);
-  };
+  const user = localStorage.getItem("user");
+  const hasPaid = localStorage.getItem(`paid_${movie.id}`);
+
+  if (!user) {
+    navigate("/createaccount");
+    return;
+  }
+
+  if (!hasPaid) {
+    navigate(`/rent/${movie.id}`);
+    return;
+  }
+
+  navigate(`/watch/${movie.id}`);
+};
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -57,8 +70,9 @@ function MovieCard({ movie }) {
 
       {movie.video ? (
         <video
-          ref={videoRef}
-          src={movie.video}
+  ref={videoRef}
+  src={movie.video}
+  data-src={movie.video}
           poster={movie.poster}
           style={styles.image}
           preload="metadata"

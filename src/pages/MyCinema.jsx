@@ -9,11 +9,47 @@ function MyCinema() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const videoRef = useRef(null);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
   const rowRefs = useRef([]);
 
   useEffect(() => {
-    loadFilms();
-  }, []);
+  loadFilms();
+
+  const channel = supabase
+    .channel("films-realtime-mycinema")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "films"
+      },
+      () => {
+        loadFilms(); // 🔥 instant sync
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, []);
+
+useEffect(() => {
+  const unlock = () => {
+    setAudioUnlocked(true);
+    window.removeEventListener("click", unlock);
+    window.removeEventListener("scroll", unlock);
+  };
+
+  window.addEventListener("click", unlock);
+  window.addEventListener("scroll", unlock);
+
+  return () => {
+    window.removeEventListener("click", unlock);
+    window.removeEventListener("scroll", unlock);
+  };
+}, []);
 
   useEffect(() => {
     if (films.length > 0) {
@@ -80,37 +116,67 @@ function MyCinema() {
 
       {/* BANNER */}
       {bannerFilm && (
-        <div
-          style={{
-            ...styles.banner,
-            backgroundImage: `url(${bannerFilm.poster || ""})` // ✅ FIXED
-          }}
-          onMouseEnter={() => {
-            const video = videoRef.current;
-            if (video && bannerFilm.video) { // ✅ FIXED
-              video.currentTime = 14;
-              video.muted = false;
-              video.volume = 1;
-              video.play().catch(() => {});
-            }
-          }}
-          onMouseLeave={() => {
-            const video = videoRef.current;
-            if (video) {
-              video.pause();
-              video.currentTime = 0;
-            }
-          }}
-        >
+       <div
+  style={{
+    ...styles.banner,
+    cursor: "pointer",
+    backgroundImage: `url(${bannerFilm.poster || ""})`
+  }}
+  onClick={() => {
+    const user = localStorage.getItem("user");
+    const hasPaid = localStorage.getItem(`paid_${bannerFilm.id}`);
+
+    if (!user) {
+      window.location.href = "/createaccount";
+      return;
+    }
+
+    if (!hasPaid) {
+      window.location.href = `/rent/${bannerFilm.id}`;
+      return;
+    }
+
+    window.location.href = `/watch/${bannerFilm.id}`;
+  }}
+  onMouseEnter={() => {
+    const video = videoRef.current;
+    if (video && bannerFilm.video) {
+      video.currentTime = 14;
+
+      video.muted = !audioUnlocked;
+
+      video.play().then(() => {
+        if (audioUnlocked) {
+          video.muted = false;
+          video.volume = 1;
+        }
+      }).catch(() => {});
+    }
+  }}
+  onMouseLeave={() => {
+    const video = videoRef.current;
+    if (video) {
+      video.pause();
+video.currentTime = 0;
+
+// 🔥 force poster to reappear cleanly
+video.removeAttribute("src");
+video.load();
+video.src = video.getAttribute("data-src") || video.src;
+    }
+  }}
+>
           {bannerFilm.video && ( // ✅ FIXED
             <video
-              ref={videoRef}
-              src={bannerFilm.video} // ✅ FIXED
-              poster={bannerFilm.poster} // ✅ FIXED
-              style={styles.bannerVideo}
-              loop
-              playsInline
-            />
+  ref={videoRef}
+  src={bannerFilm.video}
+  data-src={bannerFilm.video}
+  poster={bannerFilm.poster}
+  style={styles.bannerVideo}
+  loop
+  playsInline
+  muted
+/>
           )}
 
           <div style={styles.bannerOverlay}>

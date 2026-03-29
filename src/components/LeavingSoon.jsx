@@ -7,8 +7,27 @@ function LeavingSoon() {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    loadLeavingSoon();
-  }, []);
+  loadLeavingSoon();
+
+  const channel = supabase
+    .channel("films-realtime-leavingsoon")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "films"
+      },
+      () => {
+        loadLeavingSoon(); // 🔥 instant update
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, []);
 
   async function loadLeavingSoon() {
     const now = new Date().toISOString();

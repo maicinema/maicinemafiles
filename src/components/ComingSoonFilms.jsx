@@ -7,8 +7,27 @@ function ComingSoonFilms() {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    loadComingSoon();
-  }, []);
+  loadComingSoon();
+
+  const channel = supabase
+    .channel("films-realtime-comingsoon")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "films"
+      },
+      () => {
+        loadComingSoon(); // 🔥 instant update
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, []);
 
   async function loadComingSoon() {
     const { data } = await supabase
