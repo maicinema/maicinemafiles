@@ -2,6 +2,20 @@ import { useState, useEffect, useRef } from "react";
 import MovieCard from "../components/MovieCard";
 import { supabase } from "../lib/supabase";
 
+function parseTimeToSeconds(time) {
+  if (!time) return 0;
+
+  if (typeof time === "number") return time;
+
+  const parts = time.split(":");
+  if (parts.length !== 2) return 0;
+
+  const minutes = Number(parts[0]);
+  const seconds = Number(parts[1]);
+
+  return minutes * 60 + seconds;
+}
+
 function MyCinema() {
   const [films, setFilms] = useState([]);
   const [rows, setRows] = useState([]);
@@ -148,13 +162,15 @@ useEffect(() => {
   onMouseEnter={() => {
   const video = videoRef.current;
   if (video && bannerFilm.video) {
-    video.currentTime = Number(bannerFilm.previewStart) || 0;
+    const startTime = parseTimeToSeconds(bannerFilm.previewStart);
+video.currentTime = startTime;
     video.muted = false; // 🔥 direct audio
     video.volume = 1;
 
 video.play().catch(() => {});
   }
 }}
+
   onMouseLeave={() => {
   const video = videoRef.current;
   if (video) {
@@ -164,6 +180,13 @@ video.play().catch(() => {});
     video.removeAttribute("src");
     video.load();
     video.src = video.getAttribute("data-src");
+    const endTime = parseTimeToSeconds(bannerFilm.previewDuration || "00:10");
+
+video.ontimeupdate = () => {
+  if (video.currentTime >= startTime + endTime) {
+    video.pause();
+  }
+};
   }
 }}
 >

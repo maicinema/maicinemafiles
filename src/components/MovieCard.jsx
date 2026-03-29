@@ -2,6 +2,20 @@ import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { RENT_PRICE } from "../config/pricing";
 
+function parseTimeToSeconds(time) {
+  if (!time) return 0;
+
+  if (typeof time === "number") return time;
+
+  const parts = time.split(":");
+  if (parts.length !== 2) return 0;
+
+  const minutes = Number(parts[0]);
+  const seconds = Number(parts[1]);
+
+  return minutes * 60 + seconds;
+}
+
 function MovieCard({ movie }) {
   const videoRef = useRef(null);
   const navigate = useNavigate();
@@ -10,15 +24,22 @@ function MovieCard({ movie }) {
   const video = videoRef.current;
   if (!video || !movie.video) return;
 
-  video.currentTime = Number(movie.previewStart) || 0;
+  const startTime = parseTimeToSeconds(movie.previewStart);
+  const duration = parseTimeToSeconds(movie.previewDuration || "00:10");
 
-  video.muted = false; // 🔥 enable audio
+  video.currentTime = startTime;
+
+  video.muted = false;
   video.volume = 1;
 
-  video.playbackRate = 1;
-video.play().catch(() => {});
+  video.play().then(() => {
+    video.ontimeupdate = () => {
+      if (video.currentTime >= startTime + duration) {
+        video.pause();
+      }
+    };
+  }).catch(() => {});
 };
-
   const stopPreview = () => {
   const video = videoRef.current;
   if (!video) return;
@@ -82,6 +103,7 @@ video.play().catch(() => {});
   style={styles.image}
   preload="metadata"
   playsInline
+  muted   // 🔥 helps instant start
 />
       ) : (
         <img
