@@ -7,24 +7,28 @@ function MovieCard({ movie }) {
   const navigate = useNavigate();
 
   const startPreview = () => {
-    const video = videoRef.current;
-    if (!video || !movie.video) return;
+  const video = videoRef.current;
+  if (!video || !movie.video) return;
 
-    video.currentTime = movie.previewStart || 0;
+  video.currentTime = movie.previewStart || 0;
 
-    video.muted = true; // ✅ REQUIRED for autoplay
-    video.play().catch(() => {});
-  };
+  video.muted = false; // 🔥 enable audio
+  video.volume = 1;
+
+  video.play().catch(() => {});
+};
 
   const stopPreview = () => {
-    const video = videoRef.current;
+  const video = videoRef.current;
+  if (!video) return;
 
-    if (video) {
-      video.pause();
-      video.currentTime = 0;
-      // ❌ removed video.load() (was causing lag)
-    }
-  };
+  video.pause();
+  video.currentTime = 0;
+
+  video.removeAttribute("src");
+  video.load();
+  video.src = video.getAttribute("data-src");
+};
 
   const handleClick = () => {
   const user = localStorage.getItem("user");
@@ -73,12 +77,11 @@ function MovieCard({ movie }) {
   ref={videoRef}
   src={movie.video}
   data-src={movie.video}
-          poster={movie.poster}
-          style={styles.image}
-          preload="metadata"
-          playsInline
-          muted   // ✅ MUST be here
-        />
+  poster={movie.poster}
+  style={styles.image}
+  preload="auto"
+  playsInline
+/>
       ) : (
         <img
           src={movie.poster}

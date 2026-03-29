@@ -139,32 +139,27 @@ useEffect(() => {
     window.location.href = `/watch/${bannerFilm.id}`;
   }}
   onMouseEnter={() => {
-    const video = videoRef.current;
-    if (video && bannerFilm.video) {
-      video.currentTime = 14;
+  const video = videoRef.current;
+  if (video && bannerFilm.video) {
+    video.currentTime = bannerFilm.previewStart || 0;
 
-      video.muted = !audioUnlocked;
+    video.muted = false; // 🔥 direct audio
+    video.volume = 1;
 
-      video.play().then(() => {
-        if (audioUnlocked) {
-          video.muted = false;
-          video.volume = 1;
-        }
-      }).catch(() => {});
-    }
-  }}
+    video.play().catch(() => {});
+  }
+}}
   onMouseLeave={() => {
-    const video = videoRef.current;
-    if (video) {
-      video.pause();
-video.currentTime = 0;
+  const video = videoRef.current;
+  if (video) {
+    video.pause();
+    video.currentTime = 0;
 
-// 🔥 force poster to reappear cleanly
-video.removeAttribute("src");
-video.load();
-video.src = video.getAttribute("data-src") || video.src;
-    }
-  }}
+    video.removeAttribute("src");
+    video.load();
+    video.src = video.getAttribute("data-src");
+  }
+}}
 >
           {bannerFilm.video && ( // ✅ FIXED
             <video
@@ -176,6 +171,7 @@ video.src = video.getAttribute("data-src") || video.src;
   loop
   playsInline
   muted
+  preload="auto"   // 🔥 THIS FIXES LAG
 />
           )}
 
