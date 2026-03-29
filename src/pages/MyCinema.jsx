@@ -160,58 +160,58 @@ useEffect(() => {
     window.location.href = `/watch/${bannerFilm.id}`;
   }}
   onMouseEnter={() => {
-  const video = videoRef.current;
-  if (video && bannerFilm.video) {
+    const video = videoRef.current;
+    if (!video || !bannerFilm.video) return;
+
     const startTime = parseTimeToSeconds(bannerFilm.previewStart);
-video.currentTime = startTime;
-    video.muted = false; // 🔥 direct audio
+    const duration = parseTimeToSeconds(bannerFilm.previewDuration || "00:10");
+
+    video.currentTime = startTime;
+
+    video.muted = false;
     video.volume = 1;
 
-video.play().catch(() => {});
-  }
-}}
-
+    video.play().then(() => {
+      video.ontimeupdate = () => {
+        if (video.currentTime >= startTime + duration) {
+          video.pause();
+        }
+      };
+    }).catch(() => {});
+  }}
   onMouseLeave={() => {
-  const video = videoRef.current;
-  if (video) {
+    const video = videoRef.current;
+    if (!video) return;
+
     video.pause();
     video.currentTime = 0;
 
     video.removeAttribute("src");
     video.load();
     video.src = video.getAttribute("data-src");
-    const endTime = parseTimeToSeconds(bannerFilm.previewDuration || "00:10");
-
-video.ontimeupdate = () => {
-  if (video.currentTime >= startTime + endTime) {
-    video.pause();
-  }
-};
-  }
-}}
+  }}
 >
-          {bannerFilm.video && ( // ✅ FIXED
-            <video
-  ref={videoRef}
-  src={bannerFilm.video}
-  data-src={bannerFilm.video}
-  poster={bannerFilm.poster}
-  style={styles.bannerVideo}
-  loop
-  playsInline
-  muted
-  preload="metadata"   // 🔥 THIS FIXES LAG
-/>
-          )}
+  {bannerFilm.video && (
+    <video
+      ref={videoRef}
+      src={bannerFilm.video}
+      data-src={bannerFilm.video}
+      poster={bannerFilm.poster}
+      style={styles.bannerVideo}
+      playsInline
+      muted
+      preload="metadata"
+    />
+  )}
 
-          <div style={styles.bannerOverlay}>
-            <h1 style={styles.bannerTitle}>{bannerFilm.title}</h1>
-            <p style={styles.bannerMeta}>
-              {bannerFilm.genre} • {bannerFilm.rating}
-            </p>
-            <p style={styles.bannerDesc}>{bannerFilm.description}</p>
-          </div>
-        </div>
+  <div style={styles.bannerOverlay}>
+    <h1 style={styles.bannerTitle}>{bannerFilm.title}</h1>
+    <p style={styles.bannerMeta}>
+      {bannerFilm.genre} • {bannerFilm.rating}
+    </p>
+    <p style={styles.bannerDesc}>{bannerFilm.description}</p>
+  </div>
+</div>
       )}
 
       {/* ROWS */}
