@@ -3,6 +3,24 @@ import { supabase } from "../lib/supabase";
 import AdminNavbar from "../components/AdminNavbar";
 import NavigationArrows from "../components/NavigationArrows";
 
+function formatToMMSS(value) {
+  if (!value) return "";
+
+  // if already formatted like 01:30 → return
+  if (typeof value === "string" && value.includes(":")) {
+    return value;
+  }
+
+  // convert number → mm:ss
+  const seconds = Number(value);
+  if (isNaN(seconds)) return "";
+
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
 function ManageFilms() {
   const [films, setFilms] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -268,7 +286,7 @@ previewDuration: film.previewDuration || "00:10"
   style={styles.input}
   type="text"
   placeholder="00:30"
-  value={film.previewStart || ""}
+  value={formatToMMSS(film.previewStart)}
   onChange={(e) =>
     handleChange(film.id, "previewStart", e.target.value)
   }
@@ -278,7 +296,7 @@ previewDuration: film.previewDuration || "00:10"
   style={styles.input}
   type="text"
   placeholder="01:45"
-  value={film.previewDuration || film.preview_duration || ""}
+  value={formatToMMSS(film.previewDuration)}
   onChange={(e) =>
     handleChange(film.id, "previewDuration", e.target.value)
   }
