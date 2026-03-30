@@ -35,7 +35,7 @@ function MyCinema() {
     .on(
       "postgres_changes",
       {
-        event: "*",
+        event: "UPDATE",
         schema: "public",
         table: "films"
       },
@@ -94,7 +94,7 @@ useEffect(() => {
       return;
     }
 
-    setFilms(data || []);
+    setFilms([...new Map((data || []).map(f => [f.id, f])).values()]);
   }
 
   function shuffleArray(array) {
