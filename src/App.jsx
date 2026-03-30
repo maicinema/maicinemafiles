@@ -95,7 +95,7 @@ function Layout() {
   }, []);
 useEffect(() => {
   async function trackVisitor() {
-    if (hideLayout) return;
+    if (location.pathname.startsWith("/admin/login")) return;
 
     const { error } = await supabase
       .from("visitors")
@@ -112,6 +112,7 @@ useEffect(() => {
 
   trackVisitor();
 }, [location.pathname]);
+
   return (
     <>
       {!hideLayout && <Navbar />}
