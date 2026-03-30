@@ -6,7 +6,8 @@ function CreateAccount(){
 const navigate = useNavigate();
 const location = useLocation();
 
-const { type, title } = location.state || {};
+const params = new URLSearchParams(location.search);
+const filmId = params.get("filmId");
 
 const [name,setName] = useState("");
 const [age,setAge] = useState("");
@@ -36,14 +37,12 @@ return;
 
 const user = {name,age,email};
 
-localStorage.setItem("maicinemaUser",JSON.stringify(user));
+localStorage.setItem("user", JSON.stringify(user));
 
-if(type === "rent"){
-navigate(`/rent/${title}`);
-}
-
-if(type === "subscribe"){
-navigate("/subscribe");
+if (filmId) {
+  navigate(`/rent/${filmId}`);
+} else {
+  navigate("/");
 }
 
 };

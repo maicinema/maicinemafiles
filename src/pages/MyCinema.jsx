@@ -131,6 +131,19 @@ useEffect(() => {
     });
   };
 
+  useEffect(() => {
+  loadFilms();
+  trackVisitor(); // 🔥 ADD THIS
+}, []);
+
+async function trackVisitor() {
+  try {
+    await supabase.from("visitors").insert({});
+  } catch (err) {
+    console.log("Visitor tracking error", err);
+  }
+}
+
   return (
     <div style={styles.page}>
       {errorMessage && <p>{errorMessage}</p>}

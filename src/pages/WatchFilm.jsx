@@ -1,37 +1,98 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
 
-function WatchFilm(){
+function WatchFilm() {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-const { title } = useParams()
+  const [film, setFilm] = useState(null);
 
-return(
+  useEffect(() => {
+    checkAccess();
+    loadFilm();
+  }, []);
 
-<div style={styles.container}>
+  // ✅ CHECK PAYMENT ACCESS
+ // ✅ CHECK PAYMENT ACCESS
+async function checkAccess() {
+  const user = JSON.parse(localStorage.getItem("maicinemaUser"));
 
-<h1>{title}</h1>
+  if (!user) {
+    navigate(`/createaccount?filmId=${id}`);
+    return;
+  }
 
-<video
-controls
-width="900"
-src="/src/assets/videos/demoFilm.mp4"
-/>
+  const now = new Date().toISOString();
 
-</div>
+  const { data } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("user_email", user.email)
+    .eq("status", "completed");
 
-)
+  const validAccess = data?.some((p) => {
+    // 🎬 RENT (48 hours)
+    if (p.type === "rent" && p.film_id === id) {
+      return p.expires_at > now;
+    }
 
+    // 🎟 SUBSCRIPTION (monthly)
+    if (p.type === "subscription") {
+      return p.expires_at > now;
+    }
+
+    return false;
+  });
+
+  if (!validAccess) {
+    navigate(`/rent/${id}`);
+  }
 }
 
-const styles={
+  // ✅ LOAD FILM FROM DATABASE
+  async function loadFilm() {
+    const { data } = await supabase
+      .from("films")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-container:{
-background:"#000",
-color:"white",
-minHeight:"100vh",
-paddingTop:"120px",
-textAlign:"center"
+    setFilm(data);
+  }
+
+  if (!film) {
+    return <div style={{ color: "white" }}>Loading...</div>;
+  }
+
+  return (
+    <div style={styles.container}>
+      <h1>{film.title}</h1>
+
+      <video
+        controls
+        autoPlay
+        style={styles.video}
+        src={film.video || film.video_url}
+      />
+    </div>
+  );
 }
 
-}
+const styles = {
+  container: {
+    background: "#000",
+    color: "white",
+    minHeight: "100vh",
+    paddingTop: "120px",
+    textAlign: "center"
+  },
 
-export default WatchFilm
+  video: {
+    width: "80%",
+    maxWidth: "1000px",
+    marginTop: "20px"
+  }
+};
+
+export default WatchFilm;

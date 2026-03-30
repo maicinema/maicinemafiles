@@ -20,7 +20,7 @@ function MovieCard({ movie }) {
   const videoRef = useRef(null);
   const navigate = useNavigate();
 
-  const startPreview = () => {
+ const startPreview = () => {
   const video = videoRef.current;
   if (!video || !movie.video) return;
 
@@ -32,14 +32,17 @@ function MovieCard({ movie }) {
   video.muted = false;
   video.volume = 1;
 
-  video.play().then(() => {
-    video.ontimeupdate = () => {
-      if (video.currentTime >= startTime + duration) {
-        video.pause();
-      }
-    };
-  }).catch(() => {});
+  video.play().catch(() => {});
+
+  video.ontimeupdate = () => {
+    if (video.currentTime >= startTime + duration) {
+      video.pause();
+      video.ontimeupdate = null;
+    }
+  };
 };
+
+
   const stopPreview = () => {
   const video = videoRef.current;
   if (!video) return;
@@ -52,21 +55,15 @@ function MovieCard({ movie }) {
   video.src = video.getAttribute("data-src");
 };
 
-  const handleClick = () => {
-  const user = localStorage.getItem("user");
-  const hasPaid = localStorage.getItem(`paid_${movie.id}`);
+ const handleClick = () => {
+  const user = localStorage.getItem("maicinemaUser");
 
   if (!user) {
-    navigate("/createaccount");
+    navigate(`/createaccount?filmId=${movie.id}`);
     return;
   }
 
-  if (!hasPaid) {
-    navigate(`/rent/${movie.id}`);
-    return;
-  }
-
-  navigate(`/watch/${movie.id}`);
+  navigate(`/rent/${movie.id}`);
 };
 
   const structuredData = {
@@ -86,7 +83,7 @@ function MovieCard({ movie }) {
   return (
     <div
       style={styles.card}
-      onMouseOver={startPreview}   // ✅ faster than onMouseEnter
+      onMouseEnter={startPreview}  // ✅ faster than onMouseEnter
       onMouseLeave={stopPreview}
       onClick={handleClick}
     >

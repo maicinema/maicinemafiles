@@ -27,10 +27,13 @@ function ManageFilms() {
   const [posterFile, setPosterFile] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
   const [loading, setLoading] = useState(true);
+const [rentCount, setRentCount] = useState(0);
+const [subscriptionCount, setSubscriptionCount] = useState(0);
 
   useEffect(() => {
-    loadFilms();
-  }, []);
+  loadFilms();
+  loadStats(); // ✅ ADD HERE
+}, []);
 
   async function loadFilms() {
     setLoading(true);
@@ -45,6 +48,20 @@ function ManageFilms() {
       setLoading(false);
       return;
     }
+
+async function loadStats() {
+  const { data } = await supabase
+    .from("payments")
+    .select("type");
+
+  if (!data) return;
+
+  const rents = data.filter(p => p.type === "rent").length;
+  const subs = data.filter(p => p.type === "subscription").length;
+
+  setRentCount(rents);
+  setSubscriptionCount(subs);
+}
 
     setFilms(data || []);
 
@@ -215,7 +232,15 @@ previewDuration: film.previewDuration || "00:10"
 
       <div style={styles.container}>
         <h1 style={styles.heading}>Films</h1>
+<div style={{ display: "flex", gap: "20px", marginBottom: "30px", justifyContent: "center" }}>
+  <div style={styles.statBox}>
+    🎬 Rentals: {rentCount}
+  </div>
 
+  <div style={styles.statBox}>
+    💳 Subscriptions: {subscriptionCount}
+  </div>
+</div>
         {loading ? (
           <p>Loading films...</p>
         ) : films.length === 0 ? (
@@ -534,6 +559,13 @@ const styles = {
     padding: "10px 16px",
     cursor: "pointer"
   },
+  statBox: {
+  background: "#111",
+  padding: "15px 25px",
+  borderRadius: "8px",
+  fontWeight: "bold"
+},
+
   cancelButton: {
     background: "#666",
     color: "white",

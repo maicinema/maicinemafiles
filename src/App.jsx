@@ -93,6 +93,11 @@ function Layout() {
       });
     }
   }, []);
+useEffect(() => {
+  if (!hideLayout) {
+    supabase.from("visitors").insert({});
+  }
+}, [location.pathname]);
 
   return (
     <>
@@ -109,9 +114,9 @@ function Layout() {
           <Route path="/studios" element={<Studios />} />
           <Route path="/events" element={<Events />} />
           <Route path="/subscribe" element={<Subscribe />} />
-          <Route path="/rent/:title" element={<RentFilm />} />
-          <Route path="/watch/:title" element={<WatchFilm />} />
-          <Route path="/create-account" element={<CreateAccount />} />
+          <Route path="/rent/:id" element={<RentFilm />} />
+<Route path="/watch/:id" element={<WatchFilm />} />
+         <Route path="/createaccount" element={<CreateAccount />} />
           <Route path="/submit-film" element={<SubmitFilm />} />
 
           {/* SYSTEM */}
