@@ -29,6 +29,9 @@ function ManageFilms() {
     }
 
     setFilms(data || []);
+
+console.log("FILMS DATA:", data); // 👈 ADD THIS LINE
+
     setLoading(false);
   }
 
@@ -275,7 +278,7 @@ previewDuration: film.previewDuration || "00:10"
   style={styles.input}
   type="text"
   placeholder="01:45"
-  value={film.previewDuration || ""}
+  value={film.previewDuration || film.preview_duration || ""}
   onChange={(e) =>
     handleChange(film.id, "previewDuration", e.target.value)
   }
