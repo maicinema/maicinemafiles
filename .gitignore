@@ -26,3 +26,10 @@ dist-ssr
 src/assets/studio/*.MP4
 src/assets/videos/*.mp4
 src/assets/videos/*.MP4
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
