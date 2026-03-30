@@ -94,11 +94,24 @@ function Layout() {
     }
   }, []);
 useEffect(() => {
-  if (!hideLayout) {
-    supabase.from("visitors").insert({});
-  }
-}, [location.pathname]);
+  async function trackVisitor() {
+    if (hideLayout) return;
 
+    const { error } = await supabase
+      .from("visitors")
+      .insert([
+        { created_at: new Date().toISOString() }
+      ]);
+
+    if (error) {
+      console.log("Visitor insert error:", error);
+    } else {
+      console.log("Visitor tracked");
+    }
+  }
+
+  trackVisitor();
+}, [location.pathname]);
   return (
     <>
       {!hideLayout && <Navbar />}
