@@ -70,15 +70,30 @@ return(
 
 <AdminStats />
 
+{/* 🔥 ADD THIS BLOCK RIGHT HERE */}
+<div style={{
+  display: "flex",
+  justifyContent: "center",
+  marginTop: "30px",
+  marginBottom: "20px"
+}}>
+  <div style={{
+    background: "#111",
+    padding: "25px",
+    borderRadius: "8px",
+    minWidth: "250px",
+    textAlign: "center"
+  }}>
+    <h2>Total Visitors</h2>
+    <p style={{ fontSize: "28px", marginTop: "10px" }}>
+      {visitorCount}
+    </p>
+  </div>
+</div>
+
 <TicketAnalytics />
 
 <div style={styles.grid}>
-    <div style={styles.card}>
-  <h2>Total Visitors</h2>
-  <p style={{ fontSize: "24px", marginTop: "10px" }}>
-    {visitorCount}
-  </p>
-</div>
 
 {/* TICKET SCANNER */}
 
