@@ -27,33 +27,38 @@ function ManageFilms() {
   const [posterFile, setPosterFile] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
   const [loading, setLoading] = useState(true);
-const [rentCount, setRentCount] = useState(0);
-const [subscriptionCount, setSubscriptionCount] = useState(0);
 
+  const [rentCount, setRentCount] = useState(0);
+  const [subscriptionCount, setSubscriptionCount] = useState(0);
+
+  // ✅ LOAD EVERYTHING ON PAGE LOAD
   useEffect(() => {
-  loadFilms();
-  loadStats(); // ✅ ADD HERE
-}, []);
+    loadFilms();
+    loadStats();
+  }, []);
 
-async function loadStats() {
-  const { data, error } = await supabase
-    .from("payments")
-    .select("type");
+  // ✅ FIXED: properly scoped
+  async function loadStats() {
+    const { data, error } = await supabase
+      .from("payments")
+      .select("type");
 
-  if (error) {
-    console.log("Stats error:", error);
-    return;
+    if (error) {
+      console.log("Stats error:", error);
+      return;
+    }
+
+    const rents = data.filter((p) => p.type === "rent").length;
+    const subs = data.filter((p) => p.type === "subscription").length;
+
+    setRentCount(rents);
+    setSubscriptionCount(subs);
   }
 
-  const rents = data.filter(p => p.type === "rent").length;
-  const subs = data.filter(p => p.type === "subscription").length;
-
-  setRentCount(rents);
-  setSubscriptionCount(subs);
-}
-
-async function loadFilms() {
+  // ✅ CLEAN films loader (NO nested functions)
+  async function loadFilms() {
     setLoading(true);
+
     const { data, error } = await supabase
       .from("films")
       .select("*")
@@ -65,10 +70,9 @@ async function loadFilms() {
       return;
     }
 
+    console.log("FILMS DATA:", data);
+
     setFilms(data || []);
-
-console.log("FILMS DATA:", data); // 👈 ADD THIS LINE
-
     setLoading(false);
   }
 
@@ -125,19 +129,20 @@ console.log("FILMS DATA:", data); // 👈 ADD THIS LINE
     const film = films.find((item) => item.id === id);
     if (!film) return;
 
-    let updatedPoster = film.poster || "";
-    let updatedVideo = film.video || "";
+    let updatedPoster = film.poster || film.poster_url || "";
+    let updatedVideo = film.video || film.video_url || "";
 
+    // ✅ poster upload
     if (posterFile) {
       const uploadedPoster = await uploadPoster(posterFile);
       if (uploadedPoster) updatedPoster = uploadedPoster;
     }
 
+    // ✅ video upload
     if (videoFile) {
       const uploadedVideo = await uploadVideo(videoFile);
       if (uploadedVideo) updatedVideo = uploadedVideo;
     }
-
     const payload = {
   title: film.title || "",
   description: film.description || "",
