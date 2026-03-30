@@ -95,20 +95,23 @@ function Layout() {
   }, []);
 useEffect(() => {
   async function trackVisitor() {
-    if (location.pathname.startsWith("/admin/login")) return;
+  if (location.pathname.startsWith("/admin/login")) return;
 
-    const { error } = await supabase
-      .from("visitors")
-      .insert([
-        { created_at: new Date().toISOString() }
-      ]);
+  const { data, error } = await supabase
+    .from("visitors")
+    .insert([
+      { created_at: new Date().toISOString() }
+    ])
+    .select();
 
-    if (error) {
-      console.log("Visitor insert error:", error);
-    } else {
-      console.log("Visitor tracked");
-    }
+  console.log("INSERT RESULT:", data);
+
+  if (error) {
+    console.log("❌ Visitor insert error:", error);
+  } else {
+    console.log("✅ Visitor tracked");
   }
+}
 
   trackVisitor();
 }, [location.pathname]);
