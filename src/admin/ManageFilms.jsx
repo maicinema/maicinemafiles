@@ -35,9 +35,25 @@ const [subscriptionCount, setSubscriptionCount] = useState(0);
   loadStats(); // ✅ ADD HERE
 }, []);
 
-  async function loadFilms() {
-    setLoading(true);
+async function loadStats() {
+  const { data, error } = await supabase
+    .from("payments")
+    .select("type");
 
+  if (error) {
+    console.log("Stats error:", error);
+    return;
+  }
+
+  const rents = data.filter(p => p.type === "rent").length;
+  const subs = data.filter(p => p.type === "subscription").length;
+
+  setRentCount(rents);
+  setSubscriptionCount(subs);
+}
+
+async function loadFilms() {
+    setLoading(true);
     const { data, error } = await supabase
       .from("films")
       .select("*")
@@ -48,20 +64,6 @@ const [subscriptionCount, setSubscriptionCount] = useState(0);
       setLoading(false);
       return;
     }
-
-async function loadStats() {
-  const { data } = await supabase
-    .from("payments")
-    .select("type");
-
-  if (!data) return;
-
-  const rents = data.filter(p => p.type === "rent").length;
-  const subs = data.filter(p => p.type === "subscription").length;
-
-  setRentCount(rents);
-  setSubscriptionCount(subs);
-}
 
     setFilms(data || []);
 
