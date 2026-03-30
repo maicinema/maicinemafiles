@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PLATFORM } from "../config/platform";
 import AdminStats from "./AdminStats";
+import { supabase } from "../lib/supabase";
 import TicketAnalytics from "./TicketAnalytics";
 import AdminNavbar from "../components/AdminNavbar";
 import NavigationArrows from "../components/NavigationArrows";
@@ -11,6 +12,24 @@ const [studioVideo,setStudioVideo] = useState(null);
 const [homeBanner,setHomeBanner] = useState(null);
 const [comingSoonBanner,setComingSoonBanner] = useState(null);
 const [logo,setLogo] = useState(null);
+
+const [visitorCount, setVisitorCount] = useState(0);
+useEffect(() => {
+  loadVisitors();
+}, []);
+
+async function loadVisitors() {
+  const { data, error } = await supabase
+    .from("visitors")
+    .select("id");
+
+  if (error) {
+    console.log("Visitor fetch error:", error);
+    return;
+  }
+
+  setVisitorCount(data.length);
+}
 
 const [showFooterEditor,setShowFooterEditor] = useState(false);
 const [showEmails,setShowEmails] = useState(false);
@@ -54,6 +73,12 @@ return(
 <TicketAnalytics />
 
 <div style={styles.grid}>
+    <div style={styles.card}>
+  <h2>Total Visitors</h2>
+  <p style={{ fontSize: "24px", marginTop: "10px" }}>
+    {visitorCount}
+  </p>
+</div>
 
 {/* TICKET SCANNER */}
 
