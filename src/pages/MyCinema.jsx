@@ -28,6 +28,7 @@ function MyCinema() {
 
   useEffect(() => {
   loadFilms();
+  trackVisitor(); // ✅ MOVE HERE
 
   const channel = supabase
     .channel("films-realtime-mycinema")
@@ -39,7 +40,7 @@ function MyCinema() {
         table: "films"
       },
       () => {
-        loadFilms(); // 🔥 instant sync
+        loadFilms();
       }
     )
     .subscribe();
@@ -130,11 +131,6 @@ useEffect(() => {
       behavior: "smooth"
     });
   };
-
-  useEffect(() => {
-  loadFilms();
-  trackVisitor(); // 🔥 ADD THIS
-}, []);
 
 async function trackVisitor() {
   try {
