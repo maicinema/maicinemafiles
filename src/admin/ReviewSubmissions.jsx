@@ -108,51 +108,27 @@ previewEnd: "",
 async function uploadVideo(file, onProgress) {
   if (!file) return "";
 
-  const formData = new FormData();
-  formData.append("file", file);
+  // 1. Get upload URL from Supabase Edge Function
+  const res = await fetch(
+    "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video"
+  );
 
-  let progress = 0;
+  const { uploadUrl, uid } = await res.json();
 
-  const interval = setInterval(() => {
-    progress += 10;
-    if (onProgress) onProgress(progress);
-    if (progress >= 90) clearInterval(interval);
-  }, 500);
+  // 2. Upload file directly to Cloudflare
+  const uploadRes = await fetch(uploadUrl, {
+    method: "POST",
+    body: file
+  });
 
-  let res;
-
-  try {
-    res = await fetch(
-      "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-  } catch (err) {
-    clearInterval(interval);
-    console.error("❌ FETCH ERROR:", err);
-    throw new Error("Network error");
-  }
-
-  clearInterval(interval);
-
-  const raw = await res.text();
-
-  if (!res.ok) {
-    console.error("❌ FUNCTION ERROR:", raw);
+  if (!uploadRes.ok) {
     throw new Error("Upload failed");
   }
 
-  const result = JSON.parse(raw);
-
   if (onProgress) onProgress(100);
 
-  if (!result.playbackUrl) {
-    throw new Error("Cloudflare failed");
-  }
-
-  return result.playbackUrl;
+  // 3. Return playback URL
+  return `https://videodelivery.net/${uid}/manifest/video.m3u8`;
 }
 
   function formatDuration(minutes) {
@@ -308,7 +284,7 @@ const releaseStatus = goLiveAt && goLiveAt <= now ? "live" : "coming_soon";
 
       const posterUrl = await uploadPoster(adminFilm.poster, "admin");
      const videoUrl = await uploadVideo(adminFilm.film, setUploadProgress);
-     
+
             const filmPayload = {
         title: adminFilm.title.trim(),
         director: adminFilm.director.trim(),
