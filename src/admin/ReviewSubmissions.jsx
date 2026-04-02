@@ -105,7 +105,55 @@ previewEnd: "",
     return data?.publicUrl || "";
   }
 
+async function uploadVideo(file, onProgress) {
+  if (!file) return "";
 
+  const formData = new FormData();
+  formData.append("file", file);
+
+  let progress = 0;
+
+  const interval = setInterval(() => {
+    progress += 10;
+    if (onProgress) onProgress(progress);
+    if (progress >= 90) clearInterval(interval);
+  }, 500);
+
+  let res;
+
+  try {
+    res = await fetch(
+      "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+  } catch (err) {
+    clearInterval(interval);
+    console.error("❌ FETCH ERROR:", err);
+    throw new Error("Network error");
+  }
+
+  clearInterval(interval);
+
+  const raw = await res.text();
+
+  if (!res.ok) {
+    console.error("❌ FUNCTION ERROR:", raw);
+    throw new Error("Upload failed");
+  }
+
+  const result = JSON.parse(raw);
+
+  if (onProgress) onProgress(100);
+
+  if (!result.playbackUrl) {
+    throw new Error("Cloudflare failed");
+  }
+
+  return result.playbackUrl;
+}
 
   function formatDuration(minutes) {
   if (!minutes) return "";
@@ -149,8 +197,8 @@ previewEnd: "",
       ? new Date(submission.go_live_at)
       : null;
 
-const now = new Date();
-    const releaseStatus = goLiveAt <= now ? "live" : "coming_soon";
+      const now = new Date();
+const releaseStatus = goLiveAt && goLiveAt <= now ? "live" : "coming_soon";
 
     const payload = {
       title: submission.title || "",
@@ -225,46 +273,6 @@ const now = new Date();
     await loadSubmissions();
   }
 
-  async function uploadToCloudflare(file, onProgress) {
-  if (!file) return "";
-
-  const CLOUDFLARE_ACCOUNT_ID = "3344337c485e8f0a088972d48cc76b27";
-  const CLOUDFLARE_API_TOKEN = "cfut_Kynl8s8goxnNrIouR4JoiNs4ouFC3Y0NV2MN0gLz9493fec2";
-
-  let progress = 0;
-
-  const interval = setInterval(() => {
-    progress += 10;
-    if (onProgress) onProgress(progress);
-    if (progress >= 90) clearInterval(interval);
-  }, 500);
-
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const res = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
-      },
-      body: formData
-    }
-  );
-
-  clearInterval(interval);
-
-  const data = await res.json();
-
-  if (!data.success) {
-    throw new Error("Cloudflare upload failed");
-  }
-
-  if (onProgress) onProgress(100);
-
-  return data.result.playback.hls;
-}
 
   async function approveAdminFilm(e) {
     e.preventDefault();
@@ -286,6 +294,9 @@ const now = new Date();
     }
 
     const goLiveAt = new Date(`${adminFilm.goLiveDate}T${adminFilm.goLiveTime}`);
+const now = new Date();
+
+const releaseStatus = goLiveAt && goLiveAt <= now ? "live" : "coming_soon";
 
     if (Number.isNaN(goLiveAt.getTime())) {
       alert("Invalid go live date or time.");
@@ -296,9 +307,8 @@ const now = new Date();
       setSubmittingAdminFilm(true);
 
       const posterUrl = await uploadPoster(adminFilm.poster, "admin");
-      const videoUrl = await uploadToCloudflare(adminFilm.film, setUploadProgress);
-      const releaseStatus = goLiveAt <= now ? "live" : "coming_soon";
-
+     const videoUrl = await uploadVideo(adminFilm.film, setUploadProgress);
+     
             const filmPayload = {
         title: adminFilm.title.trim(),
         director: adminFilm.director.trim(),
