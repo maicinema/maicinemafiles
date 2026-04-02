@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { RENT_PRICE } from "../config/pricing";
+import { useAuth } from "../context/AuthContext";
+
 
 function parseTimeToSeconds(time) {
   if (!time) return 0;
@@ -19,10 +21,11 @@ function parseTimeToSeconds(time) {
 function MovieCard({ movie }) {
   const videoRef = useRef(null);
   const navigate = useNavigate();
+const { user, loading } = useAuth();
 
  const startPreview = () => {
   const video = videoRef.current;
-  if (!video || !movie.video) return;
+ if (!video || !movie.video_url) return;
 
   const startTime = parseTimeToSeconds(movie.previewStart);
   const duration = parseTimeToSeconds(movie.previewDuration || "00:10");
@@ -56,7 +59,8 @@ function MovieCard({ movie }) {
 };
 
  const handleClick = () => {
-  const user = localStorage.getItem("maicinemaUser");
+
+  if (loading) return;
 
   if (!user) {
     navigate(`/createaccount?filmId=${movie.id}`);
@@ -70,7 +74,7 @@ function MovieCard({ movie }) {
     "@context": "https://schema.org",
     "@type": "Movie",
     name: movie.title,
-    image: movie.poster,
+   image: movie.poster_url,
     description: movie.description,
     genre: movie.genre,
     aggregateRating: {
@@ -79,6 +83,7 @@ function MovieCard({ movie }) {
       reviewCount: movie.views || "100"
     }
   };
+console.log("MOVIE DATA:", movie);
 
   return (
     <div
@@ -91,12 +96,12 @@ function MovieCard({ movie }) {
         {JSON.stringify(structuredData)}
       </script>
 
-      {movie.video ? (
+      {movie.video_url ? (
         <video
   ref={videoRef}
-  src={movie.video}
-  data-src={movie.video}
-  poster={movie.poster}
+  src={movie.video_url}
+data-src={movie.video_url}
+ poster={movie.poster_url + "?t=" + Date.now()}
   style={styles.image}
   preload="metadata"
   playsInline
@@ -104,7 +109,7 @@ function MovieCard({ movie }) {
 />
       ) : (
         <img
-          src={movie.poster}
+          src={movie.poster_url + "?t=" + Date.now()}
           alt={movie.title}
           style={styles.image}
           loading="lazy"

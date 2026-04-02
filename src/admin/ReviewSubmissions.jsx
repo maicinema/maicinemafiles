@@ -105,36 +105,7 @@ previewEnd: "",
     return data?.publicUrl || "";
   }
 
-  async function uploadVideo(file, prefix = "submission", onProgress) {
-  if (!file) return "";
 
-  const fileName = `${prefix}-video-${Date.now()}-${file.name}`;
-
-  // FAKE PROGRESS (for UI feedback)
-  let progress = 0;
-  const interval = setInterval(() => {
-    progress += 10;
-    if (onProgress) onProgress(progress);
-    if (progress >= 90) clearInterval(interval);
-  }, 500);
-
-  const { error } = await supabase.storage
-    .from("films")
-    .upload(fileName, file, { upsert: true });
-
-  clearInterval(interval);
-  if (onProgress) onProgress(100);
-
-  if (error) {
-    throw new Error(error.message || "Film upload failed");
-  }
-
-  const { data } = supabase.storage
-    .from("films")
-    .getPublicUrl(fileName);
-
-  return data?.publicUrl || "";
-}
 
   function formatDuration(minutes) {
   if (!minutes) return "";
@@ -171,59 +142,62 @@ previewEnd: "",
     alert("No film file available yet for preview.");
   }
 
-    async function approveFilm(submission) {
-    try {
-      const now = new Date();
-      const goLiveAt = submission.go_live_at ? new Date(submission.go_live_at) : null;
+   async function approveFilm(submission) {
+  try {
+    
+    const goLiveAt = submission.go_live_at
+      ? new Date(submission.go_live_at)
+      : null;
 
-      const releaseStatus =
-        goLiveAt && goLiveAt <= now ? "live" : "coming_soon";
+const now = new Date();
+    const releaseStatus = goLiveAt <= now ? "live" : "coming_soon";
 
-      const payload = {
-        title: submission.title || "",
-        director: submission.director || "",
-        genre: submission.genre || "",
-        rating: submission.rating || "",
-        language: submission.language || "",
-        year: submission.year || "",
-       duration: parseInt(String(submission.duration).replace(/\D/g, ""), 10) || 0,
-        description: submission.description || "",
-        poster: submission.poster || "",
-        video: submission.video || "",
-        views: 0,
-        price: 3,
-        status: releaseStatus,
-        go_live_at: submission.go_live_at || null,
-        contract_expires_at: null
-      };
+    const payload = {
+      title: submission.title || "",
+      director: submission.director || "",
+      genre: submission.genre || "",
+      rating: submission.rating || "",
+      language: submission.language || "",
+      year: submission.year || "",
+      duration:
+        parseInt(String(submission.duration).replace(/\D/g, ""), 10) || 0,
+      description: submission.description || "",
+      poster_url: submission.poster,
+      video_url: submission.video,
+      views: 0,
+      price: 3,
+      status: releaseStatus,
+      go_live_at: submission.go_live_at || null,
+      contract_expires_at: null
+    };
 
-      const { error: insertError } = await supabase
-        .from("films")
-        .insert(payload);
+    const { error: insertError } = await supabase
+      .from("films")
+      .insert(payload);
 
-      if (insertError) {
-        throw new Error(insertError.message || "Failed to approve film");
-      }
-
-      const { error: updateError } = await supabase
-        .from("film_submissions")
-        .update({
-          status: "approved",
-          review_note: reviewNotes[submission.id] || ""
-        })
-        .eq("id", submission.id);
-
-      if (updateError) {
-        throw new Error(updateError.message || "Failed to update submission");
-      }
-
-      alert("Film approved successfully.");
-      await loadSubmissions();
-    } catch (error) {
-      console.log("Approve film error:", error);
-      alert(error.message || "Failed to approve film");
+    if (insertError) {
+      throw new Error(insertError.message || "Failed to approve film");
     }
+
+    const { error: updateError } = await supabase
+      .from("film_submissions")
+      .update({
+        status: "approved",
+        review_note: reviewNotes[submission.id] || ""
+      })
+      .eq("id", submission.id);
+
+    if (updateError) {
+      throw new Error(updateError.message || "Failed to update submission");
+    }
+
+    alert("Film approved successfully.");
+    await loadSubmissions();
+  } catch (error) {
+    console.log("Approve film error:", error);
+    alert(error.message || "Failed to approve film");
   }
+}
 
   async function rejectFilm(submission) {
     const note = reviewNotes[submission.id];
@@ -250,6 +224,47 @@ previewEnd: "",
     alert("Film rejected successfully.");
     await loadSubmissions();
   }
+
+  async function uploadToCloudflare(file, onProgress) {
+  if (!file) return "";
+
+  const CLOUDFLARE_ACCOUNT_ID = "3344337c485e8f0a088972d48cc76b27";
+  const CLOUDFLARE_API_TOKEN = "cfut_Kynl8s8goxnNrIouR4JoiNs4ouFC3Y0NV2MN0gLz9493fec2";
+
+  let progress = 0;
+
+  const interval = setInterval(() => {
+    progress += 10;
+    if (onProgress) onProgress(progress);
+    if (progress >= 90) clearInterval(interval);
+  }, 500);
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
+      },
+      body: formData
+    }
+  );
+
+  clearInterval(interval);
+
+  const data = await res.json();
+
+  if (!data.success) {
+    throw new Error("Cloudflare upload failed");
+  }
+
+  if (onProgress) onProgress(100);
+
+  return data.result.playback.hls;
+}
 
   async function approveAdminFilm(e) {
     e.preventDefault();
@@ -281,8 +296,7 @@ previewEnd: "",
       setSubmittingAdminFilm(true);
 
       const posterUrl = await uploadPoster(adminFilm.poster, "admin");
-      const videoUrl = await uploadVideo(adminFilm.film, "admin", setUploadProgress);
-      const now = new Date();
+      const videoUrl = await uploadToCloudflare(adminFilm.film, setUploadProgress);
       const releaseStatus = goLiveAt <= now ? "live" : "coming_soon";
 
             const filmPayload = {
@@ -294,8 +308,8 @@ previewEnd: "",
         year: adminFilm.year.trim(),
         duration: parseInt(String(adminFilm.duration).replace(/\D/g, ""), 10) || 0,
         description: adminFilm.description.trim(),
-        poster: posterUrl,
-        video: videoUrl,
+        poster_url: posterUrl,
+video_url: videoUrl,
         preview_start: adminFilm.previewStart,
 preview_end: adminFilm.previewEnd,
         views: 0,

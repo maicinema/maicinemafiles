@@ -1,61 +1,33 @@
-export const getStudioData = () => {
+import { supabase } from "../lib/supabaseClient";
 
-const data = localStorage.getItem("studioData");
+// ✅ GET DATA
+export const getStudioData = async () => {
+  const { data, error } = await supabase
+    .from("studio_data")
+    .select("*")
+    .limit(1)
+    .single();
 
-if(data){
-return JSON.parse(data);
-}
+  if (error || !data) {
+    console.log("Error loading studio data", error);
+    return null;
+  }
 
-return {
-
-founder:{
-name:"PrinceMaozi",
-bio:"",
-image:""
-},
-
-team:[],
-
-articles:{
-
-filmProduction:{
-title:"Film Production",
-text:"",
-header:"",
-gallery:[]
-},
-
-television:{
-title:"Television Production",
-text:"",
-header:"",
-gallery:[]
-},
-
-events:{
-title:"Event Coverage",
-text:"",
-header:"",
-gallery:[]
-},
-
-maicinema:{
-title:"MaiCinema",
-text:"",
-header:"",
-gallery:[]
-}
-
-},
-
-customArticles:[]
-
+  return data.data; // 👈 important (json field)
 };
 
-};
+// ✅ SAVE DATA
+export const saveStudioData = async (newData) => {
+  const { data: existing } = await supabase
+    .from("studio_data")
+    .select("id")
+    .limit(1)
+    .single();
 
-export const saveStudioData = (data)=>{
+  if (!existing) return;
 
-localStorage.setItem("studioData",JSON.stringify(data));
-
+  await supabase
+    .from("studio_data")
+    .update({ data: newData })
+    .eq("id", existing.id);
 };

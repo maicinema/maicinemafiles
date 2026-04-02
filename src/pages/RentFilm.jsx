@@ -1,13 +1,16 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/supabaseClient";
 import { RENT_PRICE } from "../config/pricing";
+import { useAuth } from "../context/AuthContext";
 
 function RentFilm() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [film, setFilm] = useState(null);
+
+  const { user, loading } = useAuth();
 
   const [cardName, setCardName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
@@ -16,9 +19,11 @@ function RentFilm() {
 
   // ✅ LOAD FILM DETAILS
   useEffect(() => {
+  if (!loading) {
     loadFilm();
     checkIfPaid();
-  }, []);
+  }
+}, [loading]);
 
   async function loadFilm() {
     const { data } = await supabase
@@ -32,8 +37,8 @@ function RentFilm() {
 
   // ✅ CHECK IF USER ALREADY HAS VALID ACCESS
   async function checkIfPaid() {
-    const user = JSON.parse(localStorage.getItem("maicinemaUser"));
-    if (!user) return;
+   if (loading) return;
+if (!user) return;
 
     const now = new Date().toISOString();
 
@@ -41,7 +46,7 @@ function RentFilm() {
       .from("payments")
       .select("*")
       .eq("film_id", id)
-      .eq("user_email", user.email)
+      .eq("user_id", user.id)
       .eq("status", "completed");
 
     const validPayment = data?.some((p) => {
@@ -55,8 +60,11 @@ function RentFilm() {
 
   // ✅ HANDLE PAYMENT SUCCESS
   async function handlePaymentSuccess() {
-    const user = JSON.parse(localStorage.getItem("maicinemaUser"));
-
+    if (!user) {
+  alert("Please create an account first");
+  navigate(`/createaccount?filmId=${id}`);
+  return;
+}
     if (!user) {
       alert("Please create an account first");
       navigate(`/createaccount?filmId=${id}`);
@@ -70,7 +78,7 @@ function RentFilm() {
       .from("payments")
       .select("*")
       .eq("film_id", id)
-      .eq("user_email", user.email)
+      .eq("user_id", user.id)
       .eq("status", "completed");
 
     const alreadyPaid = existing?.some((p) => p.expires_at > now);
@@ -86,7 +94,7 @@ function RentFilm() {
 
     // 💾 SAVE PAYMENT
     const { error } = await supabase.from("payments").insert({
-      user_email: user.email,
+     user_id: user.id,
       film_id: id,
       amount: RENT_PRICE,
       status: "completed",

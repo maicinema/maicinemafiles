@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import MovieCard from "../components/MovieCard";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/supabaseClient";
+import { useAuth } from "../context/AuthContext";
 
 function parseTimeToSeconds(time) {
   if (!time) return 0;
@@ -21,6 +22,7 @@ function MyCinema() {
   const [rows, setRows] = useState([]);
   const [currentBanner, setCurrentBanner] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
+const { user, loading } = useAuth();
 
   const videoRef = useRef(null);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
@@ -152,22 +154,45 @@ async function trackVisitor() {
     cursor: "pointer",
     backgroundImage: `url(${bannerFilm.poster || ""})`
   }}
-  onClick={() => {
-    const user = localStorage.getItem("user");
-    const hasPaid = localStorage.getItem(`paid_${bannerFilm.id}`);
 
-    if (!user) {
-      window.location.href = "/createaccount";
-      return;
+  onClick={async () => {
+
+  if (loading) return;
+
+  if (!user) {
+    window.location.href = `/createaccount?filmId=${bannerFilm.id}`;
+    return;
+  }
+
+  const now = new Date().toISOString();
+
+  const { data } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("status", "completed");
+
+  const hasAccess = data?.some((p) => {
+    if (p.type === "rent" && p.film_id === bannerFilm.id) {
+      return p.expires_at > now;
     }
 
-    if (!hasPaid) {
-      window.location.href = `/rent/${bannerFilm.id}`;
-      return;
+    if (p.type === "subscription") {
+      return p.expires_at > now;
     }
 
-    window.location.href = `/watch/${bannerFilm.id}`;
+    return false;
+  });
+
+  if (!hasAccess) {
+    window.location.href = `/rent/${bannerFilm.id}`;
+    return;
+  }
+
+  window.location.href = `/watch/${bannerFilm.id}`;
   }}
+
+  
   onMouseEnter={() => {
     const video = videoRef.current;
     if (!video || !bannerFilm.video) return;

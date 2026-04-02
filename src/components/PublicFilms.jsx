@@ -13,7 +13,7 @@ async function loadFilms(){
 
 const { data, error } = await supabase
 .from("films")
-.select("*")
+.select("id, title, poster_url, genre, rating")
 .order("created_at",{ascending:false})
 
 if(!error){

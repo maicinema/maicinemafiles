@@ -2,7 +2,12 @@ import { demoFilms } from "./filmLibrary";
 
 export const getComingSoon = () => {
   const data = localStorage.getItem("comingSoon");
-  return data ? JSON.parse(data) : [];
+
+  try {
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
 };
 
 export const saveComingSoon = (films) => {
@@ -11,8 +16,12 @@ export const saveComingSoon = (films) => {
 
 export const getLiveFilms = () => {
   const data = localStorage.getItem("liveFilms");
-  if (data) return JSON.parse(data);
-  return demoFilms;
+
+  try {
+    return data ? JSON.parse(data) : demoFilms;
+  } catch {
+    return demoFilms;
+  }
 };
 
 export const saveLiveFilms = (films) => {

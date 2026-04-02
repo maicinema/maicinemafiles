@@ -71,21 +71,41 @@ function SubmitFilm() {
   };
 
   const uploadVideo = async (file) => {
-    if (!file) return "";
+  if (!file) return "";
 
-    const fileName = `submission-video-${Date.now()}-${file.name}`;
+  const formData = new FormData();
+  formData.append("file", file);
 
-    const { error } = await supabase.storage
-      .from("films")
-      .upload(fileName, file, { upsert: true });
+  let res;
 
-    if (error) {
-      throw new Error(error.message || "Film upload failed");
-    }
+  try {
+    res = await fetch(
+      "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+  } catch (err) {
+    console.error("❌ FETCH ERROR:", err);
+    throw new Error("Network error while uploading video");
+  }
 
-    const { data } = supabase.storage.from("films").getPublicUrl(fileName);
-    return data?.publicUrl || "";
-  };
+  const raw = await res.text();
+
+  if (!res.ok) {
+    console.error("❌ FUNCTION ERROR:", raw);
+    throw new Error("Video upload failed");
+  }
+
+  const result = JSON.parse(raw);
+
+  if (!result.playbackUrl) {
+    throw new Error("Cloudflare upload failed");
+  }
+
+  return result.playbackUrl;
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();

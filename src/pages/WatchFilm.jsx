@@ -1,34 +1,41 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/supabaseClient";
+import { useAuth } from "../context/AuthContext";
+
 
 function WatchFilm() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const { user, loading } = useAuth();
+
   const [film, setFilm] = useState(null);
 
   useEffect(() => {
+  if (!loading) {
     checkAccess();
     loadFilm();
-  }, []);
+  }
+}, [loading]);
 
   // ✅ CHECK PAYMENT ACCESS
  // ✅ CHECK PAYMENT ACCESS
 async function checkAccess() {
-  const user = JSON.parse(localStorage.getItem("maicinemaUser"));
 
-  if (!user) {
-    navigate(`/createaccount?filmId=${id}`);
-    return;
-  }
+    if (loading) return;
+
+if (!user) {
+  navigate(`/createaccount?filmId=${id}`);
+  return;
+}
 
   const now = new Date().toISOString();
 
   const { data } = await supabase
     .from("payments")
     .select("*")
-    .eq("user_email", user.email)
+   .eq("user_id", user.id)
     .eq("status", "completed");
 
   const validAccess = data?.some((p) => {
@@ -69,12 +76,12 @@ async function checkAccess() {
     <div style={styles.container}>
       <h1>{film.title}</h1>
 
-      <video
-        controls
-        autoPlay
-        style={styles.video}
-        src={film.video || film.video_url}
-      />
+      <iframe
+  src={film.video_url}
+  style={styles.video}
+  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+  allowFullScreen
+/>
     </div>
   );
 }

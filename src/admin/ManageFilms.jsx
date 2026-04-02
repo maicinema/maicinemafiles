@@ -107,30 +107,12 @@ function ManageFilms() {
     return data?.publicUrl || null;
   }
 
-  async function uploadVideo(file) {
-    if (!file) return null;
-
-    const fileName = `video-${Date.now()}-${file.name}`;
-
-    const { error } = await supabase.storage
-      .from("films")
-      .upload(fileName, file, { upsert: true });
-
-    if (error) {
-      console.log("Video upload error:", error);
-      return null;
-    }
-
-    const { data } = supabase.storage.from("films").getPublicUrl(fileName);
-    return data?.publicUrl || null;
-  }
-
   async function saveFilm(id) {
     const film = films.find((item) => item.id === id);
     if (!film) return;
 
-    let updatedPoster = film.poster || film.poster_url || "";
-    let updatedVideo = film.video || film.video_url || "";
+    let updatedPoster = film.poster_url || "";
+let updatedVideo = film.video_url || "";
 
     // ✅ poster upload
     if (posterFile) {
@@ -140,9 +122,30 @@ function ManageFilms() {
 
     // ✅ video upload
     if (videoFile) {
-      const uploadedVideo = await uploadVideo(videoFile);
-      if (uploadedVideo) updatedVideo = uploadedVideo;
+  const formData = new FormData();
+  formData.append("file", videoFile);
+
+  const res = await fetch(
+    "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY
+      },
+      body: formData
     }
+  );
+
+  const result = await res.json();
+
+  if (result.success) {
+    updatedVideo = result.playbackUrl;
+  } else {
+    alert("Cloudflare upload failed");
+    return;
+  }
+}
     const payload = {
   title: film.title || "",
   description: film.description || "",
@@ -259,9 +262,13 @@ previewDuration: film.previewDuration || "00:10"
 
               return (
                 <div key={film.id} style={styles.card}>
-                  {film.poster ? (
-                    <img src={film.poster} alt={film.title} style={styles.poster} />
-                  ) : (
+                  {film.poster_url ? (
+  <img
+    src={film.poster_url + "?t=" + Date.now()}
+    alt={film.title}
+    style={styles.poster}
+  />
+) : (
                     <div style={styles.placeholder}>No Poster</div>
                   )}
 

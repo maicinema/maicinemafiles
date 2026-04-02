@@ -34,7 +34,7 @@ function LeavingSoon() {
 
     const { data } = await supabase
   .from("films")
-  .select("id,title,poster,video,genre,rating,description,views,contract_expires_at,previewStart")
+  .select("id,title,poster_url,video_url,genre,rating,description,views,contract_expires_at,previewStart")
   .eq("status", "live")
   .gt("contract_expires_at", now)
   .order("contract_expires_at", { ascending: true });

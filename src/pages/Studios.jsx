@@ -1,5 +1,6 @@
 import ImageGallery from "../components/ImageGallery";
 import { getStudioData } from "../platform/studioData";
+import { useEffect, useState } from "react";
 
 /* PRODUCTION */
 import production1 from "../assets/studio/production1.jpg";
@@ -32,30 +33,35 @@ import maicinema5 from "../assets/studio/maicinema5.jpg";
 /* FOUNDER */
 import founder from "../assets/studio/founder1.jpg";
 
-function Studios(){
+function Studios() {
 
-const studioData = getStudioData();
+  const [data, setData] = useState(null);
 
-/* DEFAULT TEAM */
+  useEffect(() => {
+    async function load() {
+      const data = await getStudioData();
+      setData(data);
+    }
 
-const defaultTeam = [
+    load();
+  }, []);
 
-{ name:"Daniel Brooks", role:"Lead Developer" },
-{ name:"Sophia Martinez", role:"Marketing Director" },
-{ name:"Michael Tan", role:"Production Manager" },
-{ name:"Aisha Bello", role:"Social Media Manager" },
-{ name:"David Kim", role:"Public Relations Lead" }
+  if (!data) return <div>Loading...</div>;
 
+  const defaultTeam = [
+  { name:"Daniel Brooks", role:"Lead Developer" },
+  { name:"Sophia Martinez", role:"Marketing Director" },
+  { name:"Michael Tan", role:"Production Manager" },
+  { name:"Aisha Bello", role:"Social Media Manager" },
+  { name:"David Kim", role:"Public Relations Lead" }
 ];
 
-/* ENSURE TEAM ALWAYS SHOWS */
-
 const team =
-(studioData?.team && studioData.team.length > 0)
-? studioData.team
+(data?.team && data.team.length > 0)
+? data.team
 : defaultTeam;
 
-return(
+return (
 
 <div style={styles.page}>
 

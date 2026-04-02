@@ -13,10 +13,12 @@ function FilmDetails() {
 
   async function loadFilm() {
     const { data } = await supabase
-      .from("films")
-      .select("*")
-      .eq("id", Number(id)) // safe fix
-      .single();
+  .from("films")
+  .select("id, title, description, poster_url, video_url, genre, rating, views")
+  .eq("id", Number(id))
+  .single();
+
+console.log("NEW FILM DATA:", data) // 🔥 add this
 
     setFilm(data);
   }
@@ -27,6 +29,14 @@ function FilmDetails() {
       document.title = `${film.title} | MaiCinema`;
     }
   }, [film]);
+
+  useEffect(() => {
+  const interval =setInterval(() => {
+  loadFilm();
+}, 10000); // every 10 seconds
+
+  return () => clearInterval(interval);
+}, []);
 
   // ✅ SEO: Dynamic Description
   useEffect(() => {
@@ -53,7 +63,7 @@ function FilmDetails() {
     "@context": "https://schema.org",
     "@type": "Movie",
     name: film.title,
-    image: film.poster,
+    image: film.poster_url,
     description: film.description,
     genre: film.genre,
     aggregateRating: {
@@ -72,12 +82,11 @@ function FilmDetails() {
 
       <h1>{film.title}</h1>
 
-      <img
-        src={film.poster}
-        alt={film.title}
-        style={{ width: "300px", borderRadius: "8px" }}
-      />
-
+     <img
+  src={film.poster_url + "?t=" + Date.now()}
+  alt={film.title}
+  style={{ width: "300px", borderRadius: "8px" }}
+/>
       <p>{film.description}</p>
       <p>{film.genre} • {film.rating}</p>
       <p>👁 {film.views} views</p>

@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
+import { supabase } from "../lib/supabaseClient";
 
 function CreateAccount(){
 
@@ -16,7 +17,7 @@ const [password,setPassword] = useState("");
 
 const [showPassword,setShowPassword] = useState(false);
 
-const handleSubmit = (e)=>{
+const handleSubmit = async (e)=>{
 
 e.preventDefault();
 
@@ -35,9 +36,25 @@ return;
 
 }
 
-const user = {name,age,email};
+/* ✅ SUPABASE SIGNUP */
 
-localStorage.setItem("user", JSON.stringify(user));
+const { data, error } = await supabase.auth.signUp({
+  email,
+  password,
+  options: {
+    data: {
+      name,
+      age
+    }
+  }
+});
+
+if (error) {
+  alert(error.message);
+  return;
+}
+
+/* NAVIGATION */
 
 if (filmId) {
   navigate(`/rent/${filmId}`);

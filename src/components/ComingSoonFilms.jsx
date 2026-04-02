@@ -32,8 +32,7 @@ function ComingSoonFilms() {
   async function loadComingSoon() {
     const { data } = await supabase
   .from("films")
-  .select("id,title,poster,video,genre,rating,description,views,previewStart")
-  .eq("status", "coming_soon")
+  .select("id,title,poster_url,video_url,genre,rating,description,views,previewStart")
   .order("id", { ascending: false });
 
     setMovies(data || []);

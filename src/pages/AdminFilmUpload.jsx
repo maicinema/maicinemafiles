@@ -2,6 +2,7 @@ import { useState } from "react"
 import { supabase } from "../lib/supabase";
 
 export default function AdminFilmUpload(){
+console.log("✅ ADMIN UPLOAD PAGE LOADED");
 
 const [title,setTitle] = useState("")
 const [description,setDescription] = useState("")
@@ -9,21 +10,29 @@ const [genre,setGenre] = useState("")
 const [rating,setRating] = useState("")
 const [runtime,setRuntime] = useState("")
 const [releaseYear,setReleaseYear] = useState("")
+const [filmId, setFilmId] = useState("")
 
 const [poster,setPoster] = useState(null)
 const [film,setFilm] = useState(null)
 
 async function uploadFilm(){
+  console.log("🚀 START");
 
-if(!title || !poster || !film){
-alert("Please fill all required fields")
-return
-}
+  console.log("TITLE:", title);
+  console.log("POSTER:", poster);
+  console.log("FILM:", film);
+
+  if(!title || !poster || !film){
+    console.log("❌ BLOCKED HERE");
+    alert("Please fill all required fields")
+    return
+  }
+
+  console.log("✅ PASSED VALIDATION");
 
 /* UPLOAD POSTER */
 
-const posterName = Date.now() + "_" + poster.name
-
+const posterName = Date.now() + "_" + Math.random() + "_" + poster.name
 const { data:posterData, error:posterError } = await supabase
 .storage
 .from("posters")
@@ -41,40 +50,67 @@ const posterUrl = supabase
 .getPublicUrl(posterName).data.publicUrl
 
 /* UPLOAD FILM */
+console.log("🚀 UPLOAD FUNCTION STARTED");
 
-const filmName = Date.now() + "_" + film.name
+/* UPLOAD FILM TO CLOUDFLARE */
 
-const { error:filmError } = await supabase
-.storage
-.from("films")
-.upload(filmName, film)
+const formData = new FormData()
+formData.append("file", film)
+console.log("🔥 FILE SIZE (MB):", (film.size / 1024 / 1024).toFixed(2));
+console.log("🔥 ANON KEY:", import.meta.env.VITE_SUPABASE_ANON_KEY);
+console.log("🔥 FUNCTION URL:", "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video");
 
-if(filmError){
-console.error(filmError)
-alert("Film upload failed")
-return
+
+let res;
+
+try {
+  res = await fetch(
+    "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
+    {
+      method: "POST",
+      body: formData
+    }
+  );
+} catch (err) {
+  console.error("❌ FETCH ERROR:", err);
+  alert("Network error — function not reached");
+  return;
 }
 
-const filmUrl = supabase
-.storage
-.from("films")
-.getPublicUrl(filmName).data.publicUrl
+console.log("🔥 STATUS:", res.status);
+
+const raw = await res.text();
+console.log("🔥 RAW RESPONSE:", raw);
+
+if (!res.ok) {
+  alert("Upload failed: " + raw);
+  return;
+}
+
+const result = JSON.parse(raw);
+if (!result.playbackUrl) {
+  alert("Cloudflare upload failed");
+  return;
+}
+
+const filmUrl = result.playbackUrl;
 
 /* SAVE FILM TO DATABASE */
 
 const { error:dbError } = await supabase
 .from("films")
-.insert({
+.upsert({
+id: Number(filmId),   // 🔥 THIS IS THE FIX
 title,
 description,
 genre,
 rating,
 runtime,
-poster: posterUrl,
-video: filmUrl,
+poster_url: posterUrl,
+video_url: filmUrl,   // 🔥 also fix this
 release_year: releaseYear,
-status: "coming_soon",     // 🔥 IMPORTANT
-views: 0                   // 🔥 IMPORTANT
+status: "coming_soon",
+views: 0
 })
 
 if(dbError){
@@ -115,6 +151,14 @@ onChange={(e)=>setGenre(e.target.value)}
 
 <br/><br/>
 
+<input
+  placeholder="Film ID (to update)"
+  value={filmId}
+  onChange={(e)=>setFilmId(e.target.value)}
+/>
+
+<br/><br/>
+
 <input placeholder="PG Rating"
 value={rating}
 onChange={(e)=>setRating(e.target.value)}
@@ -140,7 +184,10 @@ onChange={(e)=>setReleaseYear(e.target.value)}
 <input
 type="file"
 accept="image/*"
-onChange={(e)=>setPoster(e.target.files[0])}
+onChange={(e)=>{
+  console.log("POSTER SELECTED:", e.target.files[0]);
+  setPoster(e.target.files[0])
+}}
 />
 
 <br/><br/>
@@ -149,13 +196,22 @@ onChange={(e)=>setPoster(e.target.files[0])}
 <input
 type="file"
 accept="video/*"
-onChange={(e)=>setFilm(e.target.files[0])}
+onChange={(e)=>{
+  console.log("FILM SELECTED:", e.target.files[0]);
+  setFilm(e.target.files[0])
+}}
 />
 
 <br/><br/>
 
-<button onClick={uploadFilm}>
-Upload Film
+<button
+  onClick={() => {
+    alert("CLICK WORKS");
+    console.log("🟢 BUTTON CLICKED");
+    uploadFilm();
+  }}
+>
+  Upload Film
 </button>
 
 </div>
