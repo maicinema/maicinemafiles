@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useState, useEffect } from "react";
 
 // temporary local banners (later this will come from admin upload)
