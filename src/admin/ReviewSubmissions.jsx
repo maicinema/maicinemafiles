@@ -114,13 +114,17 @@ async function uploadVideo(file, onProgress) {
   let res;
 
   try {
-    res = await fetch(
-      "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
-      {
-        method: "POST", // ✅ VERY IMPORTANT
-        body: formData
-      }
-    );
+   res = await fetch(
+  "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
+  {
+    method: "POST",
+    headers: {
+      "x-api-key": "your-super-secret-key"
+    },
+    body: formData,
+  }
+);
+
   } catch (err) {
     console.error("FETCH ERROR:", err);
     throw new Error("Network error while uploading video");
@@ -309,7 +313,7 @@ async function approveFilm(submission) {
         parseInt(String(adminFilm.duration).replace(/\D/g, ""), 10) || 0,
       description: adminFilm.description.trim(),
       poster_url: posterUrl,
-      video_url: videoUrl,
+     video_id: videoUrl.split("/")[3], // extracts ID from Cloudflare URL
       preview_start: adminFilm.previewStart,
       preview_end: adminFilm.previewEnd,
       views: 0,

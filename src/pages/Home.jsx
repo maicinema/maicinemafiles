@@ -1,5 +1,9 @@
 import { useEffect } from "react";
-import banner from "../assets/cinema-banner.jpg";
+import { useState, useEffect } from "react";
+
+// temporary local banners (later this will come from admin upload)
+import banner1 from "../assets/cinema-banner.jpg";
+import banner2 from "../assets/cinema-banner.jpg"; // duplicate for now
 import SubscribeSection from "../components/SubscribeSection";
 import TrendingNow from "../components/TrendingNow";
 import LeavingSoon from "../components/LeavingSoon";
@@ -16,12 +20,26 @@ function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  const banners = [banner1, banner2];
+
+const [currentBanner, setCurrentBanner] = useState(0);
+
+// auto-slide
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentBanner((prev) => (prev + 1) % banners.length);
+  }, 5000); // change every 5s
+
+  return () => clearInterval(interval);
+}, []);
+
   return (
     <>
       <div
         style={{
           height: "100vh",
-          backgroundImage: `url(${banner})`,
+          backgroundImage: `url(${banners[currentBanner]})`,
+transition: "background-image 1s ease-in-out",
           backgroundSize: "cover",
           backgroundPosition: "center",
           position: "relative",
@@ -45,7 +63,8 @@ function Home() {
             position: "relative",
             height: "100%",
             display: "flex",
-            alignItems: "center",
+            backgroundImage: `url(${banners[currentBanner]})`,
+transition: "background-image 1s ease-in-out",
             paddingLeft: "20px",
             paddingRight: "20px"
           }}
@@ -92,8 +111,6 @@ function Home() {
 
       {/* ✅ KEEP EVERYTHING EXACTLY */}
       <SubscribeSection />
-      <TrendingNow />
-      <LeavingSoon />
       <ComingSoonFilms />
     </>
   );

@@ -80,25 +80,34 @@ function SubmitFilm() {
 
   try {
     res = await fetch(
-      "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+  "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
+  {
+    method: "POST",
+    headers: {
+      "x-api-key": "your-super-secret-key"
+    },
+    body: formData,
+  }
+);
+
   } catch (err) {
     console.error("❌ FETCH ERROR:", err);
     throw new Error("Network error while uploading video");
   }
 
-  const raw = await res.text();
+  let result;
 
-  if (!res.ok) {
-    console.error("❌ FUNCTION ERROR:", raw);
-    throw new Error("Video upload failed");
+  try {
+    result = await res.json(); // ✅ safer
+  } catch (err) {
+    console.error("❌ JSON PARSE ERROR");
+    throw new Error("Invalid server response");
   }
 
-  const result = JSON.parse(raw);
+  if (!res.ok) {
+    console.error("❌ FUNCTION ERROR:", result);
+    throw new Error(result?.error || "Video upload failed");
+  }
 
   if (!result.playbackUrl) {
     throw new Error("Cloudflare upload failed");
@@ -161,7 +170,7 @@ function SubmitFilm() {
         description: form.description.trim(),
         email: form.email.trim(),
         poster: posterUrl,
-        video: videoUrl,
+       video_id: videoUrl.split("/")[3], // extracts ID from Cloudflare URL
         go_live_at: goLiveAt.toISOString(),
         status: "pending",
         source: "filmmaker",

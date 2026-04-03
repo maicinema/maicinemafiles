@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import { RENT_PRICE } from "../config/pricing";
 import { useAuth } from "../context/AuthContext";
 
 function RentFilm() {
@@ -96,7 +95,6 @@ if (!user) return;
     const { error } = await supabase.from("payments").insert({
      user_id: user.id,
       film_id: id,
-      amount: RENT_PRICE,
       status: "completed",
       type: "rent",
       expires_at: expiresAt.toISOString()
@@ -126,7 +124,6 @@ if (!user) return;
       </h1>
 
       <p style={styles.price}>
-        Rental Price: ${RENT_PRICE}
       </p>
 
       {/* 💳 CARD PAYMENT */}
@@ -168,7 +165,6 @@ if (!user) return;
         />
 
         <button style={styles.button}>
-          Pay ${RENT_PRICE}
         </button>
       </form>
 
@@ -178,7 +174,6 @@ if (!user) return;
         createOrder={(data, actions) => {
           return actions.order.create({
             purchase_units: [{
-              amount: { value: RENT_PRICE }
             }]
           });
         }}

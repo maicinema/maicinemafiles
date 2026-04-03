@@ -11,7 +11,7 @@ function WatchFilm() {
   const { user, loading } = useAuth();
 
   const [film, setFilm] = useState(null);
-
+const [videoUrl, setVideoUrl] = useState("");
   useEffect(() => {
   if (!loading) {
     checkAccess();
@@ -73,15 +73,22 @@ if (!user) {
   }
 
   return (
-    <div style={styles.container}>
+    <div
+  style={styles.container}
+  onContextMenu={(e) => e.preventDefault()}
+>
       <h1>{film.title}</h1>
 
-      <iframe
-  src={film.video_url}
-  style={styles.video}
-  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-  allowFullScreen
-/>
+      {film.video_url ? (
+  <iframe
+    src={film.video_url}
+    style={styles.video}
+    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+    allowFullScreen
+  />
+) : (
+  <p>Loading video...</p>
+)}
     </div>
   );
 }

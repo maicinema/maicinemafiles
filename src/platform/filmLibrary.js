@@ -11,8 +11,7 @@ export const demoFilms = [
     genre: "Drama",
     rating: "PG-13",
     description: "A quiet city hides a dangerous secret.",
-    views: 12000,
-    price: "3"
+    views: 12000
   },
   {
     title: "Last Frame",
@@ -22,7 +21,6 @@ export const demoFilms = [
     genre: "Thriller",
     rating: "PG-16",
     description: "A filmmaker records something terrifying.",
-    views: 9000,
-    price: "3"
+    views: 9000
   }
 ];
