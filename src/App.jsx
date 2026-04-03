@@ -140,7 +140,6 @@ useEffect(() => {
           <Route path="/studios" element={<Studios />} />
           <Route path="/events" element={<Events />} />
           <Route path="/subscribe" element={<Subscribe />} />
-          <Route path="/rent/:id" element={<RentFilm />} />
 <Route path="/watch/:id" element={<WatchFilm />} />
          <Route path="/createaccount" element={<CreateAccount />} />
           <Route path="/submit-film" element={<SubmitFilm />} />

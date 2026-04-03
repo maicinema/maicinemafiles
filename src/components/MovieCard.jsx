@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { RENT_PRICE } from "../config/pricing";
 import { useAuth } from "../context/AuthContext";
 
 
@@ -67,7 +66,8 @@ const { user, loading } = useAuth();
     return;
   }
 
-  navigate(`/rent/${movie.id}`);
+  // ✅ go to film details instead of rent
+  navigate(`/film/${movie.id}`);
 };
 
   const structuredData = {
@@ -129,7 +129,6 @@ data-src={movie.video_url}
 
         <div style={styles.actions}>
           <button style={styles.watchlist}>+ Watchlist</button>
-          <span style={styles.price}>Rent ${RENT_PRICE}</span>
         </div>
       </div>
     </div>
@@ -193,10 +192,6 @@ const styles = {
     cursor: "pointer"
   },
 
-  price: {
-    color: "#00ffae",
-    fontWeight: "bold"
-  }
 };
 
 export default MovieCard;

@@ -167,22 +167,21 @@ async function trackVisitor() {
   const now = new Date().toISOString();
 
   const { data } = await supabase
-    .from("payments")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("status", "completed");
+  .from("payments")
+  .select("*")
+  .eq("user_id", user.id)
+  .eq("status", "completed");
 
-  const hasAccess = data?.some((p) => {
-    if (p.type === "rent" && p.film_id === bannerFilm.id) {
-      return p.expires_at > now;
-    }
+const hasSubscription = data?.some(
+  (p) => p.type === "subscription" && p.expires_at > now
+);
 
-    if (p.type === "subscription") {
-      return p.expires_at > now;
-    }
+if (!hasSubscription) {
+  window.location.href = `/subscribe`;
+  return;
+}
 
-    return false;
-  });
+window.location.href = `/watch/${bannerFilm.id}`;
 
   if (!hasAccess) {
     window.location.href = `/rent/${bannerFilm.id}`;
