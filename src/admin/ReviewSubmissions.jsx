@@ -108,27 +108,36 @@ previewEnd: "",
 async function uploadVideo(file, onProgress) {
   if (!file) return "";
 
-  // 1. Get upload URL from Supabase Edge Function
-  const res = await fetch(
-    "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video"
-  );
+  const formData = new FormData();
+  formData.append("file", file);
 
-  const { uploadUrl, uid } = await res.json();
+  let res;
 
-  // 2. Upload file directly to Cloudflare
-  const uploadRes = await fetch(uploadUrl, {
-    method: "POST",
-    body: file
-  });
+  try {
+    res = await fetch(
+      "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
+      {
+        method: "POST", // ✅ VERY IMPORTANT
+        body: formData
+      }
+    );
+  } catch (err) {
+    console.error("FETCH ERROR:", err);
+    throw new Error("Network error while uploading video");
+  }
 
-  if (!uploadRes.ok) {
+  const raw = await res.text();
+
+  if (!res.ok) {
+    console.error("FUNCTION ERROR:", raw);
     throw new Error("Upload failed");
   }
 
+  const result = JSON.parse(raw);
+
   if (onProgress) onProgress(100);
 
-  // 3. Return playback URL
-  return `https://videodelivery.net/${uid}/manifest/video.m3u8`;
+  return result.playbackUrl;
 }
 
   function formatDuration(minutes) {

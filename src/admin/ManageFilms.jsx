@@ -62,6 +62,8 @@ function ManageFilms() {
     const { data, error } = await supabase
       .from("films")
       .select("*")
+.not("video_url", "is", null)
+.not("poster_url", "is", null)
       .order("id", { ascending: false });
 
     if (error) {
