@@ -17,7 +17,6 @@ import Studios from "./pages/Studios";
 import Events from "./pages/Events";
 import Login from "./Login";
 import Subscribe from "./pages/Subscribe";
-import RentFilm from "./pages/RentFilm";
 import WatchFilm from "./pages/WatchFilm";
 import CreateAccount from "./pages/CreateAccount";
 import SubmitFilm from "./pages/SubmitFilm";
