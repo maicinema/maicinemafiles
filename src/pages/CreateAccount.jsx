@@ -57,7 +57,7 @@ if (error) {
 /* NAVIGATION */
 
 if (filmId) {
-  navigate(`/rent/${filmId}`);
+  navigate(`/film/${filmId}`);
 } else {
   navigate("/");
 }

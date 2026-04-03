@@ -7,3 +7,12 @@ export default async function handler(req, res) {
 
   res.status(200).json({ url: secureUrl });
 }
+
+// Example logic
+const userId = req.headers.userid;
+
+const hasAccess = await checkIfUserPaid(userId, id);
+
+if (!hasAccess) {
+  return res.status(403).json({ error: "Access denied" });
+}

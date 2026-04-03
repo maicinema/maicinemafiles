@@ -38,23 +38,14 @@ if (!user) {
    .eq("user_id", user.id)
     .eq("status", "completed");
 
-  const validAccess = data?.some((p) => {
-    // 🎬 RENT (48 hours)
-    if (p.type === "rent" && p.film_id === id) {
-      return p.expires_at > now;
-    }
+ const hasSubscription = data?.some(
+  (p) => p.type === "subscription" && p.expires_at > now
+);
 
-    // 🎟 SUBSCRIPTION (monthly)
-    if (p.type === "subscription") {
-      return p.expires_at > now;
-    }
-
-    return false;
-  });
-
-  if (!validAccess) {
-    navigate(`/rent/${id}`);
-  }
+if (!hasSubscription) {
+  navigate(`/subscribe`);
+  return;
+}
 }
 
   // ✅ LOAD FILM FROM DATABASE
