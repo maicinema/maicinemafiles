@@ -165,16 +165,18 @@ async function uploadVideo(file, onProgress) {
 
     alert("No film file available yet for preview.");
   }
-
-   async function approveFilm(submission) {
+async function approveFilm(submission) {
   try {
-    
     const goLiveAt = submission.go_live_at
       ? new Date(submission.go_live_at)
       : null;
 
-      const now = new Date();
-const releaseStatus = goLiveAt && goLiveAt <= now ? "live" : "coming_soon";
+    const now = new Date();
+
+    const releaseStatus =
+      goLiveAt && !Number.isNaN(goLiveAt.getTime()) && goLiveAt <= now
+        ? "live"
+        : "coming_soon";
 
     const payload = {
       title: submission.title || "",
@@ -251,98 +253,105 @@ const releaseStatus = goLiveAt && goLiveAt <= now ? "live" : "coming_soon";
 
 
   async function approveAdminFilm(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (
-      !adminFilm.title ||
-      !adminFilm.genre ||
-      !adminFilm.description ||
-      !adminFilm.goLiveDate ||
-      !adminFilm.goLiveTime
-    ) {
-      alert("Please complete the important film details.");
-      return;
-    }
-
-    if (!adminFilm.poster || !adminFilm.film) {
-      alert("Please upload both poster and film file.");
-      return;
-    }
-
-    const goLiveAt = new Date(`${adminFilm.goLiveDate}T${adminFilm.goLiveTime}`);
-const now = new Date();
-
-const releaseStatus = goLiveAt && goLiveAt <= now ? "live" : "coming_soon";
-
-    if (Number.isNaN(goLiveAt.getTime())) {
-      alert("Invalid go live date or time.");
-      return;
-    }
-
-    try {
-      setSubmittingAdminFilm(true);
-
-      const posterUrl = await uploadPoster(adminFilm.poster, "admin");
-     const videoUrl = await uploadVideo(adminFilm.film, setUploadProgress);
-
-            const filmPayload = {
-        title: adminFilm.title.trim(),
-        director: adminFilm.director.trim(),
-        genre: adminFilm.genre.trim(),
-        rating: adminFilm.rating.trim(),
-        language: adminFilm.language.trim(),
-        year: adminFilm.year.trim(),
-        duration: parseInt(String(adminFilm.duration).replace(/\D/g, ""), 10) || 0,
-        description: adminFilm.description.trim(),
-        poster_url: posterUrl,
-video_url: videoUrl,
-        preview_start: adminFilm.previewStart,
-preview_end: adminFilm.previewEnd,
-        views: 0,
-        price: 3,
-        status: releaseStatus,
-        go_live_at: goLiveAt.toISOString(),
-        contract_expires_at: null
-      };
-
-            const { error: filmError } = await supabase.from("films").insert(filmPayload);
-
-      if (filmError) {
-        throw new Error(filmError.message || "Failed to create admin film");
-      }
-
-      alert("Admin film uploaded successfully.");
-
-      setAdminFilm({
-        title: "",
-        director: "",
-        producer: "",
-        cinematographer: "",
-        actors: "",
-        genre: "",
-        rating: "",
-        language: "",
-        year: "",
-        duration: "",
-        description: "",
-        email: "",
-        goLiveDate: "",
-        goLiveTime: "",
-        poster: null,
-        film: null
-      });
-
-      const fileInputs = document.querySelectorAll('input[type="file"]');
-      fileInputs.forEach((input) => {
-        input.value = "";
-      });
-    } catch (error) {
-      console.log("Admin approve film error:", error);
-      alert(error.message || "Failed to upload admin film");
-    } finally {
-      setSubmittingAdminFilm(false);
-    }
+  if (
+    !adminFilm.title ||
+    !adminFilm.genre ||
+    !adminFilm.description ||
+    !adminFilm.goLiveDate ||
+    !adminFilm.goLiveTime
+  ) {
+    alert("Please complete the important film details.");
+    return;
   }
+
+  if (!adminFilm.poster || !adminFilm.film) {
+    alert("Please upload both poster and film file.");
+    return;
+  }
+
+  const goLiveAt = new Date(
+    `${adminFilm.goLiveDate}T${adminFilm.goLiveTime}`
+  );
+
+  if (Number.isNaN(goLiveAt.getTime())) {
+    alert("Invalid go live date or time.");
+    return;
+  }
+
+  const now = new Date();
+  const releaseStatus = goLiveAt <= now ? "live" : "coming_soon";
+
+  try {
+    setSubmittingAdminFilm(true);
+
+    const posterUrl = await uploadPoster(adminFilm.poster, "admin");
+    const videoUrl = await uploadVideo(adminFilm.film, setUploadProgress);
+
+    const filmPayload = {
+      title: adminFilm.title.trim(),
+      director: adminFilm.director.trim(),
+      genre: adminFilm.genre.trim(),
+      rating: adminFilm.rating.trim(),
+      language: adminFilm.language.trim(),
+      year: adminFilm.year.trim(),
+      duration:
+        parseInt(String(adminFilm.duration).replace(/\D/g, ""), 10) || 0,
+      description: adminFilm.description.trim(),
+      poster_url: posterUrl,
+      video_url: videoUrl,
+      preview_start: adminFilm.previewStart,
+      preview_end: adminFilm.previewEnd,
+      views: 0,
+      price: 3,
+      status: releaseStatus,
+      go_live_at: goLiveAt.toISOString(),
+      contract_expires_at: null
+    };
+
+    const { error: filmError } = await supabase
+      .from("films")
+      .insert(filmPayload);
+
+    if (filmError) {
+      throw new Error(filmError.message || "Failed to create admin film");
+    }
+
+    alert("Admin film uploaded successfully.");
+
+    setAdminFilm({
+      title: "",
+      director: "",
+      producer: "",
+      cinematographer: "",
+      actors: "",
+      genre: "",
+      rating: "",
+      language: "",
+      year: "",
+      duration: "",
+      description: "",
+      previewStart: "",
+      previewEnd: "",
+      email: "",
+      goLiveDate: "",
+      goLiveTime: "",
+      poster: null,
+      film: null
+    });
+
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    fileInputs.forEach((input) => {
+      input.value = "";
+    });
+  } catch (error) {
+    console.log("Admin approve film error:", error);
+    alert(error.message || "Failed to upload admin film");
+  } finally {
+    setSubmittingAdminFilm(false);
+  }
+}
 
   return (
     <div style={styles.page}>

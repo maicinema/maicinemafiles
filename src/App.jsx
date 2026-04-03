@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
 import "./App.css";
 import FilmDetails from "./pages/FilmDetails";
+import ProtectedRoute from './components/ProtectedRoute'
 
 import EventMonitor from "./pages/EventMonitor";
 import EventControl from "./pages/EventControl";
@@ -47,7 +48,9 @@ function ProtectedAdmin({ children }) {
     });
   }, []);
 
-  if (loading) return null;
+ if (loading) {
+  return <div style={{ color: "white", padding: "40px" }}>Checking access...</div>;
+}
 
   if (!session) {
     return <Navigate to="/admin/login" replace />;
@@ -95,23 +98,23 @@ function Layout() {
   }, []);
 useEffect(() => {
   async function trackVisitor() {
-  if (location.pathname.startsWith("/admin/login")) return;
+    // ❌ NEVER run on admin pages
+    if (location.pathname.startsWith("/admin")) return;
 
-  const { data, error } = await supabase
-    .from("visitors")
-    .insert([
-      { created_at: new Date().toISOString() }
-    ])
-    .select();
+    try {
+      const { error } = await supabase
+        .from("visitors")
+        .insert([
+          { created_at: new Date().toISOString() }
+        ]);
 
-  console.log("INSERT RESULT:", data);
-
-  if (error) {
-    console.log("❌ Visitor insert error:", error);
-  } else {
-    console.log("✅ Visitor tracked");
+      if (error) {
+        console.log("Visitor tracking error:", error.message);
+      }
+    } catch (err) {
+      console.log("Visitor tracking crashed:", err);
+    }
   }
-}
 
   trackVisitor();
 }, [location.pathname]);
@@ -126,7 +129,14 @@ useEffect(() => {
           {/* PUBLIC ROUTES */}
           <Route path="/" element={<Home />} />
           <Route path="/film/:id" element={<FilmDetails />} />
-          <Route path="/mycinema" element={<MyCinema />} />
+<Route
+  path="/mycinema"
+  element={
+    <ProtectedRoute>
+      <MyCinema />
+    </ProtectedRoute>
+  }
+/>
           <Route path="/comingsoon" element={<ComingSoon />} />
           <Route path="/studios" element={<Studios />} />
           <Route path="/events" element={<Events />} />

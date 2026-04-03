@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import MovieCard from "../components/MovieCard";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 
 function parseTimeToSeconds(time) {
@@ -192,7 +192,7 @@ async function trackVisitor() {
   window.location.href = `/watch/${bannerFilm.id}`;
   }}
 
-  
+
   onMouseEnter={() => {
     const video = videoRef.current;
     if (!video || !bannerFilm.video) return;

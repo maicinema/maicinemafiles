@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../lib/supabase";
 import { RENT_PRICE } from "../config/pricing";
 import { useAuth } from "../context/AuthContext";
 

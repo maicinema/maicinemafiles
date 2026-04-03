@@ -1,15 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = "https://qrujwmcbobhthwzqmmjp.supabase.co";
-const supabaseAnonKey = "sb_publishable_R_-LtJr1moFsplC4CHBBwg_oYLPq-XK";
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-/* 🔥 SINGLETON PATTERN (VERY IMPORTANT) */
-let supabase;
-
-if (!globalThis.__supabase) {
-  globalThis.__supabase = createClient(supabaseUrl, supabaseAnonKey);
+// ❗ DO NOT CRASH APP — just warn
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error("❌ Supabase ENV missing");
 }
 
-supabase = globalThis.__supabase;
-
-export { supabase };
+export const supabase = createClient(
+  supabaseUrl || "",
+  supabaseAnonKey || ""
+);
