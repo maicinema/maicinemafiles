@@ -4,8 +4,6 @@ import banner1 from "../assets/cinema-banner.jpg";
 import banner2 from "../assets/cinema-banner.jpg";
 
 import SubscribeSection from "../components/SubscribeSection";
-import ComingSoonFilms from "../components/ComingSoonFilms";
-
 function Home() {
 
   // refresh every 60s
@@ -17,7 +15,7 @@ function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  const banners = [banner1, banner2];
+ const banners = [banner1, banner2];
   const [currentBanner, setCurrentBanner] = useState(0);
 
   // auto-slide banner
@@ -35,6 +33,7 @@ function Home() {
         style={{
           height: "100vh",
           backgroundImage: `url(${banners[currentBanner]})`,
+          transition: "background-image 1s ease-in-out",
           backgroundSize: "cover",
           backgroundPosition: "center",
           position: "relative",
@@ -67,10 +66,11 @@ function Home() {
           }}
         >
           <div
-            style={{
-              maxWidth: "800px"
-            }}
-          >
+  style={{
+    maxWidth: "800px",
+    animation: "heroMove 25s linear infinite"
+  }}
+>
             <h1
               style={{
                 fontSize: "clamp(28px, 6vw, 64px)",
@@ -92,9 +92,20 @@ function Home() {
           </div>
         </div>
       </div>
+<style>
+{`
+@keyframes heroMove {
+  0% { transform: translateX(0%); opacity: 1; }
+  70% { transform: translateX(0%); opacity: 1; }
 
+  80% { transform: translateX(120%); opacity: 0; }
+  81% { transform: translateX(-120%); opacity: 0; }
+
+  100% { transform: translateX(0%); opacity: 1; }
+}
+`}
+</style>
       <SubscribeSection />
-      <ComingSoonFilms />
     </>
   );
 }
