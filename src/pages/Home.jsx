@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 import banner1 from "../assets/cinema-banner.jpg";
-import banner2 from "../assets/cinema-banner.jpg";
+import banner2 from "../assets/cinema-banner-2.jpg";
 
 import SubscribeSection from "../components/SubscribeSection";
 function Home() {
@@ -22,7 +22,7 @@ function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBanner((prev) => (prev + 1) % banners.length);
-    }, 5000);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [banners.length]);
