@@ -22,7 +22,7 @@ function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBanner((prev) => (prev + 1) % banners.length);
-    }, 3000);
+    }, 9000);
 
     return () => clearInterval(interval);
   }, [banners.length]);
@@ -32,7 +32,7 @@ function Home() {
       <div
         style={{
           height: "100vh",
-          backgroundImage: `url(${banners[currentBanner]})`,
+          backgroundImage: `url(${banners[currentBanner]}?t=${Date.now()})`,
           transition: "background-image 1s ease-in-out",
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -49,7 +49,7 @@ function Home() {
             left: 0,
             width: "100%",
             height: "100%",
-            background: "rgba(0,0,0,0.85)"
+            background: "linear-gradient(to right, rgba(0,0,0,0.7), rgba(0,0,0,0.2))"
           }}
         />
 
