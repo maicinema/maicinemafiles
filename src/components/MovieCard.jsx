@@ -36,6 +36,7 @@ const startPreview = () => {
     video.currentTime = startTime;
 
     video.muted = false;
+video.defaultMuted = false;
     video.volume = 1;
 
     video.play().catch(() => {});
@@ -118,12 +119,11 @@ console.log("MOVIE DATA:", movie);
         <video
   ref={videoRef}
   src={movie.video_url}
-data-src={movie.video_url}
- poster={movie.poster_url + "?t=" + Date.now()}
+  data-src={movie.video_url}
+  poster={movie.poster_url + "?t=" + Date.now()}
   style={styles.image}
   preload="auto"
   playsInline
-  muted   // 🔥 helps instant start
 />
       ) : (
         <img
