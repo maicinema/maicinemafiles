@@ -2,7 +2,6 @@ import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-
 function parseTimeToSeconds(time) {
   if (!time) return 0;
 
@@ -26,9 +25,11 @@ const { user, loading } = useAuth();
   const video = videoRef.current;
  if (!video || !movie.video_url) return;
 
-  const startTime = parseTimeToSeconds(movie.previewStart);
+  const startTime = parseTimeToSeconds(movie.previewStart || "00:00");
   const duration = parseTimeToSeconds(movie.previewDuration || "00:10");
 
+  video.load();
+  
   video.currentTime = startTime;
 
   video.muted = false;
@@ -103,7 +104,7 @@ console.log("MOVIE DATA:", movie);
 data-src={movie.video_url}
  poster={movie.poster_url + "?t=" + Date.now()}
   style={styles.image}
-  preload="metadata"
+  preload="auto"
   playsInline
   muted   // 🔥 helps instant start
 />
