@@ -115,15 +115,7 @@ useEffect(() => {
     return result;
   }
 
-useEffect(() => {
-  if (!bannerFilm?.video_url) return;
 
-  const video = videoRef.current;
-  if (!video) return;
-
-  video.src = bannerFilm.video_url;
-  video.load(); // 🔥 preload early
-}, [bannerFilm]);
 
   const bannerFilm = films[currentBanner];
 useEffect(() => {
@@ -249,14 +241,13 @@ window.location.href = `/watch/${bannerFilm.id}`;
 }}
 >
   {bannerFilm.video && (
-    <video
+   <video
   ref={videoRef}
-  src={bannerFilm.video_url}
   data-src={bannerFilm.video_url}
   poster={bannerFilm.poster_url}
   style={styles.bannerVideo}
   playsInline
-  preload="auto"   // 🔥 IMPORTANT
+  preload="metadata"
 />
   )}
 
