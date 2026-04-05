@@ -115,6 +115,16 @@ useEffect(() => {
     return result;
   }
 
+useEffect(() => {
+  if (!bannerFilm?.video_url) return;
+
+  const video = videoRef.current;
+  if (!video) return;
+
+  video.src = bannerFilm.video_url;
+  video.load(); // 🔥 preload early
+}, [bannerFilm]);
+
   const bannerFilm = films[currentBanner];
 useEffect(() => {
   if (!bannerFilm || !bannerFilm.video) return;
@@ -193,48 +203,61 @@ window.location.href = `/watch/${bannerFilm.id}`;
 
 
   onMouseEnter={() => {
-    const video = videoRef.current;
-    if (!video || !bannerFilm.video_url) return;
+  const video = videoRef.current;
+  if (!video || !bannerFilm.video_url) return;
 
-    const startTime = parseTimeToSeconds(bannerFilm.previewStart);
-    const duration = parseTimeToSeconds(bannerFilm.previewDuration || "00:10");
+  const startTime = parseTimeToSeconds(bannerFilm.previewStart || "00:00");
+  const duration = parseTimeToSeconds(bannerFilm.previewDuration || "00:10");
 
+  // ✅ clear old events
+  video.onloadeddata = null;
+  video.ontimeupdate = null;
+
+  const playPreview = () => {
     video.currentTime = startTime;
 
     video.muted = false;
     video.volume = 1;
 
-    video.play().then(() => {
-      video.ontimeupdate = () => {
-        if (video.currentTime >= startTime + duration) {
-          video.pause();
-        }
-      };
-    }).catch(() => {});
-  }}
+    video.play().catch(() => {});
+
+    video.ontimeupdate = () => {
+      if (video.currentTime >= startTime + duration) {
+        video.pause();
+        video.ontimeupdate = null;
+      }
+    };
+  };
+
+  // ✅ instant if ready, else wait
+  if (video.readyState >= 2) {
+    playPreview();
+  } else {
+    video.onloadeddata = playPreview;
+  }
+}}
+
   onMouseLeave={() => {
-    const video = videoRef.current;
-    if (!video) return;
+  const video = videoRef.current;
+  if (!video) return;
 
-    video.pause();
-    video.currentTime = 0;
+  video.pause();
+  video.currentTime = 0;
 
-    video.removeAttribute("src");
-    video.load();
-    video.src = video.getAttribute("data-src");
-  }}
+  video.onloadeddata = null;
+  video.ontimeupdate = null;
+}}
 >
   {bannerFilm.video && (
     <video
-      ref={videoRef}
-      src={bannerFilm.video_url}
-data-src={bannerFilm.video_url}
-poster={bannerFilm.poster_url}
-      style={styles.bannerVideo}
-      playsInline
-      muted
-      preload="metadata"
-    />
+  ref={videoRef}
+  src={bannerFilm.video_url}
+  data-src={bannerFilm.video_url}
+  poster={bannerFilm.poster_url}
+  style={styles.bannerVideo}
+  playsInline
+  preload="auto"   // 🔥 IMPORTANT
+/>
   )}
 
   <div style={styles.bannerOverlay}>
