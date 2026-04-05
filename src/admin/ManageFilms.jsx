@@ -204,7 +204,7 @@ previewDuration: film.previewDuration || "00:10"
     alert("Film deleted successfully");
   }
 
-  async function goLiveFilm(film) {
+ async function goLiveFilm(film) {
   const now = new Date();
   const currentExpiry = film.contract_expires_at
     ? new Date(film.contract_expires_at)
@@ -221,20 +221,19 @@ previewDuration: film.previewDuration || "00:10"
   const { error } = await supabase
     .from("films")
     .update({
-      status: "live",                 // ✅ critical
-      contract_expires_at: nextExpiry,
-      updated_at: new Date().toISOString() // 🔥 forces realtime trigger
+      status: "live",
+      contract_expires_at: nextExpiry
     })
     .eq("id", film.id);
 
   if (error) {
-    console.log("Go live error:", error);
-    alert("Failed to return film to live");
+    console.log("🔥 Go live error FULL:", error);
+    alert(error.message || "Failed to return film to live");
     return;
   }
 
   await loadFilms();
-  alert("Film is now LIVE on public page");
+  alert("Film is now LIVE on public page ✅");
 }
 
   return (
