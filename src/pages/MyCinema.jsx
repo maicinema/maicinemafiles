@@ -120,7 +120,7 @@ useEffect(() => {
   if (!bannerFilm || !bannerFilm.video) return;
 
   const video = document.createElement("video");
-  video.src = bannerFilm.video;
+  video.src = bannerFilm.video_url;
   video.preload = "metadata";
 }, [bannerFilm]);
 
@@ -152,7 +152,7 @@ async function trackVisitor() {
   style={{
     ...styles.banner,
     cursor: "pointer",
-    backgroundImage: `url(${bannerFilm.poster || ""})`
+   backgroundImage: `url(${bannerFilm.poster_url || ""})`
   }}
 
   onClick={async () => {
@@ -194,7 +194,7 @@ window.location.href = `/watch/${bannerFilm.id}`;
 
   onMouseEnter={() => {
     const video = videoRef.current;
-    if (!video || !bannerFilm.video) return;
+    if (!video || !bannerFilm.video_url) return;
 
     const startTime = parseTimeToSeconds(bannerFilm.previewStart);
     const duration = parseTimeToSeconds(bannerFilm.previewDuration || "00:10");
@@ -227,9 +227,9 @@ window.location.href = `/watch/${bannerFilm.id}`;
   {bannerFilm.video && (
     <video
       ref={videoRef}
-      src={bannerFilm.video}
-      data-src={bannerFilm.video}
-      poster={bannerFilm.poster}
+      src={bannerFilm.video_url}
+data-src={bannerFilm.video_url}
+poster={bannerFilm.poster_url}
       style={styles.bannerVideo}
       playsInline
       muted
@@ -269,13 +269,7 @@ window.location.href = `/watch/${bannerFilm.id}`;
 
                 return movie ? (
                   <div key={movie.id} style={styles.cardWrap}>
-                    <MovieCard
-                      movie={{
-                        ...movie,
-                        video: movie.video,   // ✅ FIXED
-                        poster: movie.poster  // ✅ FIXED
-                      }}
-                    />
+                    <MovieCard movie={movie} />
                   </div>
                 ) : (
                   <div key={i} style={styles.skeleton} />
