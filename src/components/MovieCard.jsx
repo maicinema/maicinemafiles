@@ -23,26 +23,43 @@ const { user, loading } = useAuth();
 
  const startPreview = () => {
   const video = videoRef.current;
- if (!video || !movie.video_url) return;
+  if (!video || !movie.video_url) return;
 
   const startTime = parseTimeToSeconds(movie.previewStart || "00:00");
   const duration = parseTimeToSeconds(movie.previewDuration || "00:10");
 
-  video.load();
-  
-  video.currentTime = startTime;
+  // ✅ Always ensure correct source
+  if (video.src !== movie.video_url) {
+    video.src = movie.video_url;
+  }
 
-  video.muted = false;
-  video.volume = 1;
+  // ✅ WAIT for video to be ready
+  const playPreview = () => {
+    try {
+      video.currentTime = startTime;
 
-  video.play().catch(() => {});
+      video.muted = false;
+      video.volume = 1;
 
-  video.ontimeupdate = () => {
-    if (video.currentTime >= startTime + duration) {
-      video.pause();
-      video.ontimeupdate = null;
+      video.play().catch(() => {});
+
+      video.ontimeupdate = () => {
+        if (video.currentTime >= startTime + duration) {
+          video.pause();
+          video.ontimeupdate = null;
+        }
+      };
+    } catch (err) {
+      console.log("Preview error:", err);
     }
   };
+
+  // ✅ If already ready → play instantly
+  if (video.readyState >= 2) {
+    playPreview();
+  } else {
+    video.onloadeddata = playPreview;
+  }
 };
 
 
