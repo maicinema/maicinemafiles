@@ -80,7 +80,7 @@ useEffect(() => {
 
     const bannerInterval = setInterval(() => {
       setCurrentBanner((prev) => (prev + 1) % films.length);
-    }, 10000);
+    }, 25000);
 
     return () => clearInterval(bannerInterval);
   }, [films]);
@@ -201,11 +201,11 @@ window.location.href = `/watch/${bannerFilm.id}`;
   const startTime = parseTimeToSeconds(bannerFilm.previewStart || "00:00");
   const duration = parseTimeToSeconds(bannerFilm.previewDuration || "00:10");
 
-  // ✅ clear old events
-  video.onloadeddata = null;
-  video.ontimeupdate = null;
+  // ✅ set src ONLY when hovering
+  video.src = bannerFilm.video_url;
+  video.load();
 
-  const playPreview = () => {
+  video.onloadeddata = () => {
     video.currentTime = startTime;
 
     video.muted = false;
@@ -216,17 +216,9 @@ window.location.href = `/watch/${bannerFilm.id}`;
     video.ontimeupdate = () => {
       if (video.currentTime >= startTime + duration) {
         video.pause();
-        video.ontimeupdate = null;
       }
     };
   };
-
-  // ✅ instant if ready, else wait
-  if (video.readyState >= 2) {
-    playPreview();
-  } else {
-    video.onloadeddata = playPreview;
-  }
 }}
 
   onMouseLeave={() => {
@@ -238,6 +230,10 @@ window.location.href = `/watch/${bannerFilm.id}`;
 
   video.onloadeddata = null;
   video.ontimeupdate = null;
+
+  // ✅ REMOVE video → show poster again
+  video.removeAttribute("src");
+  video.load();
 }}
 >
   {bannerFilm.video && (
