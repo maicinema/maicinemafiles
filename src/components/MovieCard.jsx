@@ -21,40 +21,34 @@ function MovieCard({ movie }) {
   const navigate = useNavigate();
 const { user, loading } = useAuth();
 
- const startPreview = () => {
+const startPreview = () => {
   const video = videoRef.current;
   if (!video || !movie.video_url) return;
 
   const startTime = parseTimeToSeconds(movie.previewStart || "00:00");
   const duration = parseTimeToSeconds(movie.previewDuration || "00:10");
 
-  // ✅ Always ensure correct source
-  if (video.src !== movie.video_url) {
-    video.src = movie.video_url;
-  }
+  // ✅ CLEAR old listeners
+  video.onloadeddata = null;
+  video.ontimeupdate = null;
 
-  // ✅ WAIT for video to be ready
   const playPreview = () => {
-    try {
-      video.currentTime = startTime;
+    video.currentTime = startTime;
 
-      video.muted = false;
-      video.volume = 1;
+    video.muted = false;
+    video.volume = 1;
 
-      video.play().catch(() => {});
+    video.play().catch(() => {});
 
-      video.ontimeupdate = () => {
-        if (video.currentTime >= startTime + duration) {
-          video.pause();
-          video.ontimeupdate = null;
-        }
-      };
-    } catch (err) {
-      console.log("Preview error:", err);
-    }
+    video.ontimeupdate = () => {
+      if (video.currentTime >= startTime + duration) {
+        video.pause();
+        video.ontimeupdate = null;
+      }
+    };
   };
 
-  // ✅ If already ready → play instantly
+  // ✅ WAIT for readiness (fix for new uploads)
   if (video.readyState >= 2) {
     playPreview();
   } else {
@@ -67,9 +61,15 @@ const { user, loading } = useAuth();
   const video = videoRef.current;
   if (!video) return;
 
+  // ✅ STOP playback
   video.pause();
   video.currentTime = 0;
 
+  // ✅ KILL ALL ACTIVE EVENTS (THIS WAS MISSING)
+  video.onloadeddata = null;
+  video.ontimeupdate = null;
+
+  // ✅ RESET TO POSTER (YOUR ORIGINAL BEHAVIOR)
   video.removeAttribute("src");
   video.load();
   video.src = video.getAttribute("data-src");
