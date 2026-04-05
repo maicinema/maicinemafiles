@@ -118,6 +118,22 @@ useEffect(() => {
 
 
   const bannerFilm = films[currentBanner];
+  useEffect(() => {
+  if (!bannerFilm?.video_url) return;
+
+  const video = videoRef.current;
+  if (!video) return;
+
+  // preload quietly without showing frame
+  video.src = bannerFilm.video_url;
+  video.load();
+
+  // immediately remove so poster stays visible
+  setTimeout(() => {
+    video.removeAttribute("src");
+  }, 100);
+}, [bannerFilm]);
+
 useEffect(() => {
   if (!bannerFilm || !bannerFilm.video) return;
 
@@ -201,7 +217,6 @@ window.location.href = `/watch/${bannerFilm.id}`;
   const startTime = parseTimeToSeconds(bannerFilm.previewStart || "00:00");
   const duration = parseTimeToSeconds(bannerFilm.previewDuration || "00:10");
 
-  // ✅ set src ONLY when hovering
   video.src = bannerFilm.video_url;
   video.load();
 
@@ -231,7 +246,6 @@ window.location.href = `/watch/${bannerFilm.id}`;
   video.onloadeddata = null;
   video.ontimeupdate = null;
 
-  // ✅ REMOVE video → show poster again
   video.removeAttribute("src");
   video.load();
 }}
@@ -243,7 +257,7 @@ window.location.href = `/watch/${bannerFilm.id}`;
   poster={bannerFilm.poster_url}
   style={styles.bannerVideo}
   playsInline
-  preload="metadata"
+  preload="auto"   // 🔥 THIS is the speed booster
 />
   )}
 
