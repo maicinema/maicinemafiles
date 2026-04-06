@@ -141,12 +141,14 @@ let updatedVideo = film.video_url || "";
 
   const result = await res.json();
 
-  if (result.success) {
-    updatedVideo = result.playbackUrl;
-  } else {
-    alert("Cloudflare upload failed");
-    return;
-  }
+  if (!result.success || !result.playbackUrl) {
+  console.log("❌ Upload failed FULL:", result);
+  alert("Video upload failed properly — no playback URL");
+  return;
+}
+
+updatedVideo = result.playbackUrl;
+
 }
     const payload = {
   title: film.title || "",
