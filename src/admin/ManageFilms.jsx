@@ -129,43 +129,29 @@ function ManageFilms() {
   }
 
     // ✅ video upload
-    if (videoFile) {
+    // ✅ DIRECT upload to Supabase Storage
+if (videoFile) {
   console.log("🚀 Upload starting...");
 
-  const formData = new FormData();
-  formData.append("file", videoFile);
+  const fileName = `videos/${Date.now()}-${videoFile.name}`;
 
-  try {
-    const res = await fetch(
-      "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY
-        },
-        body: formData
-      }
-    );
+  const { error: uploadError } = await supabase.storage
+    .from("videos")
+    .upload(fileName, videoFile);
 
-    console.log("📡 Response status:", res.status);
-
-    const result = await res.json();
-    console.log("📦 Upload result FULL:", result);
-
-    if (!result.success || !result.playbackUrl) {
-      alert("Upload failed — check console");
-      return;
-    }
-
-    updatedVideo = result.playbackUrl;
-    console.log("✅ Video URL saved:", updatedVideo);
-
-  } catch (err) {
-    console.log("🔥 Upload crash:", err);
-    alert("Upload crashed");
+  if (uploadError) {
+    console.log("🔥 Upload error:", uploadError);
+    alert("Upload failed");
     return;
   }
+
+  const { data } = supabase.storage
+    .from("videos")
+    .getPublicUrl(fileName);
+
+  updatedVideo = data.publicUrl;
+
+  console.log("✅ Video URL saved:", updatedVideo);
 }
     const payload = {
   title: film.title || "",
