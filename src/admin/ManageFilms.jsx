@@ -130,31 +130,42 @@ function ManageFilms() {
 
     // ✅ video upload
     if (videoFile) {
+  console.log("🚀 Upload starting...");
+
   const formData = new FormData();
   formData.append("file", videoFile);
 
-  const res = await fetch(
-    "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY
-      },
-      body: formData
+  try {
+    const res = await fetch(
+      "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY
+        },
+        body: formData
+      }
+    );
+
+    console.log("📡 Response status:", res.status);
+
+    const result = await res.json();
+    console.log("📦 Upload result FULL:", result);
+
+    if (!result.success || !result.playbackUrl) {
+      alert("Upload failed — check console");
+      return;
     }
-  );
 
-  const result = await res.json();
+    updatedVideo = result.playbackUrl;
+    console.log("✅ Video URL saved:", updatedVideo);
 
-  if (!result.success || !result.playbackUrl) {
-  console.log("❌ Upload failed FULL:", result);
-  alert("Video upload failed properly — no playback URL");
-  return;
-}
-
-updatedVideo = result.playbackUrl;
-
+  } catch (err) {
+    console.log("🔥 Upload crash:", err);
+    alert("Upload crashed");
+    return;
+  }
 }
     const payload = {
   title: film.title || "",
