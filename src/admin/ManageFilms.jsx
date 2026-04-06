@@ -110,17 +110,23 @@ function ManageFilms() {
   }
 
   async function saveFilm(id) {
-    const film = films.find((item) => item.id === id);
-    if (!film) return;
+  const film = films.find((item) => item.id === id);
+  if (!film) return;
 
-    let updatedPoster = film.poster_url || "";
-let updatedVideo = film.video_url || "";
+  let updatedPoster = film.poster_url || "";
+  let updatedVideo = film.video_url || "";
 
-    // ✅ poster upload
-    if (posterFile) {
-      const uploadedPoster = await uploadPoster(posterFile);
-      if (uploadedPoster) updatedPoster = uploadedPoster;
-    }
+  // ✅ ADD THIS RIGHT HERE
+  if (!videoFile && !film.video_url) {
+    alert("Please select a video");
+    return;
+  }
+
+  // ✅ poster upload
+  if (posterFile) {
+    const uploadedPoster = await uploadPoster(posterFile);
+    if (uploadedPoster) updatedPoster = uploadedPoster;
+  }
 
     // ✅ video upload
     if (videoFile) {
@@ -381,19 +387,29 @@ previewDuration: film.previewDuration || "00:10"
 
                       <label style={styles.label}>Select Video</label>
                       <input
-                        style={styles.input}
-                        type="file"
-                        accept="video/*"
-                        onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
-                      />
+  style={styles.input}
+  type="file"
+  accept="video/*"
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setVideoFile(file);
+
+    console.log("VIDEO SELECTED:", file.name);
+  }}
+/>
 
                       <div style={styles.buttonRow}>
                         <button
-                          style={styles.saveButton}
-                          onClick={() => saveFilm(film.id)}
-                        >
-                          Save
-                        </button>
+  style={styles.saveButton}
+  onClick={() => {
+    console.log("SAVE CLICKED", film.id);
+    saveFilm(film.id);
+  }}
+>
+  Save
+</button>
 
                         <button
                           style={styles.cancelButton}
