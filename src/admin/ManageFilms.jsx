@@ -130,27 +130,54 @@ function ManageFilms() {
 
     // ✅ video upload
     // ✅ CLOUDFARE UPLOAD (RESTORED)
+// ✅ CLOUDLFARE DIRECT UPLOAD (FINAL)
 if (videoFile) {
-  console.log("🚀 Upload starting...");
+  console.log("🚀 Cloudflare upload starting...");
 
-  const formData = new FormData();
-  formData.append("file", videoFile);
+  try {
+    // 1️⃣ Get upload URL from Supabase function
+    const res = await fetch(
+      "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
+      {
+        method: "POST",
+      }
+    );
 
-  const res = await fetch("/api/upload-video", {
-    method: "POST",
-    body: formData,
-  });
+    const data = await res.json();
 
-  const result = await res.json();
+    if (!data.success) {
+      console.log("❌ Failed to get upload URL:", data);
+      alert("Failed to start upload");
+      return;
+    }
 
-  if (!result.success || !result.playbackUrl) {
-    alert("Upload failed — check console");
+    const { uploadURL, uid } = data;
+
+    console.log("📡 Upload URL received");
+
+    // 2️⃣ Upload video directly to Cloudflare
+    const uploadRes = await fetch(uploadURL, {
+      method: "POST",
+      body: videoFile,
+    });
+
+    if (!uploadRes.ok) {
+      console.log("🔥 Upload failed:", await uploadRes.text());
+      alert("Upload failed");
+      return;
+    }
+
+    console.log("✅ Uploaded to Cloudflare");
+
+    // 3️⃣ Save playback URL
+    updatedVideo = `https://videodelivery.net/${uid}/manifest/video.m3u8`;
+
+    console.log("🎬 Video URL:", updatedVideo);
+  } catch (err) {
+    console.log("🔥 Upload crash:", err);
+    alert("Upload crashed");
     return;
   }
-
-  updatedVideo = result.playbackUrl;
-
-  console.log("✅ Video URL saved:", updatedVideo);
 }
 
     const payload = {
