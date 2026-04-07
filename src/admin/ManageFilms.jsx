@@ -147,10 +147,10 @@ if (videoFile) {
     const data = await res.json();
 
     if (!data.success) {
-      console.log("❌ Failed to get upload URL:", data);
-      alert("Failed to start upload");
-      return;
-    }
+  console.log("❌ FULL ERROR:", data);
+  alert(JSON.stringify(data, null, 2)); // 👈 shows real error
+  return;
+}
 
     const { uploadURL, uid } = data;
 
