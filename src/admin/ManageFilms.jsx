@@ -55,6 +55,7 @@ function ManageFilms() {
     setSubscriptionCount(subs);
   }
 
+
   // ✅ CLEAN films loader (NO nested functions)
   async function loadFilms() {
     setLoading(true);
@@ -156,10 +157,13 @@ if (videoFile) {
     console.log("📡 Upload URL received");
 
     // 2️⃣ Upload video directly to Cloudflare
-    const uploadRes = await fetch(uploadURL, {
-      method: "POST",
-      body: videoFile,
-    });
+    const formData = new FormData();
+formData.append("file", videoFile);
+
+const uploadRes = await fetch(uploadURL, {
+  method: "POST",
+  body: formData,
+});
 
     if (!uploadRes.ok) {
       console.log("🔥 Upload failed:", await uploadRes.text());
