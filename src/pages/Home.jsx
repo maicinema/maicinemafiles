@@ -37,6 +37,7 @@ aspectRatio: "16 / 9",
           transition: "background-image 1s ease-in-out",
           backgroundSize: "cover",
           backgroundPosition: "center",
+          backgroundColor: "#000",
           position: "relative",
           color: "white",
           overflow: "hidden"
@@ -50,7 +51,7 @@ aspectRatio: "16 / 9",
             left: 0,
             width: "100%",
             height: "100%",
-            background: "linear-gradient(to right, rgba(0,0,0,0.7), rgba(0,0,0,0.2))"
+            background: "linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent)"
           }}
         />
 
@@ -61,9 +62,8 @@ aspectRatio: "16 / 9",
             height: "100%",
             display: "flex",
             alignItems: "flex-end",
-            paddingBottom: "80px",
-            paddingLeft: "20px",
-            paddingRight: "20px"
+paddingBottom: "40px",
+            padding: "0 16px 40px 16px"
           }}
         >
           <div
@@ -106,7 +106,9 @@ aspectRatio: "16 / 9",
 }
 `}
 </style>
-      <SubscribeSection />
+      <div style={{ marginTop: "20px" }}>
+  <SubscribeSection />
+</div>
     </>
   );
 }

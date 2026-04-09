@@ -40,3 +40,61 @@
 .read-the-docs {
   color: #888;
 }
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* ================= MOBILE BANNER FIX ================= */
+@media (max-width: 768px) {
+
+  .banner {
+    position: relative;
+    height: 70vh;
+    overflow: hidden;
+  }
+
+  .banner-overlay {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.95),
+      rgba(0, 0, 0, 0.6),
+      transparent
+    );
+    padding: 20px;
+    box-sizing: border-box;
+    text-align: left;
+  }
+
+  .banner-title {
+    font-size: 20px;
+    margin-bottom: 5px;
+  }
+
+  .banner-subtitle {
+    font-size: 14px;
+    opacity: 0.8;
+  }
+
+  .subscription-section {
+    margin-top: 20px;
+    padding-top: 10px;
+  }
+
+  /* Fix black mismatch */
+  .banner,
+  footer {
+    background-color: #000;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+  }
+}
