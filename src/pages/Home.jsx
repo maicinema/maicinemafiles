@@ -33,6 +33,7 @@ function Home() {
         style={{
           height: "auto",
 minHeight: "60vh",
+marginBottom: "-40px",
           backgroundImage: `url(${banners[currentBanner]}?t=${Date.now()})`,
           transition: "background-image 1s ease-in-out",
           backgroundSize: "cover",
@@ -62,7 +63,8 @@ minHeight: "60vh",
             height: "100%",
             display: "flex",
             alignItems: "flex-end",
-paddingBottom: "30px",
+paddingBottom: "10px",
+marginTop: "60px",
             padding: "0 16px 40px 16px"
           }}
         >
@@ -106,7 +108,7 @@ paddingBottom: "30px",
 }
 `}
 </style>
-      <div style={{ marginTop: "20px" }}>
+      <div style={{ marginTop: "30px" }}>
   <SubscribeSection />
 </div>
     </>
