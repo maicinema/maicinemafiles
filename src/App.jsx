@@ -119,57 +119,61 @@ useEffect(() => {
 }, [location.pathname]);
 
   return (
-    <>
-      {!hideLayout && <Navbar />}
-      {!hideLayout && <NavigationArrows />}
+  <>
+    {!hideLayout && <Navbar />}
+    {!hideLayout && <NavigationArrows />}
 
-      <PageWrapper>
-        <Routes>
-          {/* PUBLIC ROUTES */}
-          <Route path="/" element={<Home />} />
-          <Route path="/film/:id" element={<FilmDetails />} />
-<Route
-  path="/mycinema"
-  element={
-    <ProtectedRoute>
-      <MyCinema />
-    </ProtectedRoute>
-  }
-/>
-          <Route path="/comingsoon" element={<ComingSoon />} />
-          <Route path="/studios" element={<Studios />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/subscribe" element={<Subscribe />} />
-<Route path="/watch/:id" element={<WatchFilm />} />
-         <Route path="/createaccount" element={<CreateAccount />} />
-          <Route path="/submit-film" element={<SubmitFilm />} />
+    <Routes>
+      {/* HOME (FULL WIDTH — NO WRAPPER) */}
+      <Route path="/" element={<Home />} />
 
-          {/* SYSTEM */}
-          <Route path="/scan-ticket" element={<TicketScanner />} />
-          <Route path="/event-monitor" element={<EventMonitor />} />
-          <Route path="/event-control" element={<EventControl />} />
-          <Route path="/admin-upload-film" element={<AdminFilmUpload />} />
+      {/* OTHER PAGES (WRAPPED) */}
+      <Route
+        path="/film/:id"
+        element={<PageWrapper><FilmDetails /></PageWrapper>}
+      />
 
-          {/* LOGIN */}
-          <Route path="/admin/login" element={<Login />} />
+      <Route
+        path="/mycinema"
+        element={
+          <ProtectedRoute>
+            <PageWrapper><MyCinema /></PageWrapper>
+          </ProtectedRoute>
+        }
+      />
 
-          {/* ✅ RESET PASSWORD (NOW WORKS) */}
-          <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/comingsoon" element={<PageWrapper><ComingSoon /></PageWrapper>} />
+      <Route path="/studios" element={<PageWrapper><Studios /></PageWrapper>} />
+      <Route path="/events" element={<PageWrapper><Events /></PageWrapper>} />
+      <Route path="/subscribe" element={<PageWrapper><Subscribe /></PageWrapper>} />
+      <Route path="/watch/:id" element={<PageWrapper><WatchFilm /></PageWrapper>} />
+      <Route path="/createaccount" element={<PageWrapper><CreateAccount /></PageWrapper>} />
+      <Route path="/submit-film" element={<PageWrapper><SubmitFilm /></PageWrapper>} />
 
-          {/* ADMIN */}
-          <Route path="/admin" element={<ProtectedAdmin><AdminDashboard /></ProtectedAdmin>} />
-          <Route path="/admin/films" element={<ProtectedAdmin><ManageFilms /></ProtectedAdmin>} />
-          <Route path="/admin/events" element={<ProtectedAdmin><ManageEvents /></ProtectedAdmin>} />
-          <Route path="/admin/submissions" element={<ProtectedAdmin><ReviewSubmissions /></ProtectedAdmin>} />
-          <Route path="/admin/studios" element={<ProtectedAdmin><ManageStudios /></ProtectedAdmin>} />
-        </Routes>
-      </PageWrapper>
+      {/* SYSTEM */}
+      <Route path="/scan-ticket" element={<PageWrapper><TicketScanner /></PageWrapper>} />
+      <Route path="/event-monitor" element={<PageWrapper><EventMonitor /></PageWrapper>} />
+      <Route path="/event-control" element={<PageWrapper><EventControl /></PageWrapper>} />
+      <Route path="/admin-upload-film" element={<PageWrapper><AdminFilmUpload /></PageWrapper>} />
 
-      {!hideLayout && <Footer />}
-    </>
-  );
+      {/* LOGIN */}
+      <Route path="/admin/login" element={<Login />} />
+
+      {/* RESET PASSWORD */}
+      <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* ADMIN */}
+      <Route path="/admin" element={<ProtectedAdmin><AdminDashboard /></ProtectedAdmin>} />
+      <Route path="/admin/films" element={<ProtectedAdmin><ManageFilms /></ProtectedAdmin>} />
+      <Route path="/admin/events" element={<ProtectedAdmin><ManageEvents /></ProtectedAdmin>} />
+      <Route path="/admin/submissions" element={<ProtectedAdmin><ReviewSubmissions /></ProtectedAdmin>} />
+      <Route path="/admin/studios" element={<ProtectedAdmin><ManageStudios /></ProtectedAdmin>} />
+    </Routes>
+
+    {!hideLayout && <Footer />}
+  </>
+);
 }
-
 /* APP */
 function App() {
   return (
