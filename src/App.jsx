@@ -71,7 +71,7 @@ function PageWrapper({ children }) {
         width: "100%",
         maxWidth: "1400px",
         margin: "0 auto",
-        padding: "0 16px",
+        padding: "0",
         boxSizing: "border-box"
       }}
     >
