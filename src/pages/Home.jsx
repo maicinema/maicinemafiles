@@ -45,15 +45,15 @@ aspectRatio: "16 / 9",
       >
         {/* Overlay */}
         <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent)"
-          }}
-        />
+  style={{
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    height: "50%",
+    background: "linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent)"
+  }}
+/>
 
         {/* Content */}
         <div
@@ -62,7 +62,7 @@ aspectRatio: "16 / 9",
             height: "100%",
             display: "flex",
             alignItems: "flex-end",
-paddingBottom: "40px",
+paddingBottom: "30px",
             padding: "0 16px 40px 16px"
           }}
         >
