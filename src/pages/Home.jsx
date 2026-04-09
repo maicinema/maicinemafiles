@@ -29,7 +29,7 @@ const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   }, [banners.length]);
 useEffect(() => {
   const handleResize = () => {
-    setIsMobile(isMobile);
+   setIsMobile(window.innerWidth <= 768);
   };
 
   window.addEventListener("resize", handleResize);
@@ -40,9 +40,11 @@ useEffect(() => {
   <>
     {/* BANNER */}
     <div
-      style={{
-        height: "auto",
-        aspectRatio: "16 / 9",
+  style={{
+    width: "100vw",
+    marginLeft: "calc(50% - 50vw)",
+    height: "auto",
+    aspectRatio: "16 / 9",
         backgroundImage: `url(${banners[currentBanner]}?t=${Date.now()})`,
         transition: "background-image 1s ease-in-out",
         backgroundSize: "cover",
@@ -67,7 +69,7 @@ useEffect(() => {
       />
 
       {/* DESKTOP TEXT ONLY */}
-      {window.innerWidth > 768 && (
+      {!isMobile && (
         <div
           style={{
             position: "relative",
@@ -94,7 +96,7 @@ useEffect(() => {
 
             <p
               style={{
-                marginTop: "20px",
+                marginTop: "0px",
                 fontSize: "clamp(14px, 2.5vw, 18px)",
                 color: "#ccc"
               }}
@@ -107,16 +109,17 @@ useEffect(() => {
     </div>
 
     {/* MOBILE TEXT BELOW BANNER */}
-    {window.innerWidth <= 768 && (
-      <div
-        style={{
-          padding: "16px",
-          textAlign: "center",
-          color: "white",
-          backgroundColor: "#000",
-          marginTop: "-10px"
-        }}
-      >
+    {isMobile && (
+  <div
+    style={{
+      padding: "16px",
+      textAlign: "center",
+      color: "white",
+      backgroundColor: "#000",
+      marginTop: "-30px",
+      animation: "heroMove 25s linear infinite"
+    }}
+  >
         <h1 style={{ fontSize: "22px", margin: 0 }}>
           Welcome to <span style={{ color: "red" }}>MaiCinema</span>
         </h1>
