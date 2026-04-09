@@ -21,6 +21,7 @@ function MyCinema() {
   const [films, setFilms] = useState([]);
   const [rows, setRows] = useState([]);
   const [currentBanner, setCurrentBanner] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [errorMessage, setErrorMessage] = useState("");
 const { user, loading } = useAuth();
 
@@ -66,6 +67,15 @@ useEffect(() => {
     window.removeEventListener("click", unlock);
     window.removeEventListener("scroll", unlock);
   };
+}, []);
+
+useEffect(() => {
+  const handleResize = () => {
+    setIsMobile(window.innerWidth <= 768);
+  };
+
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
 }, []);
 
   useEffect(() => {
@@ -275,40 +285,46 @@ window.location.href = `/watch/${bannerFilm.id}`;
       <div style={styles.gridSection}>
         <h2 style={styles.heading}>MyCinema</h2>
 
-        {rows.map((row, index) => (
-          <div key={index} style={styles.wrapper}>
-            <button
-              style={styles.arrowLeft}
-              onClick={() => scroll(index, "left")}
-            >
-              ◀
-            </button>
+    {rows.map((row, index) => (
+  <div key={index} style={styles.wrapper}>
 
-            <div
-              style={styles.row}
-              ref={(el) => (rowRefs.current[index] = el)}
-            >
-              {Array.from({ length: 10 }).map((_, i) => {
-                const movie = row[i];
+    {!isMobile && (
+      <button
+        style={styles.arrowLeft}
+        onClick={() => scroll(index, "left")}
+      >
+        ◀
+      </button>
+    )}
 
-                return movie ? (
-                  <div key={movie.id} style={styles.cardWrap}>
-                    <MovieCard movie={movie} />
-                  </div>
-                ) : (
-                  <div key={i} style={styles.skeleton} />
-                );
-              })}
-            </div>
+    <div
+      style={isMobile ? styles.mobileGrid : styles.row}
+      ref={(el) => (rowRefs.current[index] = el)}
+    >
+      {Array.from({ length: 10 }).map((_, i) => {
+        const movie = row[i];
 
-            <button
-              style={styles.arrowRight}
-              onClick={() => scroll(index, "right")}
-            >
-              ▶
-            </button>
+        return movie ? (
+          <div key={movie.id} style={styles.cardWrap}>
+            <MovieCard movie={movie} />
           </div>
-        ))}
+        ) : (
+          <div key={i} style={styles.skeleton} />
+        );
+      })}
+    </div>
+
+    {!isMobile && (
+      <button
+        style={styles.arrowRight}
+        onClick={() => scroll(index, "right")}
+      >
+        ▶
+      </button>
+    )}
+
+  </div>
+))}
       </div>
     </div>
   );
@@ -322,13 +338,15 @@ const styles = {
   },
 
   banner: {
-    height: "500px",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    position: "relative",
-    display: "flex",
-    alignItems: "center"
-  },
+  width: "100vw",
+  marginLeft: "calc(50% - 50vw)",
+  height: "500px",
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  position: "relative",
+  display: "flex",
+  alignItems: "center"
+},
 
   bannerVideo: {
     position: "absolute",
@@ -349,8 +367,11 @@ const styles = {
   },
 
   gridSection: {
-    padding: "20px"
-  },
+  width: "100vw",
+  marginLeft: "calc(50% - 50vw)",
+  padding: "20px",
+  background: "#000"
+},
 
   heading: {
     marginBottom: "20px"
@@ -403,7 +424,13 @@ const styles = {
     height: "100%",
     width: "40px",
     cursor: "pointer"
-  }
+  },
+  mobileGrid: {
+  display: "grid",
+  gridTemplateColumns: "repeat(2, 1fr)",
+  gap: "12px",
+  width: "100%"
+},
 };
 
 export default MyCinema;
