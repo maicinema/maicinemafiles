@@ -31,7 +31,8 @@ function Home() {
     <>
       <div
         style={{
-          height: "100vh",
+          height: "auto",
+aspectRatio: "16 / 9",
           backgroundImage: `url(${banners[currentBanner]}?t=${Date.now()})`,
           transition: "background-image 1s ease-in-out",
           backgroundSize: "cover",
