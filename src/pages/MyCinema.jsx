@@ -298,7 +298,7 @@ window.location.href = `/watch/${bannerFilm.id}`;
     )}
 
     <div
-      style={isMobile ? styles.mobileGrid : styles.row}
+      style={styles.row}
       ref={(el) => (rowRefs.current[index] = el)}
     >
       {Array.from({ length: 10 }).map((_, i) => {
@@ -388,7 +388,8 @@ const styles = {
   display: "flex",
   gap: "16px",
   overflowX: "auto",
-  minHeight: "150px"
+  WebkitOverflowScrolling: "touch",
+  paddingBottom: "10px"
 },
 
   cardWrap: {
@@ -426,13 +427,6 @@ const styles = {
     width: "40px",
     cursor: "pointer"
   },
-  mobileGrid: {
-  display: "grid",
-  gridTemplateColumns: "repeat(2, 1fr)",
-  gap: "12px",
-  width: "100%",
-  minHeight: "200px"
-},
 };
 
 export default MyCinema;
