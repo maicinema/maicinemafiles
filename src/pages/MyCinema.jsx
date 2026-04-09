@@ -385,15 +385,16 @@ const styles = {
   },
 
   row: {
-    display: "flex",
-    gap: "16px",
-    overflowX: "auto"
-  },
+  display: "flex",
+  gap: "16px",
+  overflowX: "auto",
+  minHeight: "150px"
+},
 
   cardWrap: {
-    flex: "0 0 auto",
-    width: "220px"
-  },
+  flex: "0 0 auto",
+  width: "100%"
+},
 
   skeleton: {
     width: "220px",
@@ -429,7 +430,8 @@ const styles = {
   display: "grid",
   gridTemplateColumns: "repeat(2, 1fr)",
   gap: "12px",
-  width: "100%"
+  width: "100%",
+  minHeight: "200px"
 },
 };
 
