@@ -394,9 +394,9 @@ const styles = {
 
   cardWrap: {
   flex: "0 0 auto",
-  width: "220%"
+  width: "220px",
+  maxWidth: "220px"
 },
-
   skeleton: {
     width: "220px",
     height: "150px",
