@@ -115,7 +115,6 @@ useEffect(() => {
       padding: "16px",
       textAlign: "center",
       color: "white",
-      backgroundColor: "#000",
       marginTop: "-30px",
       animation: "heroMove 25s linear infinite"
     }}
@@ -144,9 +143,17 @@ useEffect(() => {
     </style>
 
     {/* SUBSCRIPTION */}
-    <div style={{ marginTop: "20px" }}>
-      <SubscribeSection />
-    </div>
+    <div
+  style={{
+    width: "100vw",
+    marginLeft: "calc(50% - 50vw)",
+    backgroundColor: "#000",
+    marginTop: "-30px",
+    paddingBottom: "20px"
+  }}
+>
+  <SubscribeSection />
+</div>
   </>
 );
 }

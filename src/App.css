@@ -97,4 +97,12 @@
     padding: 0;
     background-color: #000;
   }
+
+  html, body, #root {
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  width: 100%;
+  overflow-x: hidden;
+}
 }
