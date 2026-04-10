@@ -21,7 +21,7 @@ function MyCinema() {
   const [films, setFilms] = useState([]);
   const [rows, setRows] = useState([]);
   const [currentBanner, setCurrentBanner] = useState(0);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 const { user, loading } = useAuth();
 
@@ -70,12 +70,14 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
-  const handleResize = () => {
+  const checkScreen = () => {
     setIsMobile(window.innerWidth <= 768);
   };
 
-  window.addEventListener("resize", handleResize);
-  return () => window.removeEventListener("resize", handleResize);
+  checkScreen(); // ✅ RUN ON LOAD
+
+  window.addEventListener("resize", checkScreen);
+  return () => window.removeEventListener("resize", checkScreen);
 }, []);
 
   useEffect(() => {
