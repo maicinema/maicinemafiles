@@ -285,17 +285,15 @@ window.location.href = `/watch/${bannerFilm.id}`;
       <div style={styles.gridSection}>
         <h2 style={styles.heading}>MyCinema</h2>
 
-    {rows.map((row, index) => (
+   {rows.map((row, index) => (
   <div key={index} style={styles.wrapper}>
-
-    {!isMobile && (
-      <button
-        style={styles.arrowLeft}
-        onClick={() => scroll(index, "left")}
-      >
-        ◀
-      </button>
-    )}
+    
+    <button
+      style={styles.arrowLeft}
+      onClick={() => scroll(index, "left")}
+    >
+      ◀
+    </button>
 
     <div
       style={styles.row}
@@ -314,14 +312,12 @@ window.location.href = `/watch/${bannerFilm.id}`;
       })}
     </div>
 
-    {!isMobile && (
-      <button
-        style={styles.arrowRight}
-        onClick={() => scroll(index, "right")}
-      >
-        ▶
-      </button>
-    )}
+    <button
+      style={styles.arrowRight}
+      onClick={() => scroll(index, "right")}
+    >
+      ▶
+    </button>
 
   </div>
 ))}
@@ -394,8 +390,7 @@ const styles = {
 
   cardWrap: {
   flex: "0 0 auto",
-  width: "220px",
-  maxWidth: "220px"
+  width: "220px"
 },
   skeleton: {
     width: "220px",
