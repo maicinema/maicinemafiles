@@ -285,39 +285,49 @@ window.location.href = `/watch/${bannerFilm.id}`;
       <div style={styles.gridSection}>
         <h2 style={styles.heading}>MyCinema</h2>
 
-   {rows.map((row, index) => (
+  {rows.map((row, index) => (
   <div key={index} style={styles.wrapper}>
-    
-    <button
-      style={styles.arrowLeft}
-      onClick={() => scroll(index, "left")}
-    >
-      ◀
-    </button>
 
-    <div
-      style={styles.row}
-      ref={(el) => (rowRefs.current[index] = el)}
-    >
-      {Array.from({ length: 10 }).map((_, i) => {
-        const movie = row[i];
+    {/* DESKTOP */}
+    {!isMobile && (
+      <>
+        <button
+          style={styles.arrowLeft}
+          onClick={() => scroll(index, "left")}
+        >
+          ◀
+        </button>
 
-        return movie ? (
-          <div key={movie.id} style={styles.cardWrap}>
+        <div
+          style={styles.row}
+          ref={(el) => (rowRefs.current[index] = el)}
+        >
+          {row.map((movie) => (
+            <div key={movie.id} style={styles.cardWrap}>
+              <MovieCard movie={movie} />
+            </div>
+          ))}
+        </div>
+
+        <button
+          style={styles.arrowRight}
+          onClick={() => scroll(index, "right")}
+        >
+          ▶
+        </button>
+      </>
+    )}
+
+    {/* MOBILE */}
+    {isMobile && (
+      <div style={styles.mobileGrid}>
+        {row.map((movie) => (
+          <div key={movie.id} style={styles.mobileCardWrap}>
             <MovieCard movie={movie} />
           </div>
-        ) : (
-          <div key={i} style={styles.skeleton} />
-        );
-      })}
-    </div>
-
-    <button
-      style={styles.arrowRight}
-      onClick={() => scroll(index, "right")}
-    >
-      ▶
-    </button>
+        ))}
+      </div>
+    )}
 
   </div>
 ))}
@@ -365,7 +375,7 @@ const styles = {
   gridSection: {
   width: "100vw",
   marginLeft: "calc(50% - 50vw)",
-  padding: "20px",
+  padding: "20px 12px",
   background: "#000"
 },
 
@@ -422,6 +432,17 @@ const styles = {
     width: "40px",
     cursor: "pointer"
   },
+
+  mobileGrid: {
+  display: "grid",
+  gridTemplateColumns: "repeat(2, 1fr)",
+  gap: "12px",
+  width: "100%"
+},
+
+mobileCardWrap: {
+  width: "100%"
+},
 };
 
 export default MyCinema;
