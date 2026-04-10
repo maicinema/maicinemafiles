@@ -284,15 +284,25 @@ window.location.href = `/watch/${bannerFilm.id}`;
       )}
 
       {/* ROWS */}
-      <div style={styles.gridSection}>
-        <h2 style={styles.heading}>MyCinema</h2>
+<div style={styles.gridSection}>
+  <h2 style={styles.heading}>MyCinema</h2>
 
-  {rows.map((row, index) => (
-  <div key={index} style={styles.wrapper}>
+  {/* MOBILE */}
+  {isMobile && (
+    <div style={styles.mobileGrid}>
+      {films.map((movie) => (
+        <div key={movie.id} style={styles.mobileCardWrap}>
+          <MovieCard movie={movie} />
+        </div>
+      ))}
+    </div>
+  )}
 
-    {/* DESKTOP */}
-    {!isMobile && (
-      <>
+  {/* DESKTOP */}
+  {!isMobile &&
+    rows.map((row, index) => (
+      <div key={index} style={styles.wrapper}>
+        
         <button
           style={styles.arrowLeft}
           onClick={() => scroll(index, "left")}
@@ -304,11 +314,6 @@ window.location.href = `/watch/${bannerFilm.id}`;
           style={styles.row}
           ref={(el) => (rowRefs.current[index] = el)}
         >
-
-          <p style={{ color: "white" }}>
-  Films: {films.length} | Rows: {rows.length}
-</p>
-
           {row.map((movie) => (
             <div key={movie.id} style={styles.cardWrap}>
               <MovieCard movie={movie} />
@@ -322,24 +327,12 @@ window.location.href = `/watch/${bannerFilm.id}`;
         >
           ▶
         </button>
-      </>
-    )}
 
-    {/* MOBILE */}
-    {isMobile && (
-      <div style={styles.mobileGrid}>
-        {row.map((movie) => (
-          <div key={movie.id} style={styles.mobileCardWrap}>
-            <MovieCard movie={movie} />
-          </div>
-        ))}
       </div>
-    )}
+    ))}
+</div>
 
-  </div>
-))}
       </div>
-    </div>
   );
 }
 
