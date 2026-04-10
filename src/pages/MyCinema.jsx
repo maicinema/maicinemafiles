@@ -302,6 +302,11 @@ window.location.href = `/watch/${bannerFilm.id}`;
           style={styles.row}
           ref={(el) => (rowRefs.current[index] = el)}
         >
+
+          <p style={{ color: "white" }}>
+  Films: {films.length} | Rows: {rows.length}
+</p>
+
           {row.map((movie) => (
             <div key={movie.id} style={styles.cardWrap}>
               <MovieCard movie={movie} />
