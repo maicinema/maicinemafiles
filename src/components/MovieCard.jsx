@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 
 function parseTimeToSeconds(time) {
@@ -76,8 +77,7 @@ video.defaultMuted = false;
   video.src = video.getAttribute("data-src");
 };
 
- const handleClick = () => {
-
+ const handleClick = async () => {
   if (loading) return;
 
   if (!user) {
@@ -85,8 +85,24 @@ video.defaultMuted = false;
     return;
   }
 
-  // ✅ go to film details instead of rent
-  navigate(`/film/${movie.id}`);
+  const now = new Date().toISOString();
+
+  const { data } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("status", "completed");
+
+  const hasSubscription = data?.some(
+    (p) => p.type === "subscription" && p.expires_at > now
+  );
+
+  if (!hasSubscription) {
+    navigate(`/subscribe`);
+    return;
+  }
+
+  navigate(`/watch/${movie.id}`);
 };
 
   const structuredData = {
@@ -118,7 +134,6 @@ console.log("MOVIE DATA:", movie);
       {movie.video_url ? (
         <video
   ref={videoRef}
-  src={movie.video_url}
   data-src={movie.video_url}
   poster={movie.poster_url + "?t=" + Date.now()}
   style={styles.image}
