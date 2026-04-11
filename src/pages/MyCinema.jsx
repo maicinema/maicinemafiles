@@ -203,21 +203,76 @@ return (
 
     {/* BANNER */}
     {bannerFilm && (
-      <div
-        style={{
-          ...styles.banner,
-          backgroundImage: `url(${bannerFilm.poster_url || ""})`
-        }}
-      >
-        <div style={styles.bannerOverlay}>
-          <h1 style={styles.bannerTitle}>{bannerFilm.title}</h1>
-          <p style={styles.bannerMeta}>
-            {bannerFilm.genre} • {bannerFilm.rating}
-          </p>
-          <p style={styles.bannerDesc}>{bannerFilm.description}</p>
-        </div>
-      </div>
+  <div
+    style={{
+      ...styles.banner,
+      cursor: "pointer",
+      backgroundImage: `url(${bannerFilm.poster_url || ""})`
+    }}
+
+    onMouseEnter={() => {
+      const video = videoRef.current;
+      if (!video || !bannerFilm.video_url) return;
+
+      const startTime = parseTimeToSeconds(
+        bannerFilm.previewStart || "00:00"
+      );
+      const duration = parseTimeToSeconds(
+        bannerFilm.previewDuration || "00:10"
+      );
+
+      video.src = bannerFilm.video_url;
+      video.load();
+
+      video.onloadeddata = () => {
+        video.currentTime = startTime;
+
+        video.muted = false;
+        video.volume = 1;
+
+        video.play().catch(() => {});
+
+        video.ontimeupdate = () => {
+          if (video.currentTime >= startTime + duration) {
+            video.pause();
+          }
+        };
+      };
+    }}
+
+    onMouseLeave={() => {
+      const video = videoRef.current;
+      if (!video) return;
+
+      video.pause();
+      video.currentTime = 0;
+
+      video.onloadeddata = null;
+      video.ontimeupdate = null;
+
+      video.removeAttribute("src");
+      video.load();
+    }}
+  >
+    {bannerFilm.video_url && (
+      <video
+        ref={videoRef}
+        poster={bannerFilm.poster_url}
+        style={styles.bannerVideo}
+        playsInline
+        preload="auto"
+      />
     )}
+
+    <div style={styles.bannerOverlay}>
+      <h1 style={styles.bannerTitle}>{bannerFilm.title}</h1>
+      <p style={styles.bannerMeta}>
+        {bannerFilm.genre} • {bannerFilm.rating}
+      </p>
+      <p style={styles.bannerDesc}>{bannerFilm.description}</p>
+    </div>
+  </div>
+)}
 
     {/* DESKTOP ROWS */}
     <div style={styles.gridSection}>
