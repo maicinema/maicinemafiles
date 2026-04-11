@@ -210,6 +210,35 @@ return (
       backgroundImage: `url(${bannerFilm.poster_url || ""})`
     }}
 
+    onClick={async () => {
+
+      if (loading) return;
+
+      if (!user) {
+        window.location.href = `/createaccount?filmId=${bannerFilm.id}`;
+        return;
+      }
+
+      const now = new Date().toISOString();
+
+      const { data } = await supabase
+        .from("payments")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("status", "completed");
+
+      const hasSubscription = data?.some(
+        (p) => p.type === "subscription" && p.expires_at > now
+      );
+
+      if (!hasSubscription) {
+        window.location.href = `/subscribe`;
+        return;
+      }
+
+      window.location.href = `/watch/${bannerFilm.id}`;
+    }}
+
     onMouseEnter={() => {
       const video = videoRef.current;
       if (!video || !bannerFilm.video_url) return;
@@ -254,9 +283,10 @@ return (
       video.load();
     }}
   >
-    {bannerFilm.video_url && (
+    {bannerFilm.video && (
       <video
         ref={videoRef}
+        data-src={bannerFilm.video_url}
         poster={bannerFilm.poster_url}
         style={styles.bannerVideo}
         playsInline
