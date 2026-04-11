@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import MovieCard from "../components/MovieCard";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
+import MyCinemaMobile from "./MyCinemaMobile";
 
 function parseTimeToSeconds(time) {
   if (!time) return 0;
@@ -190,9 +191,53 @@ async function trackVisitor() {
   }
 }
 
-  return (
-  <div style={{ background: "black", height: "100vh", color: "red", fontSize: "30px" }}>
-    MYCINEMA LOADED
+  // ✅ MOBILE
+if (isMobile) {
+  return <MyCinemaMobile films={films} />;
+}
+
+// ✅ DESKTOP (RESTORED)
+return (
+  <div style={styles.page}>
+    {errorMessage && <p>{errorMessage}</p>}
+
+    {/* BANNER */}
+    {bannerFilm && (
+      <div
+        style={{
+          ...styles.banner,
+          backgroundImage: `url(${bannerFilm.poster_url || ""})`
+        }}
+      >
+        <div style={styles.bannerOverlay}>
+          <h1 style={styles.bannerTitle}>{bannerFilm.title}</h1>
+          <p style={styles.bannerMeta}>
+            {bannerFilm.genre} • {bannerFilm.rating}
+          </p>
+          <p style={styles.bannerDesc}>{bannerFilm.description}</p>
+        </div>
+      </div>
+    )}
+
+    {/* DESKTOP ROWS */}
+    <div style={styles.gridSection}>
+      <h2 style={styles.heading}>MyCinema</h2>
+
+      {rows.map((row, index) => (
+        <div key={index} style={styles.wrapper}>
+          <div
+            style={styles.row}
+            ref={(el) => (rowRefs.current[index] = el)}
+          >
+            {row.map((movie) => (
+              <div key={movie.id} style={styles.cardWrap}>
+                <MovieCard movie={movie} />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
   </div>
 );
 }
