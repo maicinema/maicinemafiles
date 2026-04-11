@@ -31,7 +31,13 @@ const { user, loading } = useAuth();
 
   useEffect(() => {
   loadFilms();
-  trackVisitor(); // ✅ MOVE HERE
+
+  // retry for mobile (very important)
+  const timeout = setTimeout(() => {
+    loadFilms();
+  }, 2000);
+
+  trackVisitor();
 
   const channel = supabase
     .channel("films-realtime-mycinema")
@@ -98,19 +104,31 @@ useEffect(() => {
   }, [films]);
 
   async function loadFilms() {
+  try {
     const { data, error } = await supabase
       .from("films")
-      .select("*") // ✅ FIXED
+      .select("*")
       .eq("status", "live");
 
     if (error) {
+      console.log("SUPABASE ERROR:", error.message);
       setErrorMessage(error.message);
       return;
     }
 
-    setFilms([...new Map((data || []).map(f => [f.id, f])).values()]);
-  }
+    if (!data || data.length === 0) {
+      console.log("NO FILMS RETURNED");
+    }
 
+    const uniqueFilms = [...new Map((data || []).map(f => [f.id, f])).values()];
+
+    console.log("FILMS LOADED:", uniqueFilms.length);
+
+    setFilms(uniqueFilms);
+  } catch (err) {
+    console.log("LOAD FILMS CRASH:", err);
+  }
+}
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -174,6 +192,9 @@ async function trackVisitor() {
 
   return (
     <div style={styles.page}>
+  <p style={{ color: "white", padding: "10px" }}>
+    Films: {films.length} | Rows: {rows.length}
+  </p>
       {errorMessage && <p>{errorMessage}</p>}
 
       {/* BANNER */}
