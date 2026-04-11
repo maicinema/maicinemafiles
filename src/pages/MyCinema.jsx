@@ -302,23 +302,11 @@ async function trackVisitor() {
 <div style={styles.gridSection}>
   <h2 style={styles.heading}>MyCinema</h2>
 
-  {rows.map((row, index) => (
-    <div key={index} style={styles.wrapper}>
-
-      {/* SCROLL ROW (works on ALL devices) */}
-      <div
-        style={styles.row}
-        ref={(el) => (rowRefs.current[index] = el)}
-      >
-        {row.map((movie) => (
-          <div key={movie.id} style={styles.cardWrap}>
-            <MovieCard movie={movie} />
-          </div>
-        ))}
-      </div>
-
-    </div>
-  ))}
+  {films.map((movie) => (
+  <div key={movie.id} style={{ width: "100%", marginBottom: "20px" }}>
+    <MovieCard movie={movie} />
+  </div>
+))}
 </div>
       </div>
   );
