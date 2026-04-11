@@ -199,110 +199,104 @@ async function trackVisitor() {
 
       {/* BANNER */}
       {bannerFilm && (
-       <div
-  style={{
-    ...styles.banner,
-    cursor: "pointer",
-   backgroundImage: `url(${bannerFilm.poster_url || ""})`
-  }}
+  <div
+    style={{
+      ...styles.banner,
+      cursor: "pointer",
+      backgroundImage: `url(${bannerFilm.poster_url || ""})`
+    }}
 
-  onClick={async () => {
+    onClick={async () => {
+      if (loading) return;
 
-  if (loading) return;
-
-  if (!user) {
-    window.location.href = `/createaccount?filmId=${bannerFilm.id}`;
-    return;
-  }
-
-  const now = new Date().toISOString();
-
-  const { data } = await supabase
-  .from("payments")
-  .select("*")
-  .eq("user_id", user.id)
-  .eq("status", "completed");
-
-const hasSubscription = data?.some(
-  (p) => p.type === "subscription" && p.expires_at > now
-);
-
-if (!hasSubscription) {
-  window.location.href = `/subscribe`;
-  return;
-}
-
-window.location.href = `/watch/${bannerFilm.id}`;
-
-  if (!hasAccess) {
-    window.location.href = `/rent/${bannerFilm.id}`;
-    return;
-  }
-
-  window.location.href = `/watch/${bannerFilm.id}`;
-  }}
-
-
-  onMouseEnter={() => {
-  const video = videoRef.current;
-  if (!video || !bannerFilm.video_url) return;
-
-  const startTime = parseTimeToSeconds(bannerFilm.previewStart || "00:00");
-  const duration = parseTimeToSeconds(bannerFilm.previewDuration || "00:10");
-
-  video.src = bannerFilm.video_url;
-  video.load();
-
-  video.onloadeddata = () => {
-    video.currentTime = startTime;
-
-    video.muted = false;
-    video.volume = 1;
-
-    video.play().catch(() => {});
-
-    video.ontimeupdate = () => {
-      if (video.currentTime >= startTime + duration) {
-        video.pause();
+      if (!user) {
+        window.location.href = `/createaccount?filmId=${bannerFilm.id}`;
+        return;
       }
-    };
-  };
-}}
 
-  onMouseLeave={() => {
-  const video = videoRef.current;
-  if (!video) return;
+      const now = new Date().toISOString();
 
-  video.pause();
-  video.currentTime = 0;
+      const { data } = await supabase
+        .from("payments")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("status", "completed");
 
-  video.onloadeddata = null;
-  video.ontimeupdate = null;
+      const hasSubscription = data?.some(
+        (p) => p.type === "subscription" && p.expires_at > now
+      );
 
-  video.removeAttribute("src");
-  video.load();
-}}
->
-  {bannerFilm.video && (
-   <video
-  ref={videoRef}
-  data-src={bannerFilm.video_url}
-  poster={bannerFilm.poster_url}
-  style={styles.bannerVideo}
-  playsInline
-  preload="auto"   // 🔥 THIS is the speed booster
-/>
-  )}
+      if (!hasSubscription) {
+        window.location.href = `/subscribe`;
+        return;
+      }
 
-  <div style={styles.bannerOverlay}>
-    <h1 style={styles.bannerTitle}>{bannerFilm.title}</h1>
-    <p style={styles.bannerMeta}>
-      {bannerFilm.genre} • {bannerFilm.rating}
-    </p>
-    <p style={styles.bannerDesc}>{bannerFilm.description}</p>
+      window.location.href = `/watch/${bannerFilm.id}`;
+    }}
+
+    onMouseEnter={() => {
+      const video = videoRef.current;
+      if (!video || !bannerFilm.video_url) return;
+
+      const startTime = parseTimeToSeconds(
+        bannerFilm.previewStart || "00:00"
+      );
+      const duration = parseTimeToSeconds(
+        bannerFilm.previewDuration || "00:10"
+      );
+
+      video.src = bannerFilm.video_url;
+      video.load();
+
+      video.onloadeddata = () => {
+        video.currentTime = startTime;
+        video.muted = false;
+        video.volume = 1;
+
+        video.play().catch(() => {});
+
+        video.ontimeupdate = () => {
+          if (video.currentTime >= startTime + duration) {
+            video.pause();
+          }
+        };
+      };
+    }}
+
+    onMouseLeave={() => {
+      const video = videoRef.current;
+      if (!video) return;
+
+      video.pause();
+      video.currentTime = 0;
+
+      video.onloadeddata = null;
+      video.ontimeupdate = null;
+
+      video.removeAttribute("src");
+      video.load();
+    }}
+  >
+    {bannerFilm.video && (
+      <video
+        ref={videoRef}
+        data-src={bannerFilm.video_url}
+        poster={bannerFilm.poster_url}
+        style={styles.bannerVideo}
+        playsInline
+        preload="auto"
+      />
+    )}
+
+    <div style={styles.bannerOverlay}>
+      <h1 style={styles.bannerTitle}>{bannerFilm.title}</h1>
+      <p style={styles.bannerMeta}>
+        {bannerFilm.genre} • {bannerFilm.rating}
+      </p>
+      <p style={styles.bannerDesc}>{bannerFilm.description}</p>
+    </div>
   </div>
-</div>
-      )}
+)}
 
       {/* ROWS */}
 <div style={styles.gridSection}>
