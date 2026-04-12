@@ -8,7 +8,6 @@ function Navbar() {
   const navItems = [
     { name: "Home", path: "/" },
     { name: "MyCinema", path: "/mycinema" },
-    { name: "Coming Soon", path: "/comingsoon" },
     { name: "MaiCinemaTV", path: "/studios" },
     { name: "Events", path: "/events" }
   ];
