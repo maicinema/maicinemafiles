@@ -148,10 +148,7 @@ useEffect(() => {
 
 
 
-  const bannerFilm = films[currentBanner];
-  if (isMobile) {
- return <MyCinemaMobile films={films} />;
-}
+ const bannerFilm = films[currentBanner];
   useEffect(() => {
   if (!bannerFilm?.video_url) return;
 
