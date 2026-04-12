@@ -134,14 +134,9 @@ useEffect(() => {
       />
 
       <Route
-        path="/mycinema"
-        element={
-          <ProtectedRoute>
-            <PageWrapper><MyCinema /></PageWrapper>
-          </ProtectedRoute>
-        }
-      />
-
+  path="/mycinema"
+  element={<PageWrapper><MyCinema /></PageWrapper>}
+/>
       <Route path="/comingsoon" element={<PageWrapper><ComingSoon /></PageWrapper>} />
       <Route path="/studios" element={<PageWrapper><Studios /></PageWrapper>} />
       <Route path="/events" element={<PageWrapper><Events /></PageWrapper>} />
