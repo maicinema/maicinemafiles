@@ -1,17 +1,13 @@
 import { demoFilms } from "./filmLibrary";
 
-export const getComingSoon = () => {
-  const data = localStorage.getItem("comingSoon");
+export const getStoredFilms = () => {
+  const data = localStorage.getItem("films");
 
   try {
     return data ? JSON.parse(data) : [];
   } catch {
     return [];
   }
-};
-
-export const saveComingSoon = (films) => {
-  localStorage.setItem("comingSoon", JSON.stringify(films));
 };
 
 export const getLiveFilms = () => {

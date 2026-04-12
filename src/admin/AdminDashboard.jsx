@@ -10,7 +10,6 @@ function AdminDashboard(){
 
 const [studioVideo,setStudioVideo] = useState(null);
 const [homeBanner,setHomeBanner] = useState(null);
-const [comingSoonBanner,setComingSoonBanner] = useState(null);
 const [logo,setLogo] = useState(null);
 
 const [visitorCount, setVisitorCount] = useState(0);
@@ -200,32 +199,6 @@ onChange={(e)=>setHomeBanner(e.target.files[0])}
 <button
 style={styles.button}
 onClick={()=>handleSave("Home Banner")}
->
-Save
-</button>
-
-</div>
-
-
-{/* COMING SOON BANNER */}
-
-<div style={styles.card}>
-
-<h2>Coming Soon Banner</h2>
-
-<input
-type="file"
-accept="image/*"
-onChange={(e)=>setComingSoonBanner(e.target.files[0])}
-/>
-
-{comingSoonBanner && (
-<p style={styles.preview}>{comingSoonBanner.name}</p>
-)}
-
-<button
-style={styles.button}
-onClick={()=>handleSave("Coming Soon Banner")}
 >
 Save
 </button>

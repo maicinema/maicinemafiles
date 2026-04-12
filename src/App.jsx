@@ -12,7 +12,6 @@ import AdminFilmUpload from "./pages/AdminFilmUpload";
 
 import Home from "./pages/Home";
 import MyCinema from "./pages/MyCinema";
-import ComingSoon from "./pages/ComingSoon";
 import Studios from "./pages/Studios";
 import Events from "./pages/Events";
 import Login from "./Login";
@@ -137,7 +136,7 @@ useEffect(() => {
   path="/mycinema"
   element={<PageWrapper><MyCinema /></PageWrapper>}
 />
-      <Route path="/comingsoon" element={<PageWrapper><ComingSoon /></PageWrapper>} />
+      
       <Route path="/studios" element={<PageWrapper><Studios /></PageWrapper>} />
       <Route path="/events" element={<PageWrapper><Events /></PageWrapper>} />
       <Route path="/subscribe" element={<PageWrapper><Subscribe /></PageWrapper>} />
