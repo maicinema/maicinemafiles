@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 
-
 function WatchFilm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -11,44 +10,48 @@ function WatchFilm() {
   const { user, loading } = useAuth();
 
   const [film, setFilm] = useState(null);
-const [videoUrl, setVideoUrl] = useState("");
+  const [hasAccess, setHasAccess] = useState(false);
+  const [checkingAccess, setCheckingAccess] = useState(true);
+
   useEffect(() => {
-  if (!loading) {
-    checkAccess();
-    loadFilm();
-  }
-}, [loading]);
+    if (!loading) {
+      checkAccess();
+    }
+  }, [loading]);
 
-  // ✅ CHECK PAYMENT ACCESS
- // ✅ CHECK PAYMENT ACCESS
-async function checkAccess() {
-
+  // ✅ FINAL ACCESS CONTROL (ONLY SOURCE OF TRUTH)
+  async function checkAccess() {
     if (loading) return;
 
-if (!user) {
-  navigate(`/createaccount?filmId=${id}`);
-  return;
-}
+    if (!user) {
+      navigate(`/createaccount?filmId=${id}`);
+      return;
+    }
 
-  const now = new Date().toISOString();
+    const now = new Date().toISOString();
 
-  const { data } = await supabase
-    .from("payments")
-    .select("*")
-   .eq("user_id", user.id)
-    .eq("status", "completed");
+    const { data } = await supabase
+      .from("payments")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("status", "completed");
 
- const hasSubscription = data?.some(
-  (p) => p.type === "subscription" && p.expires_at > now
-);
+    const validSubscription = data?.some(
+      (p) => p.type === "subscription" && p.expires_at > now
+    );
 
-if (!hasSubscription) {
-  navigate(`/subscribe`);
-  return;
-}
-}
+    if (!validSubscription) {
+      setHasAccess(false);
+      setCheckingAccess(false);
+      return;
+    }
 
-  // ✅ LOAD FILM FROM DATABASE
+    setHasAccess(true);
+    setCheckingAccess(false);
+    loadFilm();
+  }
+
+  // ✅ LOAD FILM ONLY IF AUTHORIZED
   async function loadFilm() {
     const { data } = await supabase
       .from("films")
@@ -59,27 +62,46 @@ if (!hasSubscription) {
     setFilm(data);
   }
 
-  if (!film) {
-    return <div style={{ color: "white" }}>Loading...</div>;
+  // ⏳ While checking access
+  if (checkingAccess) {
+    return <div style={{ color: "white" }}>Checking access...</div>;
   }
 
+  // ❌ No access UI (NO redirect loop, cleaner UX)
+  if (!hasAccess) {
+    return (
+      <div style={styles.container}>
+        <h2>Subscribe to watch this film</h2>
+        <button onClick={() => navigate("/subscribe")}>
+          Subscribe Now
+        </button>
+      </div>
+    );
+  }
+
+  // ⏳ Loading film
+  if (!film) {
+    return <div style={{ color: "white" }}>Loading film...</div>;
+  }
+
+  // ✅ FINAL PLAYER (ONLY SHOWN IF AUTHORIZED)
   return (
     <div
-  style={styles.container}
-  onContextMenu={(e) => e.preventDefault()}
->
+      style={styles.container}
+      onContextMenu={(e) => e.preventDefault()}
+    >
       <h1>{film.title}</h1>
 
       {film.video_url ? (
-  <iframe
-    src={film.video_url}
-    style={styles.video}
-    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-    allowFullScreen
-  />
-) : (
-  <p>Loading video...</p>
-)}
+        <iframe
+          src={film.video_url}
+          style={styles.video}
+          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+        />
+      ) : (
+        <p>Loading video...</p>
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import MovieCard from "../components/MovieCard";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -25,6 +26,7 @@ function MyCinema() {
   const [isMobile, setIsMobile] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 const { user, loading } = useAuth();
+const navigate = useNavigate();
 
   const videoRef = useRef(null);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
@@ -183,6 +185,34 @@ useEffect(() => {
     });
   };
 
+  async function handleFilmClick(film) {
+  if (loading) return;
+
+  if (!user) {
+    navigate(`/createaccount?filmId=${film.id}`);
+    return;
+  }
+
+  const now = new Date().toISOString();
+
+  const { data } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("status", "completed");
+
+  const hasSubscription = data?.some(
+    (p) => p.type === "subscription" && p.expires_at > now
+  );
+
+  if (!hasSubscription) {
+    navigate(`/subscribe`);
+    return;
+  }
+
+  navigate(`/watch/${film.id}`);
+}
+
 async function trackVisitor() {
   try {
     await supabase.from("visitors").insert({});
@@ -316,7 +346,15 @@ return (
           >
             {row.map((movie) => (
               <div key={movie.id} style={styles.cardWrap}>
-                <MovieCard movie={movie} />
+                <div
+  onClick={(e) => {
+    e.stopPropagation();
+    handleFilmClick(movie);
+  }}
+  style={{ cursor: "pointer" }}
+>
+  <MovieCard movie={movie} />
+</div>
               </div>
             ))}
           </div>
