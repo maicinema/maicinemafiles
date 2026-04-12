@@ -5,6 +5,10 @@ function MyCinemaMobile({ films }) {
     <div style={{ padding: "12px", background: "#000" }}>
       <h2 style={{ color: "white", marginBottom: "16px" }}>MyCinema</h2>
 
+      <p style={{ color: "white" }}>
+        MOBILE WORKING - Films: {films.length}
+      </p>
+
       <div
         style={{
           display: "grid",

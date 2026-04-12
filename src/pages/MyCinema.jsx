@@ -78,7 +78,7 @@ useEffect(() => {
 
 useEffect(() => {
   const checkScreen = () => {
-    setIsMobile(window.innerWidth <= 768);
+   setIsMobile(window.innerWidth <= 1024);
   };
 
   checkScreen(); // ✅ RUN ON LOAD
@@ -149,6 +149,9 @@ useEffect(() => {
 
 
   const bannerFilm = films[currentBanner];
+  if (isMobile) {
+  return <MyCinemaMobile films={films} loading={loading} user={user} />;
+}
   useEffect(() => {
   if (!bannerFilm?.video_url) return;
 
