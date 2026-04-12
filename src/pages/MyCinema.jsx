@@ -150,7 +150,7 @@ useEffect(() => {
 
   const bannerFilm = films[currentBanner];
   if (isMobile) {
-  return <MyCinemaMobile films={films} loading={loading} user={user} />;
+ return <MyCinemaMobile films={films} />;
 }
   useEffect(() => {
   if (!bannerFilm?.video_url) return;
