@@ -1,11 +1,76 @@
-import { useRef, useState } from "react";
-import MovieCard from "../components/MovieCard";
+import { useRef, useState, useEffect } from "react";
+
+/* ✅ TIME PARSER (SAME AS DESKTOP) */
+function parseTimeToSeconds(time) {
+  if (!time) return 0;
+  if (typeof time === "number") return time;
+
+  const parts = time.split(":");
+  if (parts.length !== 2) return 0;
+
+  return Number(parts[0]) * 60 + Number(parts[1]);
+}
 
 function MyCinemaMobile({ films }) {
-  const videoRef = useRef(null);
   const [currentBanner, setCurrentBanner] = useState(0);
+  const bannerVideoRef = useRef(null);
+
+  /* ✅ BANNER AUTO ROTATE */
+  useEffect(() => {
+    if (films.length < 2) return;
+
+    const interval = setInterval(() => {
+      setCurrentBanner((prev) => (prev + 1) % films.length);
+    }, 25000);
+
+    return () => clearInterval(interval);
+  }, [films]);
 
   const bannerFilm = films[currentBanner];
+
+  /* ✅ BANNER PREVIEW (TOUCH) */
+  const startBannerPreview = () => {
+    const video = bannerVideoRef.current;
+    if (!video || !bannerFilm?.video_url) return;
+
+    const startTime = parseTimeToSeconds(
+      bannerFilm.previewStart || "00:00"
+    );
+    const duration = parseTimeToSeconds(
+      bannerFilm.previewDuration || "00:10"
+    );
+
+    video.src = bannerFilm.video_url;
+    video.load();
+
+    video.onloadeddata = () => {
+      video.currentTime = startTime;
+      video.muted = false;
+      video.volume = 1;
+
+      video.play().catch(() => {});
+
+      video.ontimeupdate = () => {
+        if (video.currentTime >= startTime + duration) {
+          video.pause();
+        }
+      };
+    };
+  };
+
+  const stopBannerPreview = () => {
+    const video = bannerVideoRef.current;
+    if (!video) return;
+
+    video.pause();
+    video.currentTime = 0;
+
+    video.onloadeddata = null;
+    video.ontimeupdate = null;
+
+    video.removeAttribute("src");
+    video.load();
+  };
 
   return (
     <div style={{ padding: "12px", background: "#000" }}>
@@ -16,22 +81,34 @@ function MyCinemaMobile({ films }) {
           style={{
             width: "100%",
             height: "200px",
-            backgroundImage: `url(${bannerFilm.poster_url})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
             borderRadius: "8px",
             marginBottom: "16px",
-            position: "relative"
+            position: "relative",
+            overflow: "hidden",
+            cursor: "pointer"
           }}
+          onTouchStart={startBannerPreview}
+          onTouchEnd={stopBannerPreview}
+          onTouchCancel={stopBannerPreview}
         >
+          <video
+            ref={bannerVideoRef}
+            poster={bannerFilm.poster_url}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover"
+            }}
+            playsInline
+          />
+
           <div
             style={{
+              position: "absolute",
+              bottom: 0,
+              width: "100%",
               background: "rgba(0,0,0,0.5)",
-              height: "100%",
-              padding: "12px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-end"
+              padding: "10px"
             }}
           >
             <h2 style={{ color: "white", margin: 0 }}>
@@ -68,7 +145,7 @@ function MyCinemaMobile({ films }) {
   );
 }
 
-/* ✅ MOBILE CARD WITH TOUCH PREVIEW */
+/* ✅ MOBILE MOVIE CARD (FIXED PROPERLY) */
 function MobileMovieCard({ movie }) {
   const videoRef = useRef(null);
 
@@ -76,10 +153,25 @@ function MobileMovieCard({ movie }) {
     const video = videoRef.current;
     if (!video || !movie.video_url) return;
 
+    const startTime = parseTimeToSeconds(movie.previewStart || "00:00");
+    const duration = parseTimeToSeconds(movie.previewDuration || "00:10");
+
     video.src = movie.video_url;
-    video.currentTime = 5;
-    video.muted = false;
-    video.play().catch(() => {});
+    video.load();
+
+    video.onloadeddata = () => {
+      video.currentTime = startTime;
+      video.muted = false;
+      video.volume = 1;
+
+      video.play().catch(() => {});
+
+      video.ontimeupdate = () => {
+        if (video.currentTime >= startTime + duration) {
+          video.pause();
+        }
+      };
+    };
   };
 
   const stopPreview = () => {
@@ -88,6 +180,12 @@ function MobileMovieCard({ movie }) {
 
     video.pause();
     video.currentTime = 0;
+
+    video.onloadeddata = null;
+    video.ontimeupdate = null;
+
+    video.removeAttribute("src");
+    video.load();
   };
 
   return (
@@ -98,6 +196,7 @@ function MobileMovieCard({ movie }) {
       }}
       onTouchStart={startPreview}
       onTouchEnd={stopPreview}
+      onTouchCancel={stopPreview}
     >
       {movie.video_url ? (
         <video
@@ -127,7 +226,7 @@ function MobileMovieCard({ movie }) {
   );
 }
 
-/* ✅ SAME LOGIC AS DESKTOP */
+/* ✅ ROW LOGIC */
 function chunkArray(array, size) {
   const result = [];
   for (let i = 0; i < array.length; i += size) {
