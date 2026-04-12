@@ -1,4 +1,7 @@
 import { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
+import { useAuth } from "../context/AuthContext";
 
 /* ✅ TIME PARSER (SAME AS DESKTOP) */
 function parseTimeToSeconds(time) {
@@ -12,6 +15,8 @@ function parseTimeToSeconds(time) {
 }
 
 function MyCinemaMobile({ films }) {
+    const navigate = useNavigate();
+const { user, loading } = useAuth();
   const [currentBanner, setCurrentBanner] = useState(0);
   const bannerVideoRef = useRef(null);
 
@@ -72,6 +77,7 @@ function MyCinemaMobile({ films }) {
     video.load();
   };
 
+  
   return (
     <div style={{ padding: "12px", background: "#000" }}>
       
@@ -87,6 +93,33 @@ function MyCinemaMobile({ films }) {
             overflow: "hidden",
             cursor: "pointer"
           }}
+          onClick={async () => {
+  if (loading) return;
+
+  if (!user) {
+    navigate(`/createaccount?filmId=${bannerFilm.id}`);
+    return;
+  }
+
+  const now = new Date().toISOString();
+
+  const { data } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("status", "completed");
+
+  const hasSubscription = data?.some(
+    (p) => p.type === "subscription" && p.expires_at > now
+  );
+
+  if (!hasSubscription) {
+    navigate(`/subscribe`);
+    return;
+  }
+
+  navigate(`/watch/${bannerFilm.id}`);
+}}
           onTouchStart={startBannerPreview}
           onTouchEnd={stopBannerPreview}
           onTouchCancel={stopBannerPreview}
@@ -148,6 +181,8 @@ function MyCinemaMobile({ films }) {
 /* ✅ MOBILE MOVIE CARD (FIXED PROPERLY) */
 function MobileMovieCard({ movie }) {
   const videoRef = useRef(null);
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
   const startPreview = () => {
     const video = videoRef.current;
@@ -188,15 +223,41 @@ function MobileMovieCard({ movie }) {
     video.load();
   };
 
+  const handleClick = async () => {
+    if (loading) return;
+
+    if (!user) {
+      navigate(`/createaccount?filmId=${movie.id}`);
+      return;
+    }
+
+    const now = new Date().toISOString();
+
+    const { data } = await supabase
+      .from("payments")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("status", "completed");
+
+    const hasSubscription = data?.some(
+      (p) => p.type === "subscription" && p.expires_at > now
+    );
+
+    if (!hasSubscription) {
+      navigate(`/subscribe`);
+      return;
+    }
+
+    navigate(`/watch/${movie.id}`);
+  };
+
   return (
     <div
-      style={{
-        width: "100%",
-        cursor: "pointer"
-      }}
+      style={{ width: "100%", cursor: "pointer" }}
       onTouchStart={startPreview}
       onTouchEnd={stopPreview}
       onTouchCancel={stopPreview}
+      onClick={handleClick}
     >
       {movie.video_url ? (
         <video
