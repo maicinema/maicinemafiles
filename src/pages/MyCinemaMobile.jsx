@@ -77,27 +77,11 @@ const { user, loading } = useAuth();
     video.load();
   };
 
-  
-  return (
-    <div style={{ padding: "12px", background: "#000" }}>
-      
-      {/* ✅ BANNER */}
-      {bannerFilm && (
-        <div
-          style={{
-            width: "100%",
-            height: "200px",
-            borderRadius: "8px",
-            marginBottom: "16px",
-            position: "relative",
-            overflow: "hidden",
-            cursor: "pointer"
-          }}
-          onClick={async () => {
+  async function handleFilmClick(film) {
   if (loading) return;
 
   if (!user) {
-    navigate(`/createaccount?filmId=${bannerFilm.id}`);
+    navigate(`/createaccount?filmId=${film.id}`);
     return;
   }
 
@@ -118,8 +102,25 @@ const { user, loading } = useAuth();
     return;
   }
 
-  navigate(`/watch/${bannerFilm.id}`);
-}}
+  navigate(`/watch/${film.id}`);
+}
+  
+  return (
+    <div style={{ padding: "12px", background: "#000" }}>
+      
+      {/* ✅ BANNER */}
+      {bannerFilm && (
+        <div
+          style={{
+            width: "100%",
+            height: "200px",
+            borderRadius: "8px",
+            marginBottom: "16px",
+            position: "relative",
+            overflow: "hidden",
+            cursor: "pointer"
+          }}
+         onClick={() => handleFilmClick(bannerFilm)}
           onTouchStart={startBannerPreview}
           onTouchEnd={stopBannerPreview}
           onTouchCancel={stopBannerPreview}
@@ -169,7 +170,7 @@ const { user, loading } = useAuth();
         >
           {row.map((movie) => (
             <div key={movie.id} style={{ flex: "0 0 140px" }}>
-              <MobileMovieCard movie={movie} />
+             <MobileMovieCard movie={movie} onClick={handleFilmClick} />
             </div>
           ))}
         </div>
@@ -179,7 +180,7 @@ const { user, loading } = useAuth();
 }
 
 /* ✅ MOBILE MOVIE CARD (FIXED PROPERLY) */
-function MobileMovieCard({ movie }) {
+function MobileMovieCard({ movie, onClick }) {
   const videoRef = useRef(null);
   const navigate = useNavigate();
   const { user, loading } = useAuth();
@@ -223,41 +224,13 @@ function MobileMovieCard({ movie }) {
     video.load();
   };
 
-  const handleClick = async () => {
-    if (loading) return;
-
-    if (!user) {
-      navigate(`/createaccount?filmId=${movie.id}`);
-      return;
-    }
-
-    const now = new Date().toISOString();
-
-    const { data } = await supabase
-      .from("payments")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("status", "completed");
-
-    const hasSubscription = data?.some(
-      (p) => p.type === "subscription" && p.expires_at > now
-    );
-
-    if (!hasSubscription) {
-      navigate(`/subscribe`);
-      return;
-    }
-
-    navigate(`/watch/${movie.id}`);
-  };
-
   return (
     <div
       style={{ width: "100%", cursor: "pointer" }}
       onTouchStart={startPreview}
       onTouchEnd={stopPreview}
       onTouchCancel={stopPreview}
-      onClick={handleClick}
+     onClick={() => onClick(movie)}
     >
       {movie.video_url ? (
         <video
