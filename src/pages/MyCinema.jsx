@@ -80,7 +80,7 @@ useEffect(() => {
 
 useEffect(() => {
   const checkScreen = () => {
-   setIsMobile(window.innerWidth <= 1024);
+   setIsMobile(window.innerWidth <= 768);
   };
 
   checkScreen(); // ✅ RUN ON LOAD
