@@ -148,9 +148,10 @@ function Events() {
 
   return (
   <div style={styles.page}>
-    <h1 style={styles.heading}>Upcoming Events</h1>
 
     <SupportDonationSection />
+
+<h1 style={styles.heading}>Upcoming Events</h1>
 
     {events.map((event) => {
       const eventTickets = getEventTickets(event.title);

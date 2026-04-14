@@ -128,9 +128,10 @@ const styles = {
   },
 
   title: {
-    fontSize: "28px",
-    marginBottom: "10px",
-  },
+  fontSize: "clamp(32px, 6vw, 48px)",
+  fontWeight: "bold",
+  marginBottom: "15px",
+},
 
   subtitle: {
     maxWidth: "700px",
