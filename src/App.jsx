@@ -9,6 +9,7 @@ import EventMonitor from "./pages/EventMonitor";
 import EventControl from "./pages/EventControl";
 import TicketScanner from "./pages/TicketScanner";
 import AdminFilmUpload from "./pages/AdminFilmUpload";
+import TicketCheckout from "./pages/TicketCheckout";
 
 import SupportPayment from "./pages/SupportPayment";
 import Home from "./pages/Home";
@@ -148,6 +149,7 @@ useEffect(() => {
       <Route path="/event-control" element={<PageWrapper><EventControl /></PageWrapper>} />
       <Route path="/admin-upload-film" element={<PageWrapper><AdminFilmUpload /></PageWrapper>} />
 <Route path="/support-payment" element={<SupportPayment />} />
+<Route path="/ticket-checkout" element={<TicketCheckout />} />
 
       {/* LOGIN */}
       <Route path="/admin/login" element={<Login />} />

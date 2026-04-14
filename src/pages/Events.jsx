@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import React from "react";
 import QRCode from "react-qr-code";
+import { useNavigate } from "react-router-dom";
 import fallbackPoster from "../assets/events/nightwemarried-poster.jpg";
 import { supabase } from "../lib/supabase";
 import SupportDonationSection from "../components/SupportDonationSection";
@@ -23,6 +24,7 @@ function Events() {
   });
 
   const [timeLeftMap, setTimeLeftMap] = useState({});
+const navigate = useNavigate();
 
   useEffect(() => {
     let isMounted = true;
@@ -203,8 +205,7 @@ function Events() {
                   <button
                     key={ticket.id}
                     style={styles.ticketBtn}
-                    onClick={() => selectTicket(event, ticket)}
-                  >
+onClick={() => navigate("/ticket-checkout", { state: { event, ticket } })}                  >
                     {ticket.title} — {formatDisplay(ticket.price)}
                   </button>
                 ))
