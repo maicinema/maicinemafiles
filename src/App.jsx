@@ -158,7 +158,6 @@ useEffect(() => {
       <Route path="/admin/films" element={<ProtectedAdmin><ManageFilms /></ProtectedAdmin>} />
       <Route path="/admin/events" element={<ProtectedAdmin><ManageEvents /></ProtectedAdmin>} />
       <Route path="/admin/submissions" element={<ProtectedAdmin><ReviewSubmissions /></ProtectedAdmin>} />
-      <Route path="/admin/studios" element={<ProtectedAdmin><ManageStudios /></ProtectedAdmin>} />
     </Routes>
 
     {!hideLayout && <Footer />}
