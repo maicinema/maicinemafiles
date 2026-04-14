@@ -15,7 +15,10 @@ function Home() {
     return () => clearInterval(interval);
   }, []);
 
- const banners = [banner1, banner2];
+const introVideo =
+  "https://qrujwmcbobhthwzqmmjp.supabase.co/storage/v1/object/public/banners/studiointro.MP4";
+
+const banners = [banner1, banner2];
   const [currentBanner, setCurrentBanner] = useState(0);
 const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -45,16 +48,39 @@ useEffect(() => {
     marginLeft: "calc(50% - 50vw)",
     height: "auto",
     aspectRatio: "16 / 9",
-        backgroundImage: `url(${banners[currentBanner]}?t=${Date.now()})`,
-        transition: "background-image 1s ease-in-out",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundColor: "#000",
-        position: "relative",
-        color: "white",
-        overflow: "hidden"
-      }}
-    >
+    backgroundColor: "#000",
+    position: "relative",
+    color: "white",
+    overflow: "hidden"
+  }}
+>
+  <video
+    src={introVideo}
+    autoPlay
+    loop
+    muted
+    playsInline
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      objectFit: "cover"
+    }}
+  />
+
+  <div
+    style={{
+      position: "absolute",
+      inset: 0,
+      backgroundImage: `url(${banners[currentBanner]}?t=${Date.now()})`,
+      transition: "background-image 1s ease-in-out",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      opacity: 0.18
+    }}
+  >
       {/* Overlay */}
       <div
         style={{
@@ -106,7 +132,8 @@ useEffect(() => {
           </div>
         </div>
       )}
-    </div>
+       </div>
+  </div>
 
     {/* MOBILE TEXT BELOW BANNER */}
     {isMobile && (
