@@ -182,9 +182,6 @@ const { user, loading } = useAuth();
 /* ✅ MOBILE MOVIE CARD (FIXED PROPERLY) */
 function MobileMovieCard({ movie, onClick }) {
   const videoRef = useRef(null);
-  const navigate = useNavigate();
-  const { user, loading } = useAuth();
-
   const startPreview = () => {
     const video = videoRef.current;
     if (!video || !movie.video_url) return;

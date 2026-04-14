@@ -60,8 +60,6 @@ function AdminNavbar() {
           <Link to="/admin/films" style={styles.link}>Films</Link>
           <Link to="/admin/events" style={styles.link}>Events</Link>
           <Link to="/admin/submissions" style={styles.link}>Submissions</Link>
-          <Link to="/admin/studios" style={styles.link}>Studios</Link>
-
           <button onClick={handleLock} style={styles.lockBtn}>
             🔒
           </button>

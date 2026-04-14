@@ -12,7 +12,6 @@ import AdminFilmUpload from "./pages/AdminFilmUpload";
 
 import Home from "./pages/Home";
 import MyCinema from "./pages/MyCinema";
-import Studios from "./pages/Studios";
 import Events from "./pages/Events";
 import Login from "./Login";
 import Subscribe from "./pages/Subscribe";
@@ -25,7 +24,6 @@ import AdminDashboard from "./admin/AdminDashboard";
 import ManageFilms from "./admin/ManageFilms";
 import ManageEvents from "./admin/ManageEvents";
 import ReviewSubmissions from "./admin/ReviewSubmissions";
-import ManageStudios from "./admin/ManageStudios";
 import TicketAdmin from "./admin/TicketAdmin";
 import ResetPassword from "./pages/ResetPassword";
 
@@ -137,7 +135,6 @@ useEffect(() => {
   element={<PageWrapper><MyCinema /></PageWrapper>}
 />
       
-      <Route path="/studios" element={<PageWrapper><Studios /></PageWrapper>} />
       <Route path="/events" element={<PageWrapper><Events /></PageWrapper>} />
       <Route path="/subscribe" element={<PageWrapper><Subscribe /></PageWrapper>} />
       <Route path="/watch/:id" element={<PageWrapper><WatchFilm /></PageWrapper>} />

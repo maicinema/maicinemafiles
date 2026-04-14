@@ -5,12 +5,11 @@ import logo from "../assets/logo.png";
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const navItems = [
-    { name: "Home", path: "/" },
-    { name: "MyCinema", path: "/mycinema" },
-    { name: "MaiCinemaTV", path: "/studios" },
-    { name: "Events", path: "/events" }
-  ];
+ const navItems = [
+  { name: "Home", path: "/" },
+  { name: "MyCinema", path: "/mycinema" },
+  { name: "Events", path: "/events" }
+];
 
   return (
     <nav style={styles.nav}>
