@@ -198,27 +198,37 @@ const navigate = useNavigate();
           </div>
 
         <div style={styles.ticketSection}>
-  <div style={styles.buttons}>
-  {eventTickets.length > 0 ? (
-    eventTickets.map((ticket) => (
-      <button
-        key={ticket.id}
-        style={styles.ticketBtn}
-        onClick={() =>
-          navigate("/ticket-checkout", {
-            state: { event, ticket }
-          })
+  <button
+    style={styles.purchaseHeadingBtn}
+    onClick={() =>
+      navigate("/ticket-checkout", {
+        state: {
+          event,
+          ticket: eventTickets.length > 0 ? eventTickets[0] : null
         }
-      >
-        {ticket.title} — {formatDisplay(ticket.price)}
-      </button>
-    ))
-  ) : (
-    <p style={styles.noTickets}>No tickets available for this event yet.</p>
-  )}
-</div>
+      })
+    }
+  >
+    Purchase Your Tickets
+  </button>
 
-  {eventTickets.length === 0 && (
+  {eventTickets.length > 0 ? (
+    <div style={styles.buttons}>
+      {eventTickets.map((ticket) => (
+        <button
+          key={ticket.id}
+          style={styles.ticketBtn}
+          onClick={() =>
+            navigate("/ticket-checkout", {
+              state: { event, ticket }
+            })
+          }
+        >
+          {ticket.title} — {formatDisplay(ticket.price)}
+        </button>
+      ))}
+    </div>
+  ) : (
     <p style={styles.noTickets}>
       Ticket options will appear after ticket setup is added for this event.
     </p>
@@ -357,8 +367,9 @@ const styles = {
   },
 
   ticketSection: {
-    marginTop: "40px"
-  },
+  marginTop: "40px",
+  textAlign: "center"
+},
 
   buttons: {
     display: "flex",
