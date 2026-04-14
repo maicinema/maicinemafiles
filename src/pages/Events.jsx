@@ -197,24 +197,20 @@ const navigate = useNavigate();
             </div>
           </div>
 
-         <div style={styles.ticketSection}>
-  <h2>Purchase Your Tickets</h2>
-
-  <div style={styles.buttons}>
-    <button
-      style={styles.ticketBtn}
-      onClick={() =>
-        navigate("/ticket-checkout", {
-          state: {
-            event,
-            ticket: eventTickets.length > 0 ? eventTickets[0] : null
-          }
-        })
-      }
-    >
-      Buy Tickets
-    </button>
-  </div>
+        <div style={styles.ticketSection}>
+  <button
+    style={styles.purchaseHeadingBtn}
+    onClick={() =>
+      navigate("/ticket-checkout", {
+        state: {
+          event,
+          ticket: eventTickets.length > 0 ? eventTickets[0] : null
+        }
+      })
+    }
+  >
+    Purchase Your Tickets
+  </button>
 
   {eventTickets.length === 0 && (
     <p style={styles.noTickets}>
@@ -313,6 +309,19 @@ const styles = {
     gap: "20px",
     alignItems: "flex-start"
   },
+
+  purchaseHeadingBtn: {
+  background: "#e50914",
+  border: "none",
+  color: "white",
+  padding: "14px 24px",
+  cursor: "pointer",
+  borderRadius: "8px",
+  fontSize: "clamp(22px, 4vw, 32px)",
+  fontWeight: "bold",
+  display: "inline-block",
+  marginTop: "10px"
+},
 
   poster: {
     width: "100%",
