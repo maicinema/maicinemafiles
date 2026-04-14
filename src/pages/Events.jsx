@@ -198,19 +198,25 @@ const navigate = useNavigate();
           </div>
 
         <div style={styles.ticketSection}>
-  <button
-    style={styles.purchaseHeadingBtn}
-    onClick={() =>
-      navigate("/ticket-checkout", {
-        state: {
-          event,
-          ticket: eventTickets.length > 0 ? eventTickets[0] : null
+  <div style={styles.buttons}>
+  {eventTickets.length > 0 ? (
+    eventTickets.map((ticket) => (
+      <button
+        key={ticket.id}
+        style={styles.ticketBtn}
+        onClick={() =>
+          navigate("/ticket-checkout", {
+            state: { event, ticket }
+          })
         }
-      })
-    }
-  >
-    Purchase Your Tickets
-  </button>
+      >
+        {ticket.title} — {formatDisplay(ticket.price)}
+      </button>
+    ))
+  ) : (
+    <p style={styles.noTickets}>No tickets available for this event yet.</p>
+  )}
+</div>
 
   {eventTickets.length === 0 && (
     <p style={styles.noTickets}>
