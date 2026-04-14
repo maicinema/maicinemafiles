@@ -41,100 +41,101 @@ useEffect(() => {
 
   return (
   <>
-    {/* BANNER */}
+        {/* BANNER */}
     <div
-  style={{
-    width: "100vw",
-    marginLeft: "calc(50% - 50vw)",
-    height: "auto",
-    aspectRatio: "16 / 9",
-    backgroundColor: "#000",
-    position: "relative",
-    color: "white",
-    overflow: "hidden"
-  }}
->
-  <video
-    src={introVideo}
-    autoPlay
-    loop
-    muted
-    playsInline
-    style={{
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      objectFit: "cover"
-    }}
-  />
+      style={{
+        width: "100vw",
+        marginLeft: "calc(50% - 50vw)",
+        height: "auto",
+        aspectRatio: "16 / 9",
+        backgroundColor: "#000",
+        position: "relative",
+        color: "white",
+        overflow: "hidden"
+      }}
+    >
+      {currentBanner === 0 && (
+        <video
+          src={introVideo}
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover"
+          }}
+        />
+      )}
 
-  <div
-    style={{
-      position: "absolute",
-      inset: 0,
-      backgroundImage: `url(${banners[currentBanner]}?t=${Date.now()})`,
-      transition: "background-image 1s ease-in-out",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      opacity: 0.18
-    }}
-  >
-      {/* Overlay */}
       <div
         style={{
           position: "absolute",
-          bottom: 0,
-          left: 0,
-          width: "100%",
-          height: "50%",
-          background:
-            "linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent)"
+          inset: 0,
+          backgroundImage: `url(${banners[currentBanner]}?t=${Date.now()})`,
+          transition: "background-image 1s ease-in-out",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: currentBanner === 0 ? 0.18 : 1
         }}
-      />
-
-      {/* DESKTOP TEXT ONLY */}
-      {!isMobile && (
+      >
+        {/* Overlay */}
         <div
           style={{
-            position: "relative",
-            height: "100%",
-            display: "flex",
-            alignItems: "flex-end",
-            padding: "0 16px 40px 16px"
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width: "100%",
+            height: "50%",
+            background:
+              "linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent)"
           }}
-        >
+        />
+
+        {/* DESKTOP TEXT ONLY */}
+        {!isMobile && (
           <div
             style={{
-              maxWidth: "800px",
-              animation: "heroMove 25s linear infinite"
+              position: "relative",
+              height: "100%",
+              display: "flex",
+              alignItems: "flex-end",
+              padding: "0 16px 40px 16px"
             }}
           >
-            <h1
+            <div
               style={{
-                fontSize: "clamp(28px, 6vw, 64px)",
-                margin: "0"
+                maxWidth: "800px",
+                animation: "heroMove 25s linear infinite"
               }}
             >
-              Welcome to <span style={{ color: "red" }}>MaiCinema</span>
-            </h1>
+              <h1
+                style={{
+                  fontSize: "clamp(28px, 6vw, 64px)",
+                  margin: "0"
+                }}
+              >
+                Welcome to <span style={{ color: "red" }}>MaiCinema</span>
+              </h1>
 
-            <p
-              style={{
-                marginTop: "0px",
-                fontSize: "clamp(14px, 2.5vw, 18px)",
-                color: "#ccc"
-              }}
-            >
-              Stream powerful short films. Discover new voices. Experience cinema differently.
-            </p>
+              <p
+                style={{
+                  marginTop: "0px",
+                  fontSize: "clamp(14px, 2.5vw, 18px)",
+                  color: "#ccc"
+                }}
+              >
+                Stream powerful short films. Discover new voices. Experience cinema differently.
+              </p>
+            </div>
           </div>
-        </div>
-      )}
-       </div>
-  </div>
-
+        )}
+      </div>
+    </div>
     {/* MOBILE TEXT BELOW BANNER */}
     {isMobile && (
   <div
