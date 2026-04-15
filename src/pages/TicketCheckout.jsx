@@ -28,16 +28,38 @@ function TicketCheckout() {
       return;
     }
 
-    const { data, error } = await supabase
+    const { data: eventData } = await supabase
+      .from("events")
+      .select("id, total_seats, title")
+      .eq("title", event.title)
+      .single();
+
+    if (!eventData) {
+      alert("Event not found");
+      return;
+    }
+
+    const { count } = await supabase
       .from("tickets")
+      .select("*", { count: "exact", head: true })
+      .eq("event", event.title);
+
+    if (count >= eventData.total_seats) {
+      alert("Tickets are sold out");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("ticket_purchases")
       .insert([
         {
-          event: event.title,
-          title: ticket.title,
-          price: ticket.price,
-          date: event.date,
-          status: "unused",
-          user_id: null
+          event_title: event.title,
+          ticket_title: ticket.title,
+          ticket_price: ticket.price,
+          event_date: event.date,
+          buyer_name: user.name,
+          buyer_email: user.email,
+          buyer_phone: user.phone
         }
       ])
       .select()
@@ -91,8 +113,8 @@ function TicketCheckout() {
       ) : (
         <div style={styles.ticketBox}>
           <h2>Ticket Generated</h2>
-          <p>{generatedTicket.event}</p>
-          <p>{generatedTicket.title}</p>
+          <p>{generatedTicket.event_title}</p>
+          <p>{generatedTicket.ticket_title}</p>
 
           <QRCode value={generatedTicket.id} size={200} />
 
