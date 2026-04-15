@@ -27,13 +27,6 @@ async function handleSubmit(e){
 
 e.preventDefault();
 
-const parsedPrice = parseFloat(price);
-
-if (isNaN(parsedPrice)) {
-  alert("Enter valid price");
-  return;
-}
-
 /* 🔥 ONLY ONE LOGIC PATH (FIXED) */
 if (editing) {
 
@@ -42,7 +35,7 @@ if (editing) {
     .update({
       event,
       title,
-      price: parsedPrice,
+     price: price,
       date
     })
     .eq("id", editing.id)

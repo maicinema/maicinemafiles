@@ -224,7 +224,11 @@ const navigate = useNavigate();
             })
           }
         >
-          {ticket.title} — {formatDisplay(ticket.price)}
+         {ticket.title} — {
+  isNaN(ticket.price)
+    ? ticket.price
+    : formatDisplay(ticket.price)
+}
         </button>
       ))}
     </div>

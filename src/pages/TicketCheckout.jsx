@@ -14,6 +14,7 @@ function TicketCheckout() {
   });
 
   const [generatedTicket, setGeneratedTicket] = useState(null);
+const [customAmount, setCustomAmount] = useState("");
 
   const handleChange = (e) => {
     setUser({
@@ -55,7 +56,7 @@ function TicketCheckout() {
         {
           event_title: event.title,
           ticket_title: ticket.title,
-          ticket_price: ticket.price,
+         ticket_price: isNaN(ticket.price) ? customAmount : ticket.price,
           event_date: event.date,
           buyer_name: user.name,
           buyer_email: user.email,
@@ -81,7 +82,13 @@ function TicketCheckout() {
       {event && (
         <>
           <h2>{event.title}</h2>
-          <p>{ticket.title} — ${ticket.price}</p>
+          <p>
+  {ticket.title} — {
+    isNaN(ticket.price)
+      ? ticket.price
+      : `$${ticket.price}`
+  }
+</p>
         </>
       )}
 
@@ -105,6 +112,15 @@ function TicketCheckout() {
             onChange={handleChange}
             style={styles.input}
           />
+
+{isNaN(ticket.price) && (
+  <input
+    placeholder="Enter your amount"
+    value={customAmount}
+    onChange={(e) => setCustomAmount(e.target.value)}
+    style={styles.input}
+  />
+)}
 
           <button style={styles.button} onClick={handlePurchase}>
             Pay & Generate Ticket
