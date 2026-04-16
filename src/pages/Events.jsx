@@ -213,30 +213,28 @@ const navigate = useNavigate();
   </button>
 
   {eventTickets.length > 0 ? (
-    <div style={styles.buttons}>
-      {eventTickets.map((ticket) => (
-        <button
-          key={ticket.id}
-          style={styles.ticketBtn}
-          onClick={() =>
-            navigate("/ticket-checkout", {
-              state: { event, ticket }
-            })
-          }
-        >
-         {ticket.title} — {
-  isNaN(ticket.price)
-    ? ticket.price
-    : formatDisplay(ticket.price)
-}
-        </button>
-      ))}
-    </div>
-  ) : (
-    <p style={styles.noTickets}>
-      Ticket options will appear after ticket setup is added for this event.
-    </p>
-  )}
+  <div style={styles.buttons}>
+    {eventTickets.map((ticket) => (
+      <button
+        key={ticket.id}
+        style={styles.ticketBtn}
+        onClick={() =>
+          navigate("/ticket-checkout", {
+            state: { event, ticket }
+          })
+        }
+      >
+        {ticket.title}
+        <br />
+        {isNaN(ticket.price) ? ticket.price : formatDisplay(ticket.price)}
+      </button>
+    ))}
+  </div>
+) : (
+  <p style={styles.noTickets}>
+    Ticket options will appear after ticket setup is added for this event.
+  </p>
+)}
 </div>
         </div>
       );
@@ -376,21 +374,27 @@ const styles = {
 },
 
   buttons: {
-    display: "flex",
-    gap: "15px",
-    marginTop: "20px",
-    flexWrap: "wrap"
-  },
+  display: "flex",
+  gap: "12px",
+  marginTop: "20px",
+  flexWrap: "wrap",
+  justifyContent: "center",
+  alignItems: "center"
+},
 
   ticketBtn: {
-    background: "#e50914",
-    border: "none",
-    color: "white",
-    padding: "12px 16px",
-    cursor: "pointer",
-    borderRadius: "4px",
-    fontSize: "14px"
-  },
+  background: "#e50914",
+  border: "none",
+  color: "white",
+  padding: "12px 16px",
+  cursor: "pointer",
+  borderRadius: "6px",
+  fontSize: "14px",
+  minWidth: "180px",
+  maxWidth: "100%",
+  whiteSpace: "normal",
+  textAlign: "center"
+},
 
   formBox: {
     marginTop: "40px",
