@@ -219,6 +219,11 @@ console.log("MATCHED:", eventTickets);
     Purchase Your Tickets
   </button>
 
+  <p style={{ color: "yellow", marginTop: "10px" }}>
+    Tickets found: {eventTickets.length}
+  </p>
+
+
   {eventTickets.length > 0 ? (
   <div style={styles.buttons}>
     {eventTickets.map((ticket) => (
@@ -274,8 +279,7 @@ console.log("MATCHED:", eventTickets);
           onChange={handleChange}
           value={user.phone}
         />
-<p style={{ color: "yellow" }}>Tickets found: {eventTickets.length}</p>
-        <button style={styles.payBtn} onClick={proceedPayment}>
+                <button style={styles.payBtn} onClick={proceedPayment}>
           Proceed to Payment
         </button>
       </div>
