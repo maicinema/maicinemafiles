@@ -144,42 +144,16 @@ const navigate = useNavigate();
     return isNaN(num) ? price : `$${num.toFixed(2)}`;
   };
 
-  const getEventTickets = (eventObj) => {
-  const matched = tickets.filter(
-    (ticket) =>
-      ticket.event?.trim().toLowerCase() ===
-      eventObj.title?.trim().toLowerCase()
+  const normalizeText = (value) =>
+  String(value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+
+const getEventTickets = (eventObj) => {
+  return tickets.filter(
+    (ticket) => normalizeText(ticket.event) === normalizeText(eventObj.title)
   );
-
-  if (matched.length > 0) return matched;
-
-  const fallbackTickets = [];
-
-  if (eventObj.ticketRegular) {
-    fallbackTickets.push({
-      id: `${eventObj.id}-regular`,
-      title: "Regular Ticket",
-      price: eventObj.ticketRegular
-    });
-  }
-
-  if (eventObj.ticketVIP) {
-    fallbackTickets.push({
-      id: `${eventObj.id}-vip`,
-      title: "VIP",
-      price: eventObj.ticketVIP
-    });
-  }
-
-  if (eventObj.ticketPremium) {
-    fallbackTickets.push({
-      id: `${eventObj.id}-premium`,
-      title: "Premium",
-      price: eventObj.ticketPremium
-    });
-  }
-
-  return fallbackTickets;
 };
 
   return (
