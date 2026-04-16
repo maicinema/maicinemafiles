@@ -145,8 +145,12 @@ const navigate = useNavigate();
   };
 
   const getEventTickets = (eventTitle) => {
-    return tickets.filter((ticket) => ticket.event === eventTitle);
-  };
+  return tickets.filter(
+    (ticket) =>
+      ticket.event?.trim().toLowerCase() ===
+      eventTitle?.trim().toLowerCase()
+  );
+};
 
   return (
   <div style={styles.page}>
@@ -157,6 +161,9 @@ const navigate = useNavigate();
 
     {events.map((event) => {
       const eventTickets = getEventTickets(event.title);
+      console.log("EVENT:", event.title);
+console.log("TICKETS:", tickets);
+console.log("MATCHED:", eventTickets);
       const timeLeft = timeLeftMap[event.id] || {
         days: 0,
         hours: 0,
