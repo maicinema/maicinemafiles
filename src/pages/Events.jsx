@@ -231,6 +231,7 @@ const navigate = useNavigate();
     ))}
   </div>
 ) : (
+
   <p style={styles.noTickets}>
     Ticket options will appear after ticket setup is added for this event.
   </p>
@@ -266,7 +267,7 @@ const navigate = useNavigate();
           onChange={handleChange}
           value={user.phone}
         />
-
+<p style={{ color: "yellow" }}>Tickets found: {eventTickets.length}</p>
         <button style={styles.payBtn} onClick={proceedPayment}>
           Proceed to Payment
         </button>
