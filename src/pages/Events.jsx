@@ -140,23 +140,56 @@ const navigate = useNavigate();
   };
 
   const formatDisplay = (price) => {
-    const num = parseFloat(price);
-    return isNaN(num) ? price : `$${num.toFixed(2)}`;
-  };
+  const num = parseFloat(price);
+  return isNaN(num) ? price : `$${num.toFixed(2)}`;
+};
 
-  const normalizeText = (value) =>
+const normalizeText = (value) =>
   String(value || "")
     .trim()
     .replace(/\s+/g, " ")
     .toLowerCase();
 
 const getEventTickets = (eventObj) => {
-  return tickets.filter(
-    (ticket) => normalizeText(ticket.event) === normalizeText(eventObj.title)
+  const matchedTickets = tickets.filter(
+    (ticket) =>
+      normalizeText(ticket.event) === normalizeText(eventObj.title)
   );
+
+  if (matchedTickets.length > 0) {
+    return matchedTickets;
+  }
+
+  const fallbackTickets = [];
+
+  if (eventObj.ticketRegular) {
+    fallbackTickets.push({
+      id: `${eventObj.id}-regular`,
+      title: "Regular Ticket",
+      price: eventObj.ticketRegular
+    });
+  }
+
+  if (eventObj.ticketVIP) {
+    fallbackTickets.push({
+      id: `${eventObj.id}-vip`,
+      title: "VIP",
+      price: eventObj.ticketVIP
+    });
+  }
+
+  if (eventObj.ticketPremium) {
+    fallbackTickets.push({
+      id: `${eventObj.id}-premium`,
+      title: "Premium",
+      price: eventObj.ticketPremium
+    });
+  }
+
+  return fallbackTickets;
 };
 
-  return (
+return (
   <div style={styles.page}>
 
     <SupportDonationSection />
@@ -165,9 +198,6 @@ const getEventTickets = (eventObj) => {
 
     {events.map((event) => {
 const eventTickets = getEventTickets(event);     
- console.log("EVENT:", event.title);
-console.log("TICKETS:", tickets);
-console.log("MATCHED:", eventTickets);
       const timeLeft = timeLeftMap[event.id] || {
         days: 0,
         hours: 0,
