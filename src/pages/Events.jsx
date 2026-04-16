@@ -144,12 +144,42 @@ const navigate = useNavigate();
     return isNaN(num) ? price : `$${num.toFixed(2)}`;
   };
 
-  const getEventTickets = (eventTitle) => {
-  return tickets.filter(
+  const getEventTickets = (eventObj) => {
+  const matched = tickets.filter(
     (ticket) =>
       ticket.event?.trim().toLowerCase() ===
-      eventTitle?.trim().toLowerCase()
+      eventObj.title?.trim().toLowerCase()
   );
+
+  if (matched.length > 0) return matched;
+
+  const fallbackTickets = [];
+
+  if (eventObj.ticketRegular) {
+    fallbackTickets.push({
+      id: `${eventObj.id}-regular`,
+      title: "Regular Ticket",
+      price: eventObj.ticketRegular
+    });
+  }
+
+  if (eventObj.ticketVIP) {
+    fallbackTickets.push({
+      id: `${eventObj.id}-vip`,
+      title: "VIP",
+      price: eventObj.ticketVIP
+    });
+  }
+
+  if (eventObj.ticketPremium) {
+    fallbackTickets.push({
+      id: `${eventObj.id}-premium`,
+      title: "Premium",
+      price: eventObj.ticketPremium
+    });
+  }
+
+  return fallbackTickets;
 };
 
   return (
@@ -160,8 +190,8 @@ const navigate = useNavigate();
 <h1 style={styles.heading}>Upcoming Events</h1>
 
     {events.map((event) => {
-      const eventTickets = getEventTickets(event.title);
-      console.log("EVENT:", event.title);
+const eventTickets = getEventTickets(event);     
+ console.log("EVENT:", event.title);
 console.log("TICKETS:", tickets);
 console.log("MATCHED:", eventTickets);
       const timeLeft = timeLeftMap[event.id] || {
@@ -218,11 +248,6 @@ console.log("MATCHED:", eventTickets);
   >
     Purchase Your Tickets
   </button>
-
-  <p style={{ color: "yellow", marginTop: "10px" }}>
-    Tickets found: {eventTickets.length}
-  </p>
-
 
   {eventTickets.length > 0 ? (
   <div style={styles.buttons}>
