@@ -56,16 +56,16 @@ if (editing) {
 }else{
 
   const { data, error } = await supabase
-    .from("tickets")
-    .insert([
-      {
-        event,
-        title,
-        price: parsedPrice,
-        date
-      }
-    ])
-    .select();
+  .from("tickets")
+  .insert([
+    {
+      event,
+      title,
+      price: price,
+      date
+    }
+  ])
+  .select();
 
   console.log("TICKET INSERT RESULT:", data, error);
 
@@ -111,7 +111,7 @@ style={{padding:"8px", width:"250px"}}
 
 <div style={{marginBottom:"10px"}}>
 <input
-placeholder="Price (number only)"
+placeholder="Price or label"
 value={price}
 onChange={(e)=>setPrice(e.target.value)}
 style={{padding:"8px", width:"250px"}}
