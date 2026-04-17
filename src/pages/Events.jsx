@@ -151,14 +151,10 @@ const normalizeText = (value) =>
     .toLowerCase();
 
 const getEventTickets = (eventObj) => {
-  const matchedTickets = tickets.filter(
+  return tickets.filter(
     (ticket) =>
-      Number(ticket.event_id) === Number(eventObj.id) ||
-      String(ticket.event || "").trim().toLowerCase() ===
-        String(eventObj.title || "").trim().toLowerCase()
+      normalizeText(ticket.event) === normalizeText(eventObj.title)
   );
-
-  return matchedTickets;
 };
 
 return (
@@ -210,7 +206,7 @@ const eventTickets = getEventTickets(event);
             </div>
           </div>
 
-        <div style={styles.ticketSection}>
+       <div style={styles.ticketSection}>
   <button
     style={styles.purchaseHeadingBtn}
     onClick={() =>
@@ -226,29 +222,28 @@ const eventTickets = getEventTickets(event);
   </button>
 
   {eventTickets.length > 0 ? (
-  <div style={styles.buttons}>
-    {eventTickets.map((ticket) => (
-      <button
-        key={ticket.id}
-        style={styles.ticketBtn}
-        onClick={() =>
-          navigate("/ticket-checkout", {
-            state: { event, ticket }
-          })
-        }
-      >
-        {ticket.title}
-        <br />
-        {isNaN(ticket.price) ? ticket.price : formatDisplay(ticket.price)}
-      </button>
-    ))}
-  </div>
-) : (
-
-  <p style={styles.noTickets}>
-    Ticket options will appear after ticket setup is added for this event.
-  </p>
-)}
+    <div style={styles.buttons}>
+      {eventTickets.map((ticket) => (
+        <button
+          key={ticket.id}
+          style={styles.ticketBtn}
+          onClick={() =>
+            navigate("/ticket-checkout", {
+              state: { event, ticket }
+            })
+          }
+        >
+          {ticket.title}
+          <br />
+          {formatDisplay(ticket.price)}
+        </button>
+      ))}
+    </div>
+  ) : (
+    <p style={styles.noTickets}>
+      Ticket options will appear after ticket setup is added for this event.
+    </p>
+  )}
 </div>
         </div>
       );
