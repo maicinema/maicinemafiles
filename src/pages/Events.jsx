@@ -153,40 +153,12 @@ const normalizeText = (value) =>
 const getEventTickets = (eventObj) => {
   const matchedTickets = tickets.filter(
     (ticket) =>
-      normalizeText(ticket.event) === normalizeText(eventObj.title)
+      Number(ticket.event_id) === Number(eventObj.id) ||
+      String(ticket.event || "").trim().toLowerCase() ===
+        String(eventObj.title || "").trim().toLowerCase()
   );
 
-  if (matchedTickets.length > 0) {
-    return matchedTickets;
-  }
-
-  const fallbackTickets = [];
-
-  if (eventObj.ticketRegular) {
-    fallbackTickets.push({
-      id: `${eventObj.id}-regular`,
-      title: "Regular Ticket",
-      price: eventObj.ticketRegular
-    });
-  }
-
-  if (eventObj.ticketVIP) {
-    fallbackTickets.push({
-      id: `${eventObj.id}-vip`,
-      title: "VIP",
-      price: eventObj.ticketVIP
-    });
-  }
-
-  if (eventObj.ticketPremium) {
-    fallbackTickets.push({
-      id: `${eventObj.id}-premium`,
-      title: "Premium",
-      price: eventObj.ticketPremium
-    });
-  }
-
-  return fallbackTickets;
+  return matchedTickets;
 };
 
 return (
