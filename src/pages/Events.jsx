@@ -163,12 +163,6 @@ return (
     <SupportDonationSection />
 
 <h1 style={styles.heading}>Upcoming Events</h1>
-<div style={{ textAlign: "center", color: "yellow", marginBottom: "20px" }}>
-  <p>Events loaded: {events.length}</p>
-  <p>Tickets loaded: {tickets.length}</p>
-  <p>First ticket event: {tickets[0]?.event || "none"}</p>
-</div>
-<p style={{ color: "lime", textAlign: "center" }}>BUILD TEST 17</p>
     {events.map((event) => {
 const eventTickets = getEventTickets(event);     
       const timeLeft = timeLeftMap[event.id] || {
