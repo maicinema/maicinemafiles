@@ -1,5 +1,4 @@
-import { FaYoutube, FaFacebook, FaInstagram } from "react-icons/fa";
-import whatsappQR from "../assets/whatsappQR.png";
+import { FaYoutube, FaFacebook, FaInstagram } from "react-icons/fa"
 import { PLATFORM } from "../config/platform";
 
 function Footer() {
@@ -7,6 +6,28 @@ function Footer() {
 return (
 
 <footer style={styles.footer}>
+
+{/* CUSTOMER SUPPORT */}
+
+<div style={{ marginBottom: "40px" }}>
+
+<button
+onClick={() => window.location.href = "/support"}
+style={{
+background: "#e50914",
+color: "white",
+border: "none",
+padding: "14px 24px",
+borderRadius: "8px",
+cursor: "pointer",
+fontSize: "16px",
+fontWeight: "bold"
+}}
+>
+💬 Customer Support
+</button>
+
+</div>
 
 {/* NEWSLETTER */}
 
@@ -70,23 +91,6 @@ rel="noopener noreferrer"
 >
 <FaInstagram size={36} style={styles.icon}/>
 </a>
-
-</div>
-
-
-{/* WHATSAPP QR */}
-
-<div style={styles.qrContainer}>
-
-<p style={{color:"#aaa",marginBottom:"10px"}}>
-Scan to join our WhatsApp
-</p>
-
-<img
-src={whatsappQR}
-alt="WhatsApp QR"
-style={styles.qr}
-/>
 
 </div>
 
@@ -164,16 +168,6 @@ icon:{
 color:"#ccc",
 cursor:"pointer",
 transition:"0.3s"
-},
-
-qrContainer:{
-marginTop:"40px"
-},
-
-qr:{
-width:"150px",
-height:"150px",
-borderRadius:"6px"
 },
 
 copy:{
