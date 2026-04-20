@@ -1,13 +1,34 @@
 // ORIGINAL Footer.jsx (RESTORED — NO CHANGES)
 
 import { FaYoutube, FaFacebook, FaInstagram } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { PLATFORM } from "../config/platform";
 
 function Footer() {
+  const navigate = useNavigate();
 
 return (
 
 <footer style={styles.footer}>
+
+{/* CUSTOMER SERVICE BUTTON */}
+
+<div style={{ marginBottom: "40px" }}>
+  <button
+    style={{
+      background: "#00ffae",
+      color: "#000",
+      border: "none",
+      padding: "12px 20px",
+      borderRadius: "6px",
+      cursor: "pointer",
+      fontWeight: "bold"
+    }}
+    onClick={() => navigate("/support")}
+  >
+    💬 Customer Service
+  </button>
+</div>
 
 {/* NEWSLETTER */}
 
