@@ -8,6 +8,7 @@ function Support() {
     }
   ]);
   const [input, setInput] = useState("");
+  const [awaitingSupportDetails, setAwaitingSupportDetails] = useState(false);
 
   const addBotMessage = (text) => {
     setMessages((prev) => [...prev, { sender: "bot", text }]);
@@ -18,71 +19,87 @@ function Support() {
   };
 
   const handleQuickReply = (type) => {
-    if (type === "payment") {
-      addUserMessage("I need help with payment.");
-      addBotMessage(
-        "Please hold on while we transfer you to a customer service representative for payment assistance. There are other people in the queue at the moment."
-      );
-      return;
-    }
+  if (type === "payment") {
+    addUserMessage("I need help with payment.");
+    addBotMessage(
+      "What is the problem? Can you briefly explain how you want us to help?"
+    );
+    setAwaitingSupportDetails(true);
+    return;
+  }
 
-    if (type === "tickets") {
-      addUserMessage("I need help with tickets.");
-      addBotMessage(
-        "Please hold on while we transfer you to a customer service representative for ticket assistance. There are other people in the queue at the moment."
-      );
-      return;
-    }
+  if (type === "tickets") {
+    addUserMessage("I need help with tickets.");
+    addBotMessage(
+      "What is the problem? Can you briefly explain how you want us to help?"
+    );
+    setAwaitingSupportDetails(true);
+    return;
+  }
 
-    if (type === "account") {
-      addUserMessage("I need help with my account.");
-      addBotMessage(
-        "Please hold on while we transfer you to a customer service representative for account assistance. There are other people in the queue at the moment."
-      );
-      return;
-    }
+  if (type === "account") {
+    addUserMessage("I need help with my account.");
+    addBotMessage(
+      "What is the problem? Can you briefly explain how you want us to help?"
+    );
+    setAwaitingSupportDetails(true);
+    return;
+  }
 
-    if (type === "film") {
-      addUserMessage("I need help with film submission.");
-      addBotMessage(
-        "Please hold on while we transfer you to a customer service representative for film submission assistance. There are other people in the queue at the moment."
-      );
-      return;
-    }
-  };
+  if (type === "film") {
+    addUserMessage("I need help with film submission.");
+    addBotMessage(
+      "What is the problem? Can you briefly explain how you want us to help?"
+    );
+    setAwaitingSupportDetails(true);
+    return;
+  }
+};
 
   const handleSend = () => {
-    const trimmed = input.trim();
+  const trimmed = input.trim();
 
-    if (!trimmed) return;
+  if (!trimmed) return;
 
-    addUserMessage(trimmed);
-    setInput("");
+  addUserMessage(trimmed);
+  setInput("");
 
-    const lower = trimmed.toLowerCase();
+  if (awaitingSupportDetails) {
+    addBotMessage(
+      "Please hold on while we transfer you to a customer service representative. There are other people in the queue at the moment, but someone will attend to you shortly."
+    );
+    setAwaitingSupportDetails(false);
+    return;
+  }
 
-    if (lower.includes("payment")) {
-      addBotMessage(
-        "Please hold on while we transfer you to a customer service representative for payment assistance. There are other people in the queue at the moment."
-      );
-    } else if (lower.includes("ticket")) {
-      addBotMessage(
-        "Please hold on while we transfer you to a customer service representative for ticket assistance. There are other people in the queue at the moment."
-      );
-    } else if (lower.includes("account") || lower.includes("login")) {
-      addBotMessage(
-        "Please hold on while we transfer you to a customer service representative for account assistance. There are other people in the queue at the moment."
-      );
-    } else if (lower.includes("film") || lower.includes("submit")) {
-      addBotMessage(
-        "Please hold on while we transfer you to a customer service representative for film submission assistance. There are other people in the queue at the moment."
-      );
-    } else {
-      addBotMessage(
-        "Please hold on while we transfer you to a customer service representative. There are other people in the queue at the moment."
-      );
-    }
-  };
+  const lower = trimmed.toLowerCase();
+
+  if (lower.includes("payment")) {
+    addBotMessage(
+      "What is the problem? Can you briefly explain how you want us to help?"
+    );
+    setAwaitingSupportDetails(true);
+  } else if (lower.includes("ticket")) {
+    addBotMessage(
+      "What is the problem? Can you briefly explain how you want us to help?"
+    );
+    setAwaitingSupportDetails(true);
+  } else if (lower.includes("account") || lower.includes("login")) {
+    addBotMessage(
+      "What is the problem? Can you briefly explain how you want us to help?"
+    );
+    setAwaitingSupportDetails(true);
+  } else if (lower.includes("film") || lower.includes("submit")) {
+    addBotMessage(
+      "What is the problem? Can you briefly explain how you want us to help?"
+    );
+    setAwaitingSupportDetails(true);
+  } else {
+    addBotMessage(
+      "Please hold on while we transfer you to a customer service representative. There are other people in the queue at the moment, but someone will attend to you shortly."
+    );
+  }
+};
 
   return (
     <div style={styles.page}>
