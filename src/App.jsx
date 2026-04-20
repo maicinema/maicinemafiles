@@ -143,7 +143,7 @@ useEffect(() => {
       <Route path="/watch/:id" element={<PageWrapper><WatchFilm /></PageWrapper>} />
       <Route path="/createaccount" element={<PageWrapper><CreateAccount /></PageWrapper>} />
       <Route path="/submit-film" element={<PageWrapper><SubmitFilm /></PageWrapper>} />
-<Route path="/support" element={<PageWrapper><Support /></PageWrapper>} />
+<Route path="/support" element={<Support />} />
 
       {/* SYSTEM */}
       <Route path="/scan-ticket" element={<PageWrapper><TicketScanner /></PageWrapper>} />
