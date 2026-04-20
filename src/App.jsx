@@ -10,6 +10,7 @@ import EventControl from "./pages/EventControl";
 import TicketScanner from "./pages/TicketScanner";
 import AdminFilmUpload from "./pages/AdminFilmUpload";
 import TicketCheckout from "./pages/TicketCheckout";
+import Support from "./pages/Support";
 
 import SupportPayment from "./pages/SupportPayment";
 import Home from "./pages/Home";
@@ -142,6 +143,7 @@ useEffect(() => {
       <Route path="/watch/:id" element={<PageWrapper><WatchFilm /></PageWrapper>} />
       <Route path="/createaccount" element={<PageWrapper><CreateAccount /></PageWrapper>} />
       <Route path="/submit-film" element={<PageWrapper><SubmitFilm /></PageWrapper>} />
+<Route path="/support" element={<PageWrapper><Support /></PageWrapper>} />
 
       {/* SYSTEM */}
       <Route path="/scan-ticket" element={<PageWrapper><TicketScanner /></PageWrapper>} />
