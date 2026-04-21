@@ -16,20 +16,21 @@ function Subscribe() {
     }
 
     try {
-const res = await fetch("/api/paystack/initialize", {        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: user.email,
-          amount: SUBSCRIPTION_PRICE,
-          type: "subscription",
-          metadata: {
-            plan: "monthly",
-            user_id: user.id || null
-          }
-        })
-      });
-
+const res = await fetch("https://maicinemafiles.pages.dev/api/paystack/initialize", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    email: user.email,
+    amount: SUBSCRIPTION_PRICE,
+    type: "subscription",
+    metadata: {
+      plan: "monthly",
+      user_id: user.id || null
+    }
+  })
+});
       const data = await res.json();
 
       if (!res.ok || !data.status) {
