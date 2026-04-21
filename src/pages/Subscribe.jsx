@@ -1,13 +1,54 @@
 import { useNavigate } from "react-router-dom";
 import { SUBSCRIPTION_PRICE } from "../config/pricing";
+import { useAuth } from "../context/AuthContext";
 
 function Subscribe() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
-  const handleProceedPayment = () => {
-    alert(
-      "Subscription payment setup is being updated. Paystack card checkout will be connected here next."
-    );
+  const handleProceedPayment = async () => {
+    if (loading) return;
+
+    if (!user?.email) {
+      alert("Please log in first before continuing to payment.");
+      navigate("/createaccount", { state: { type: "subscribe" } });
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/paystack/initialize", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: user.email,
+          amount: SUBSCRIPTION_PRICE,
+          type: "subscription",
+          metadata: {
+            plan: "monthly",
+            user_id: user.id || null
+          }
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.status) {
+        alert(data.error || data.message || "Unable to initialize payment.");
+        return;
+      }
+
+      if (data.payment_url) {
+        window.location.href = data.payment_url;
+        return;
+      }
+
+      alert("Payment link was not returned.");
+    } catch (error) {
+      console.log("Subscribe payment init error:", error);
+      alert("Something went wrong while starting payment.");
+    }
   };
 
   return (
@@ -33,14 +74,11 @@ function Subscribe() {
         </button>
 
         <p style={styles.note}>
-          Card payment gateway is being prepared for this page.
+          You will be redirected to secure checkout once payment is available.
         </p>
       </div>
 
-      <p
-        style={styles.backLink}
-        onClick={() => navigate("/")}
-      >
+      <p style={styles.backLink} onClick={() => navigate("/")}>
         Back to Home
       </p>
     </div>
