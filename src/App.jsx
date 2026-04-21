@@ -31,6 +31,8 @@ import TicketAdmin from "./admin/TicketAdmin";
 import ResetPassword from "./pages/ResetPassword";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
+import { useEffect } from "react";
+import { trackVisitor } from "./utils/trackVisitor";
 
 /* COMPONENTS */
 import Navbar from "./components/Navbar";
@@ -48,6 +50,23 @@ function ProtectedAdmin({ children }) {
       setLoading(false);
     });
   }, []);
+
+  import { useEffect } from "react";
+import { trackVisitor } from "./utils/trackVisitor";
+
+function App() {
+  useEffect(() => {
+    trackVisitor();
+  }, []);
+
+  return (
+    <div>
+      {/* your app */}
+    </div>
+  );
+}
+
+export default App;
 
  if (loading) {
   return <div style={{ color: "white", padding: "40px" }}>Checking access...</div>;

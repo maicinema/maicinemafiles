@@ -2,8 +2,13 @@ import { supabase } from "../lib/supabase";
 
 export async function trackVisitor() {
   try {
-    const isAdminPage = window.location.pathname.startsWith("/admin");
-    if (isAdminPage) return;
+    const path = window.location.pathname;
+
+    // never track admin pages
+    if (path.startsWith("/admin")) return;
+
+    // track only public homepage
+    if (path !== "/") return;
 
     let visitorId = localStorage.getItem("maicinema_visitor_id");
 
@@ -14,9 +19,7 @@ export async function trackVisitor() {
 
     const { error } = await supabase
       .from("visitors")
-      .upsert([{ visitor_id: visitorId }], {
-        onConflict: "visitor_id",
-      });
+      .upsert([{ visitor_id: visitorId }], { onConflict: "visitor_id" });
 
     if (error) {
       console.log("Visitor tracking error:", error);
