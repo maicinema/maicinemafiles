@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "routes": [
+    { "pattern": "/api/*", "zone_name": "maicinema.com" }
+  ]
+}
