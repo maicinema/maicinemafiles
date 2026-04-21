@@ -20,20 +20,61 @@ function TicketCheckout() {
     });
   };
 
-  const handleProceedPayment = () => {
+  const handleProceedPayment = async () => {
     if (!buyer.name || !buyer.email) {
       alert("Please fill in your full name and email.");
       return;
     }
 
-    if (ticket && isNaN(ticket.price) && !buyer.amount) {
-      alert("Please enter your amount.");
+    const amount =
+      ticket && !isNaN(ticket.price)
+        ? Number(ticket.price)
+        : Number(buyer.amount);
+
+    if (!amount || amount <= 0) {
+      alert("Please enter a valid ticket amount.");
       return;
     }
 
-    alert(
-      "Ticket payment setup is being updated. Paystack ticket checkout will be connected here next."
-    );
+    try {
+      const res = await fetch("https://maicinemafiles.pages.dev/api/paystack/initialize", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: buyer.email,
+          amount,
+          type: "ticket",
+          metadata: {
+            buyer_name: buyer.name,
+            buyer_email: buyer.email,
+            buyer_phone: buyer.phone,
+            event_title: event?.title || "",
+            event_date: event?.date || "",
+            event_time: event?.time || "",
+            ticket_title: ticket?.title || ""
+          }
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.status) {
+        alert(data.error || data.message || "Unable to initialize ticket payment.");
+        return;
+      }
+
+      if (data.payment_url) {
+        window.location.href = data.payment_url;
+        return;
+      }
+
+      alert("Payment link was not returned.");
+    } catch (error) {
+      console.log("Ticket payment init error:", error);
+      alert(error.message || "Something went wrong while starting ticket payment.");
+    }
   };
 
   return (
@@ -95,7 +136,7 @@ function TicketCheckout() {
         </button>
 
         <p style={styles.note}>
-          Ticket card payment gateway is being prepared for this page.
+          You will be redirected to secure checkout once payment is available.
         </p>
       </div>
 
