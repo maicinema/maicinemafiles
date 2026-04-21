@@ -6,9 +6,7 @@ function CreateAccount(){
 
 const navigate = useNavigate();
 const location = useLocation();
-
-const params = new URLSearchParams(location.search);
-const filmId = params.get("filmId");
+const isSubscribeFlow = location.state?.type === "subscribe";
 
 const [name,setName] = useState("");
 const [age,setAge] = useState("");
@@ -55,13 +53,11 @@ if (error) {
 }
 
 /* NAVIGATION */
-
-if (filmId) {
-  navigate(`/film/${filmId}`);
+if (isSubscribeFlow) {
+  navigate("/subscribe");
 } else {
   navigate("/");
 }
-
 };
 
 return(
