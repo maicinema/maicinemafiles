@@ -1,142 +1,107 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
-import QRCode from "react-qr-code";
 
 function TicketCheckout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { event, ticket } = location.state || {};
 
-  const [user, setUser] = useState({
+  const [buyer, setBuyer] = useState({
     name: "",
     email: "",
-    phone: ""
+    phone: "",
+    amount: ""
   });
 
-  const [generatedTicket, setGeneratedTicket] = useState(null);
-const [customAmount, setCustomAmount] = useState("");
-
   const handleChange = (e) => {
-    setUser({
-      ...user,
+    setBuyer({
+      ...buyer,
       [e.target.name]: e.target.value
     });
   };
 
-  const handlePurchase = async () => {
-    if (!user.name || !user.email) {
-      alert("Fill all fields");
+  const handleProceedPayment = () => {
+    if (!buyer.name || !buyer.email) {
+      alert("Please fill in your full name and email.");
       return;
     }
 
-    const { data: eventData } = await supabase
-      .from("events")
-      .select("id, total_seats, title")
-      .eq("title", event.title)
-      .single();
-
-    if (!eventData) {
-      alert("Event not found");
+    if (ticket && isNaN(ticket.price) && !buyer.amount) {
+      alert("Please enter your amount.");
       return;
     }
 
-    const { count } = await supabase
-      .from("tickets")
-      .select("*", { count: "exact", head: true })
-      .eq("event", event.title);
-
-    if (count >= eventData.total_seats) {
-      alert("Tickets are sold out");
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("ticket_purchases")
-      .insert([
-        {
-          event_title: event.title,
-          ticket_title: ticket.title,
-         ticket_price: isNaN(ticket.price) ? customAmount : ticket.price,
-          event_date: event.date,
-          buyer_name: user.name,
-          buyer_email: user.email,
-          buyer_phone: user.phone
-        }
-      ])
-      .select()
-      .single();
-
-    if (error) {
-      alert("Payment failed");
-      console.log(error);
-      return;
-    }
-
-    setGeneratedTicket(data);
+    alert(
+      "Ticket payment setup is being updated. Paystack ticket checkout will be connected here next."
+    );
   };
 
   return (
     <div style={styles.page}>
-      <h1>Complete Your Ticket</h1>
+      <h1 style={styles.heading}>Complete Your Ticket Purchase</h1>
 
       {event && (
-        <>
-          <h2>{event.title}</h2>
-          <p>
-  {ticket.title} — {
-    isNaN(ticket.price)
-      ? ticket.price
-      : `$${ticket.price}`
-  }
-</p>
-        </>
-      )}
+        <div style={styles.eventBox}>
+          <h2 style={styles.eventTitle}>{event.title}</h2>
 
-      {!generatedTicket ? (
-        <>
-          <input
-            name="name"
-            placeholder="Full Name"
-            onChange={handleChange}
-            style={styles.input}
-          />
-          <input
-            name="email"
-            placeholder="Email"
-            onChange={handleChange}
-            style={styles.input}
-          />
-          <input
-            name="phone"
-            placeholder="Phone"
-            onChange={handleChange}
-            style={styles.input}
-          />
+          <p style={styles.ticketInfo}>
+            {ticket?.title} —{" "}
+            {ticket && isNaN(ticket.price) ? ticket.price : `$${ticket?.price}`}
+          </p>
 
-{isNaN(ticket.price) && (
-  <input
-    placeholder="Enter your amount"
-    value={customAmount}
-    onChange={(e) => setCustomAmount(e.target.value)}
-    style={styles.input}
-  />
-)}
-
-          <button style={styles.button} onClick={handlePurchase}>
-            Pay & Generate Ticket
-          </button>
-        </>
-      ) : (
-        <div style={styles.ticketBox}>
-          <h2>Ticket Generated</h2>
-          <p>{generatedTicket.event_title}</p>
-          <p>{generatedTicket.ticket_title}</p>
-
-          <QRCode value={generatedTicket.id} size={200} />
-
-          <p>Ticket ID: {generatedTicket.id}</p>
+          {event.date && <p style={styles.metaText}>Date: {event.date}</p>}
+          {event.time && <p style={styles.metaText}>Time: {event.time}</p>}
         </div>
       )}
+
+      <div style={styles.formBox}>
+        <input
+          name="name"
+          placeholder="Full Name"
+          value={buyer.name}
+          onChange={handleChange}
+          style={styles.input}
+        />
+
+        <input
+          name="email"
+          type="email"
+          placeholder="Email Address"
+          value={buyer.email}
+          onChange={handleChange}
+          style={styles.input}
+        />
+
+        <input
+          name="phone"
+          placeholder="Phone Number"
+          value={buyer.phone}
+          onChange={handleChange}
+          style={styles.input}
+        />
+
+        {ticket && isNaN(ticket.price) && (
+          <input
+            name="amount"
+            placeholder="Enter your amount"
+            value={buyer.amount}
+            onChange={handleChange}
+            style={styles.input}
+          />
+        )}
+
+        <button style={styles.button} onClick={handleProceedPayment}>
+          Proceed to Payment
+        </button>
+
+        <p style={styles.note}>
+          Ticket card payment gateway is being prepared for this page.
+        </p>
+      </div>
+
+      <p style={styles.backLink} onClick={() => navigate("/events")}>
+        Back to Events
+      </p>
     </div>
   );
 }
@@ -145,23 +110,76 @@ const styles = {
   page: {
     background: "#000",
     color: "#fff",
-    padding: "40px"
+    minHeight: "100vh",
+    padding: "120px 20px 40px",
+    textAlign: "center"
   },
+
+  heading: {
+    marginBottom: "25px"
+  },
+
+  eventBox: {
+    marginBottom: "25px"
+  },
+
+  eventTitle: {
+    marginBottom: "10px"
+  },
+
+  ticketInfo: {
+    color: "#00ffae",
+    fontSize: "18px",
+    fontWeight: "bold",
+    marginBottom: "10px"
+  },
+
+  metaText: {
+    color: "#ccc",
+    marginBottom: "6px"
+  },
+
+  formBox: {
+    width: "100%",
+    maxWidth: "420px",
+    margin: "0 auto",
+    background: "#111",
+    padding: "30px 24px",
+    borderRadius: "10px",
+    boxSizing: "border-box"
+  },
+
   input: {
     display: "block",
-    marginBottom: "10px",
-    padding: "10px",
-    width: "300px"
+    marginBottom: "14px",
+    padding: "12px",
+    width: "100%",
+    boxSizing: "border-box",
+    border: "none"
   },
+
   button: {
     background: "#e50914",
     color: "#fff",
-    padding: "12px",
+    padding: "14px",
     border: "none",
-    cursor: "pointer"
+    cursor: "pointer",
+    width: "100%",
+    borderRadius: "4px",
+    fontSize: "16px"
   },
-  ticketBox: {
-    marginTop: "30px"
+
+  note: {
+    marginTop: "15px",
+    fontSize: "13px",
+    color: "#999"
+  },
+
+  backLink: {
+    marginTop: "25px",
+    color: "#ccc",
+    cursor: "pointer",
+    fontSize: "14px"
   }
 };
 
