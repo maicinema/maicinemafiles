@@ -1,11 +1,23 @@
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "https://maicinema.com",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Content-Type": "application/json"
+};
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders
+  });
+}
+
 export async function onRequestGet() {
   return new Response(
     JSON.stringify({ message: "Paystack initialize API working" }),
     {
       status: 200,
-      headers: {
-        "Content-Type": "application/json"
-      }
+      headers: corsHeaders
     }
   );
 }
@@ -25,7 +37,7 @@ export async function onRequestPost(context) {
         JSON.stringify({ error: "Email is required" }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" }
+          headers: corsHeaders
         }
       );
     }
@@ -35,7 +47,7 @@ export async function onRequestPost(context) {
         JSON.stringify({ error: "Valid amount is required" }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" }
+          headers: corsHeaders
         }
       );
     }
@@ -45,7 +57,7 @@ export async function onRequestPost(context) {
         JSON.stringify({ error: "Payment type is required" }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" }
+          headers: corsHeaders
         }
       );
     }
@@ -60,7 +72,7 @@ export async function onRequestPost(context) {
         }),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" }
+          headers: corsHeaders
         }
       );
     }
@@ -72,7 +84,7 @@ export async function onRequestPost(context) {
         }),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" }
+          headers: corsHeaders
         }
       );
     }
@@ -114,7 +126,7 @@ export async function onRequestPost(context) {
         }),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" }
+          headers: corsHeaders
         }
       );
     }
@@ -130,9 +142,7 @@ export async function onRequestPost(context) {
       }),
       {
         status: 200,
-        headers: {
-          "Content-Type": "application/json"
-        }
+        headers: corsHeaders
       }
     );
   } catch (error) {
@@ -142,9 +152,7 @@ export async function onRequestPost(context) {
       }),
       {
         status: 500,
-        headers: {
-          "Content-Type": "application/json"
-        }
+        headers: corsHeaders
       }
     );
   }
