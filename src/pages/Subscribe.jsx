@@ -16,8 +16,7 @@ function Subscribe() {
     }
 
     try {
-const res = await fetch("https://maicinemafiles.pages.dev/api/paystack/initialize", {        method: "POST",
-        headers: {
+const res = await fetch("/api/paystack/initialize", {        headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
