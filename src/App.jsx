@@ -30,6 +30,7 @@ import ReviewSubmissions from "./admin/ReviewSubmissions";
 import TicketAdmin from "./admin/TicketAdmin";
 import ResetPassword from "./pages/ResetPassword";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCancel from "./pages/PaymentCancel";
 
 /* COMPONENTS */
 import Navbar from "./components/Navbar";
@@ -164,6 +165,7 @@ useEffect(() => {
       {/* RESET PASSWORD */}
       <Route path="/reset-password" element={<ResetPassword />} />
 <Route path="/payment-success" element={<PaymentSuccess />} />
+<Route path="/payment-cancel" element={<PaymentCancel />} />
 
       {/* ADMIN */}
       <Route path="/admin" element={<ProtectedAdmin><AdminDashboard /></ProtectedAdmin>} />
