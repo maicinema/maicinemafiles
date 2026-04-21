@@ -30,7 +30,7 @@ ${SUBSCRIPTION_PRICE} / month
 
 <button
 style={styles.button}
-onClick={()=>navigate("/create-account",{state:{type:"subscribe"}})}
+onClick={() => navigate("/createaccount", { state: { type: "subscribe" } })}
 >
 Subscribe Now
 </button>
