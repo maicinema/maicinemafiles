@@ -16,8 +16,7 @@ function Subscribe() {
     }
 
     try {
-      const res = await fetch("/api/paystack/initialize", {
-        method: "POST",
+const res = await fetch("https://maicinemafiles.pages.dev/api/paystack/initialize", {        method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
@@ -45,9 +44,9 @@ function Subscribe() {
       }
 
       alert("Payment link was not returned.");
-    } catch (error) {
+        } catch (error) {
       console.log("Subscribe payment init error:", error);
-      alert("Something went wrong while starting payment.");
+      alert(error.message || "Something went wrong while starting payment.");
     }
   };
 
