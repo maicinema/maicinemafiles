@@ -73,7 +73,9 @@ const navigate = useNavigate();
     const timer = setInterval(() => {
       const updatedTimes = {};
 
-      events.forEach((event) => {
+     events
+  .filter((event) => isEventUpcoming(event))
+  .forEach((event) => {
         const rawDateTime = `${event.date || ""} ${event.time || ""}`.trim();
         const eventDate = new Date(rawDateTime).getTime();
 
@@ -157,13 +159,41 @@ const getEventTickets = (eventObj) => {
   );
 };
 
+const isEventUpcoming = (event) => {
+  try {
+    if (!event.date) return false;
+
+    // Clean time (remove timezone text)
+    let cleanTime = (event.time || "").split("(")[0].trim();
+
+    // If no time, default to midnight
+    if (!cleanTime) cleanTime = "00:00";
+
+    // Ensure date has comma (fix "June 3 2026")
+    let cleanDate = event.date.includes(",")
+      ? event.date
+      : event.date.replace(/(\w+ \d+)( \d+)/, "$1,$2");
+
+    const eventDateTime = new Date(`${cleanDate} ${cleanTime}`);
+
+    if (isNaN(eventDateTime.getTime())) return false;
+
+    return eventDateTime.getTime() > new Date().getTime();
+  } catch (err) {
+    console.error("Date parsing error:", err);
+    return false;
+  }
+};
+
 return (
   <div style={styles.page}>
 
     <SupportDonationSection />
 
 <h1 style={styles.heading}>Upcoming Events</h1>
-    {events.map((event) => {
+    {events
+  .filter((event) => isEventUpcoming(event))
+  .map((event) => {
 const eventTickets = getEventTickets(event);     
       const timeLeft = timeLeftMap[event.id] || {
         days: 0,
