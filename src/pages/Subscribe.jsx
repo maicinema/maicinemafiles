@@ -7,48 +7,49 @@ function Subscribe() {
   const { user, loading } = useAuth();
 
   const handleProceedPayment = async () => {
-    if (loading) return;
+  if (loading) return;
 
-    if (!user?.email) {
-      alert("Please log in first before continuing to payment.");
-      navigate("/createaccount", { state: { type: "subscribe" } });
+  if (!user?.email) {
+    alert("Please log in first before continuing to payment.");
+    navigate("/createaccount", { state: { type: "subscribe" } });
+    return;
+  }
+
+  try {
+    const res = await fetch("https://maicinemafiles.pages.dev/api/paystack/initialize", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: user.email,
+        amount: SUBSCRIPTION_PRICE,
+        type: "subscription",
+        metadata: {
+          plan: "monthly",
+          user_id: user.id || null
+        }
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.status) {
+      alert(data.error || data.message || "Unable to initialize payment.");
       return;
     }
 
-    try {
-const res = await fetch("https://maicinemafiles.pages.dev/api/paystack/initialize", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    email: user.email,
-    amount: SUBSCRIPTION_PRICE,
-    type: "subscription",
-    metadata: {
-      plan: "monthly",
-      user_id: user.id || null
+    if (data.payment_url) {
+      window.location.href = data.payment_url;
+      return;
     }
-  })
-});
-      const data = await res.json();
 
-      if (!res.ok || !data.status) {
-        alert(data.error || data.message || "Unable to initialize payment.");
-        return;
-      }
-
-      if (data.payment_url) {
-        window.location.href = data.payment_url;
-        return;
-      }
-
-      alert("Payment link was not returned.");
-        } catch (error) {
-      console.log("Subscribe payment init error:", error);
-      alert(error.message || "Something went wrong while starting payment.");
-    }
-  };
+    alert("Payment link was not returned.");
+  } catch (error) {
+    console.log("Subscribe payment init error:", error);
+    alert(error.message || "Something went wrong while starting payment.");
+  }
+};
 
   return (
     <div style={styles.container}>
