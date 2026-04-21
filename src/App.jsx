@@ -51,9 +51,6 @@ function ProtectedAdmin({ children }) {
     });
   }, []);
 
-  import { useEffect } from "react";
-import { trackVisitor } from "./utils/trackVisitor";
-
 function App() {
   useEffect(() => {
     trackVisitor();
