@@ -1,25 +1,91 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 function SupportPayment() {
   const location = useLocation();
+  const navigate = useNavigate();
   const tier = location.state?.tier;
+
+  const [donor, setDonor] = useState({
+    name: "",
+    email: "",
+    amount: ""
+  });
+
+  const handleChange = (e) => {
+    setDonor({
+      ...donor,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleProceedPayment = () => {
+    if (!donor.name || !donor.email) {
+      alert("Please fill in your full name and email.");
+      return;
+    }
+
+    if (!tier && !donor.amount) {
+      alert("Please enter a donation amount.");
+      return;
+    }
+
+    alert(
+      "Donation payment setup is being updated. Paystack donation checkout will be connected here next."
+    );
+  };
 
   return (
     <div style={styles.page}>
-      <h1>Support Payment</h1>
+      <h1 style={styles.heading}>Support MaiCinema</h1>
 
       {tier && (
-        <>
-          <h2>{tier.name}</h2>
-          <p>{tier.price}</p>
-        </>
+        <div style={styles.tierBox}>
+          <h2 style={styles.tierName}>{tier.name}</h2>
+          <p style={styles.tierPrice}>{tier.price}</p>
+        </div>
       )}
 
-      <input placeholder="Full Name" style={styles.input} />
-      <input placeholder="Email" style={styles.input} />
-      <input placeholder="Amount" style={styles.input} />
+      <div style={styles.formBox}>
+        <input
+          name="name"
+          placeholder="Full Name"
+          value={donor.name}
+          onChange={handleChange}
+          style={styles.input}
+        />
 
-      <button style={styles.button}>Proceed Payment</button>
+        <input
+          name="email"
+          type="email"
+          placeholder="Email Address"
+          value={donor.email}
+          onChange={handleChange}
+          style={styles.input}
+        />
+
+        {!tier && (
+          <input
+            name="amount"
+            placeholder="Enter Donation Amount"
+            value={donor.amount}
+            onChange={handleChange}
+            style={styles.input}
+          />
+        )}
+
+        <button style={styles.button} onClick={handleProceedPayment}>
+          Proceed to Payment
+        </button>
+
+        <p style={styles.note}>
+          Donation card payment gateway is being prepared for this page.
+        </p>
+      </div>
+
+      <p style={styles.backLink} onClick={() => navigate("/events")}>
+        Back to Events
+      </p>
     </div>
   );
 }
@@ -28,21 +94,71 @@ const styles = {
   page: {
     background: "#000",
     color: "white",
-    padding: "40px",
+    minHeight: "100vh",
+    padding: "120px 20px 40px",
+    textAlign: "center"
   },
+
+  heading: {
+    marginBottom: "25px"
+  },
+
+  tierBox: {
+    marginBottom: "25px"
+  },
+
+  tierName: {
+    marginBottom: "10px"
+  },
+
+  tierPrice: {
+    color: "#00ffae",
+    fontSize: "18px",
+    fontWeight: "bold"
+  },
+
+  formBox: {
+    width: "100%",
+    maxWidth: "420px",
+    margin: "0 auto",
+    background: "#111",
+    padding: "30px 24px",
+    borderRadius: "10px",
+    boxSizing: "border-box"
+  },
+
   input: {
     display: "block",
-    marginBottom: "10px",
-    padding: "10px",
-    width: "300px",
+    width: "100%",
+    marginBottom: "14px",
+    padding: "12px",
+    boxSizing: "border-box",
+    border: "none"
   },
+
   button: {
     background: "#e50914",
-    padding: "12px",
+    padding: "14px",
     border: "none",
     color: "white",
     cursor: "pointer",
+    width: "100%",
+    borderRadius: "4px",
+    fontSize: "16px"
   },
+
+  note: {
+    marginTop: "15px",
+    fontSize: "13px",
+    color: "#999"
+  },
+
+  backLink: {
+    marginTop: "25px",
+    color: "#ccc",
+    cursor: "pointer",
+    fontSize: "14px"
+  }
 };
 
 export default SupportPayment;
