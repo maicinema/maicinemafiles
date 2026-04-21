@@ -19,20 +19,64 @@ function SupportPayment() {
     });
   };
 
-  const handleProceedPayment = () => {
+  const extractTierAmount = (priceText) => {
+    if (!priceText) return 0;
+
+    const matches = priceText.match(/[\d,]+/g);
+    if (!matches || matches.length === 0) return 0;
+
+    const firstAmount = matches[0].replace(/,/g, "");
+    return Number(firstAmount);
+  };
+
+  const handleProceedPayment = async () => {
     if (!donor.name || !donor.email) {
       alert("Please fill in your full name and email.");
       return;
     }
 
-    if (!tier && !donor.amount) {
-      alert("Please enter a donation amount.");
+    const amount = tier ? extractTierAmount(tier.price) : Number(donor.amount);
+
+    if (!amount || amount <= 0) {
+      alert("Please enter a valid donation amount.");
       return;
     }
 
-    alert(
-      "Donation payment setup is being updated. Paystack donation checkout will be connected here next."
-    );
+    try {
+      const res = await fetch("https://maicinemafiles.pages.dev/api/paystack/initialize", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: donor.email,
+          amount,
+          type: "donation",
+          metadata: {
+            donor_name: donor.name,
+            donor_email: donor.email,
+            donation_tier: tier?.name || "Custom Donation"
+          }
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.status) {
+        alert(data.error || data.message || "Unable to initialize donation payment.");
+        return;
+      }
+
+      if (data.payment_url) {
+        window.location.href = data.payment_url;
+        return;
+      }
+
+      alert("Payment link was not returned.");
+    } catch (error) {
+      console.log("Donation payment init error:", error);
+      alert(error.message || "Something went wrong while starting donation payment.");
+    }
   };
 
   return (
@@ -79,7 +123,7 @@ function SupportPayment() {
         </button>
 
         <p style={styles.note}>
-          Donation card payment gateway is being prepared for this page.
+          You will be redirected to secure checkout once payment is available.
         </p>
       </div>
 
