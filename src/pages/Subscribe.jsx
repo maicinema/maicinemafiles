@@ -4,32 +4,10 @@ import { SUBSCRIPTION_PRICE } from "../config/pricing";
 function Subscribe() {
   const navigate = useNavigate();
 
-  const handlePayPal = async () => {
-    try {
-      const res = await fetch("/api/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: SUBSCRIPTION_PRICE.toString(),
-        }),
-      });
-
-      const data = await res.json();
-
-      const approveLink = data?.links?.find((link) => link.rel === "approve");
-
-      if (approveLink) {
-        window.location.href = approveLink.href;
-      } else {
-        console.log("PayPal response:", data);
-        alert("Payment error: No approval link found.");
-      }
-    } catch (err) {
-      console.log("PayPal error:", err);
-      alert("Payment failed.");
-    }
+  const handleProceedPayment = () => {
+    alert(
+      "Subscription payment setup is being updated. Paystack card checkout will be connected here next."
+    );
   };
 
   return (
@@ -40,9 +18,31 @@ function Subscribe() {
         Monthly Subscription: ${SUBSCRIPTION_PRICE}
       </p>
 
-      <button style={styles.button} onClick={handlePayPal}>
-        Pay ${SUBSCRIPTION_PRICE} with PayPal
-      </button>
+      <div style={styles.card}>
+        <h3 style={styles.cardTitle}>What you get</h3>
+
+        <ul style={styles.list}>
+          <li>Unlimited access to short films</li>
+          <li>Stream films without individual rental payment</li>
+          <li>Access to MaiCinema subscriber-only content</li>
+          <li>Simple monthly subscription access</li>
+        </ul>
+
+        <button style={styles.button} onClick={handleProceedPayment}>
+          Proceed to Payment
+        </button>
+
+        <p style={styles.note}>
+          Card payment gateway is being prepared for this page.
+        </p>
+      </div>
+
+      <p
+        style={styles.backLink}
+        onClick={() => navigate("/")}
+      >
+        Back to Home
+      </p>
     </div>
   );
 }
@@ -54,13 +54,37 @@ const styles = {
     minHeight: "100vh",
     paddingTop: "120px",
     textAlign: "center",
+    paddingLeft: "20px",
+    paddingRight: "20px"
   },
 
   price: {
     color: "#00ffae",
     marginBottom: "30px",
     fontSize: "20px",
-    fontWeight: "bold",
+    fontWeight: "bold"
+  },
+
+  card: {
+    width: "100%",
+    maxWidth: "420px",
+    margin: "0 auto",
+    background: "#111",
+    padding: "30px 24px",
+    borderRadius: "10px",
+    boxSizing: "border-box"
+  },
+
+  cardTitle: {
+    marginBottom: "20px"
+  },
+
+  list: {
+    listStyle: "none",
+    padding: 0,
+    margin: "0 0 25px 0",
+    lineHeight: "2",
+    color: "#ccc"
   },
 
   button: {
@@ -71,7 +95,21 @@ const styles = {
     cursor: "pointer",
     fontSize: "16px",
     borderRadius: "4px",
+    width: "100%"
   },
+
+  note: {
+    marginTop: "15px",
+    fontSize: "13px",
+    color: "#999"
+  },
+
+  backLink: {
+    marginTop: "25px",
+    color: "#ccc",
+    cursor: "pointer",
+    fontSize: "14px"
+  }
 };
 
 export default Subscribe;
