@@ -29,6 +29,7 @@ import ManageEvents from "./admin/ManageEvents";
 import ReviewSubmissions from "./admin/ReviewSubmissions";
 import TicketAdmin from "./admin/TicketAdmin";
 import ResetPassword from "./pages/ResetPassword";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 /* COMPONENTS */
 import Navbar from "./components/Navbar";
@@ -84,7 +85,11 @@ function PageWrapper({ children }) {
 function Layout() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
-  const hideLayout = isAdminRoute || location.pathname === "/admin/login";
+const hideLayout =
+  isAdminRoute ||
+  location.pathname === "/admin/login" ||
+  location.pathname === "/payment-success" ||
+  location.pathname === "/payment-cancel";
 
   /* ✅ ADDED: handle Supabase reset session */
   useEffect(() => {
@@ -158,6 +163,7 @@ useEffect(() => {
 
       {/* RESET PASSWORD */}
       <Route path="/reset-password" element={<ResetPassword />} />
+<Route path="/payment-success" element={<PaymentSuccess />} />
 
       {/* ADMIN */}
       <Route path="/admin" element={<ProtectedAdmin><AdminDashboard /></ProtectedAdmin>} />
