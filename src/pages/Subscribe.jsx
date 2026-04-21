@@ -11,13 +11,34 @@ function Subscribe() {
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
 
-  const handleSubscribe = (e) => {
-    e.preventDefault();
+  const handlePayPal = async () => {
+  try {
+    const res = await fetch("/api/create-order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount: SUBSCRIPTION_PRICE.toString(),
+      }),
+    });
 
-    alert("Subscription activated! All films unlocked.");
+    const data = await res.json();
 
-    navigate("/");
-  };
+    const approveLink = data.links.find(
+      (link) => link.rel === "approve"
+    );
+
+    if (approveLink) {
+      window.location.href = approveLink.href;
+    } else {
+      alert("Payment error: No approval link found");
+    }
+  } catch (err) {
+    console.log(err);
+    alert("Payment failed");
+  }
+};
 
   return (
 
@@ -29,49 +50,9 @@ function Subscribe() {
         Monthly Subscription: ${SUBSCRIPTION_PRICE}
       </p>
 
-      <form onSubmit={handleSubscribe} style={styles.form}>
-
-        <input
-          type="text"
-          placeholder="Name on Card"
-          value={cardName}
-          onChange={(e)=>setCardName(e.target.value)}
-          style={styles.input}
-          required
-        />
-
-        <input
-          type="text"
-          placeholder="Card Number"
-          value={cardNumber}
-          onChange={(e)=>setCardNumber(e.target.value)}
-          style={styles.input}
-          required
-        />
-
-        <input
-          type="text"
-          placeholder="Expiry Date (MM/YY)"
-          value={expiry}
-          onChange={(e)=>setExpiry(e.target.value)}
-          style={styles.input}
-          required
-        />
-
-        <input
-          type="text"
-          placeholder="CVV"
-          value={cvv}
-          onChange={(e)=>setCvv(e.target.value)}
-          style={styles.input}
-          required
-        />
-
-        <button style={styles.button}>
-          Pay ${SUBSCRIPTION_PRICE}
-        </button>
-
-      </form>
+<button style={styles.button} onClick={handlePayPal}>
+  Pay ${SUBSCRIPTION_PRICE} with PayPal
+</button>
 
     </div>
   );
