@@ -114,13 +114,12 @@ async function uploadBanner() {
             loadBanners();
           }}
         >
-          Go Live
-        </button>
-
-        <button
-          style={styles.close}
-          onClick={() => setEditingBanner(false)}
-        >
+         <button
+  style={styles.button}
+  onClick={uploadBanner}
+>
+  Go Live
+</button>
           Close
         </button>
       </div>
