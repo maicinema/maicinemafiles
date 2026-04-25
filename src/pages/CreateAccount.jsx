@@ -70,6 +70,16 @@ function CreateAccount() {
       setLoading(false);
       return;
     }
+    
+await supabase.from("newsletter_subscribers").upsert(
+  [
+    {
+      email: email.trim().toLowerCase(),
+      source: "account_signup"
+    }
+  ],
+  { onConflict: "email" }
+);
 
     if (isSubscribeFlow) {
       navigate("/subscribe");
