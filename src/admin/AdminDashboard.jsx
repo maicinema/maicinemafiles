@@ -71,10 +71,7 @@ function AdminDashboard() {
     const confirmed = window.confirm("Delete this banner file?");
     if (!confirmed) return;
 
-    const { error } = await supabase
-      .from("banners")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("banners").delete().eq("id", id);
 
     if (error) {
       alert("Failed to delete banner");
@@ -102,9 +99,7 @@ function AdminDashboard() {
       return;
     }
 
-    const { data } = supabase.storage
-      .from("posters")
-      .getPublicUrl(fileName);
+    const { data } = supabase.storage.from("posters").getPublicUrl(fileName);
 
     const { error: insertError } = await supabase.from("banners").insert([
       {
@@ -156,83 +151,72 @@ function AdminDashboard() {
         </div>
 
         <div style={styles.grid}>
-  <div style={styles.card}>
-    <h2>Home Banner</h2>
+          <div style={styles.card}>
+            <h2>Home Banner</h2>
 
-  {!editingBanner ? (
-    <button
-      type="button"
-      style={styles.button}
-      onClick={() => setEditingBanner(true)}
-    >
-      Edit
-    </button>
-  ) : (
-    <>
-      {/* EXISTING BANNERS */}
-      <div style={{ marginBottom: "20px" }}>
-        {banners.length === 0 ? (
-          <p style={styles.desc}>No banner files uploaded yet.</p>
-        ) : (
-          banners.map((item, index) => (
-            <div key={item.id} style={styles.bannerItem}>
-              <p style={styles.preview}>
-                Banner {index + 1} —{" "}
-                {item.file_name || item.file_url.split("/").pop()}
-              </p>
-
+            {!editingBanner ? (
               <button
                 type="button"
-                style={styles.deleteButton}
-                onClick={() => deleteBanner(item.id)}
+                style={styles.button}
+                onClick={() => setEditingBanner(true)}
               >
-                Delete
+                Edit
               </button>
-            </div>
-          ))
-        )}
-      </div>
+            ) : (
+              <>
+                <div style={{ marginBottom: "20px" }}>
+                  {banners.length === 0 ? (
+                    <p style={styles.desc}>No banner files uploaded yet.</p>
+                  ) : (
+                    banners.map((item, index) => (
+                      <div key={item.id} style={styles.bannerItem}>
+                        <p style={styles.preview}>
+                          Banner {index + 1} —{" "}
+                          {item.file_name || item.file_url?.split("/").pop()}
+                        </p>
 
-      {/* UPLOAD NEW */}
-      <div style={{ marginTop: "10px" }}>
-        <input
-          type="file"
-          accept="image/*,video/mp4"
-          onChange={(e) => setNewBannerFile(e.target.files[0])}
-        />
+                        <button
+                          type="button"
+                          style={styles.deleteButton}
+                          onClick={() => deleteBanner(item.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
 
-        {newBannerFile && (
-          <p style={styles.preview}>{newBannerFile.name}</p>
-        )}
-      </div>
+                <input
+                  type="file"
+                  accept="image/*,video/mp4"
+                  onChange={(e) => setNewBannerFile(e.target.files[0])}
+                />
 
-      {/* ACTION BUTTONS */}
-      <div style={styles.buttonRow}>
-        <button
-          type="button"
-          style={styles.button}
-          onClick={uploadBanner}
-        >
-          Go Live
-        </button>
+                {newBannerFile && (
+                  <p style={styles.preview}>{newBannerFile.name}</p>
+                )}
 
-        <button
-          type="button"
-          style={styles.close}
-          onClick={() => setEditingBanner(false)}
-        >
-          Close
-        </button>
-      </div>
-    </>
-  )}
-</div>
+                <div style={styles.buttonRow}>
+                  <button type="button" style={styles.button} onClick={uploadBanner}>
+                    Go Live
+                  </button>
+
+                  <button
+                    type="button"
+                    style={styles.close}
+                    onClick={() => setEditingBanner(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
 
           <div style={styles.card}>
             <h2>Platform Logo</h2>
-            <p style={styles.desc}>
-              Replace existing logo and switch live branding
-            </p>
+            <p style={styles.desc}>Replace existing logo and switch live branding</p>
 
             <input
               type="file"
@@ -243,10 +227,7 @@ function AdminDashboard() {
             {logo && <p style={styles.preview}>{logo.name}</p>}
 
             <div style={styles.buttonRow}>
-              <button type="button" style={styles.button}>
-                Edit
-              </button>
-
+              <button type="button" style={styles.button}>Edit</button>
               <button
                 type="button"
                 style={styles.button}
@@ -293,56 +274,28 @@ function AdminDashboard() {
             <h2>Edit Footer</h2>
 
             <label>YouTube Link</label>
-            <input
-              value={youtube}
-              onChange={(e) => setYoutube(e.target.value)}
-              style={styles.input}
-            />
+            <input value={youtube} onChange={(e) => setYoutube(e.target.value)} style={styles.input} />
 
             <label>Facebook Link</label>
-            <input
-              value={facebook}
-              onChange={(e) => setFacebook(e.target.value)}
-              style={styles.input}
-            />
+            <input value={facebook} onChange={(e) => setFacebook(e.target.value)} style={styles.input} />
 
             <label>Instagram Link</label>
-            <input
-              value={instagram}
-              onChange={(e) => setInstagram(e.target.value)}
-              style={styles.input}
-            />
+            <input value={instagram} onChange={(e) => setInstagram(e.target.value)} style={styles.input} />
 
             <label>Email Address</label>
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={styles.input}
-            />
+            <input value={email} onChange={(e) => setEmail(e.target.value)} style={styles.input} />
 
             <label>WhatsApp QR Code</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setWhatsappQR(e.target.files[0])}
-            />
+            <input type="file" accept="image/*" onChange={(e) => setWhatsappQR(e.target.files[0])} />
 
             {whatsappQR && <p style={styles.preview}>{whatsappQR.name}</p>}
 
             <div style={styles.buttonRow}>
-              <button
-                type="button"
-                style={styles.button}
-                onClick={() => handleSave("Footer")}
-              >
+              <button type="button" style={styles.button} onClick={() => handleSave("Footer")}>
                 Save Footer
               </button>
 
-              <button
-                type="button"
-                style={styles.close}
-                onClick={() => setShowFooterEditor(false)}
-              >
+              <button type="button" style={styles.close} onClick={() => setShowFooterEditor(false)}>
                 Close
               </button>
             </div>
@@ -359,11 +312,7 @@ function AdminDashboard() {
               ))}
             </ul>
 
-            <button
-              type="button"
-              style={styles.close}
-              onClick={() => setShowEmails(false)}
-            >
+            <button type="button" style={styles.close} onClick={() => setShowEmails(false)}>
               Close
             </button>
           </div>
@@ -374,144 +323,25 @@ function AdminDashboard() {
 }
 
 const styles = {
-  page: {
-    background: "#000",
-    minHeight: "100vh"
-  },
-
-  container: {
-    background: "#000",
-    color: "white",
-    minHeight: "100vh",
-    padding: "140px 40px 60px"
-  },
-
-  title: {
-    textAlign: "center",
-    marginBottom: "10px"
-  },
-
-  subtitle: {
-    textAlign: "center",
-    color: "#aaa",
-    marginBottom: "40px"
-  },
-
-  statsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
-    gap: "20px",
-    marginBottom: "40px"
-  },
-
-  statCard: {
-    background: "#111",
-    padding: "25px",
-    borderRadius: "10px",
-    textAlign: "center"
-  },
-
-  statValue: {
-    fontSize: "32px",
-    marginTop: "10px"
-  },
-
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))",
-    gap: "25px",
-    marginTop: "20px"
-  },
-
-  card: {
-    background: "#111",
-    padding: "25px",
-    borderRadius: "10px",
-    position: "relative",
-    zIndex: 1
-  },
-
-  desc: {
-    fontSize: "14px",
-    color: "#aaa",
-    marginTop: "8px",
-    marginBottom: "18px",
-    lineHeight: "1.6"
-  },
-
-  bannerItem: {
-    marginTop: "12px",
-    padding: "10px",
-    background: "#000",
-    borderRadius: "6px"
-  },
-
-  buttonRow: {
-    display: "flex",
-    gap: "10px",
-    flexWrap: "wrap",
-    marginTop: "15px"
-  },
-
-  button: {
-    padding: "10px 14px",
-    border: "none",
-    background: "#e50914",
-    color: "white",
-    cursor: "pointer",
-    position: "relative",
-    zIndex: 10
-  },
-
-  deleteButton: {
-    padding: "10px 14px",
-    border: "none",
-    background: "#444",
-    color: "white",
-    cursor: "pointer",
-    position: "relative",
-    zIndex: 10
-  },
-
-  preview: {
-    marginTop: "10px",
-    color: "#00ffae",
-    fontSize: "14px",
-    wordBreak: "break-word"
-  },
-
-  modal: {
-    marginTop: "40px",
-    background: "#111",
-    padding: "30px",
-    borderRadius: "10px",
-    maxWidth: "500px"
-  },
-
-  input: {
-    display: "block",
-    marginTop: "10px",
-    marginBottom: "14px",
-    padding: "10px",
-    width: "100%",
-    border: "none"
-  },
-
-  close: {
-    marginTop: "15px",
-    padding: "8px 12px",
-    background: "#444",
-    border: "none",
-    color: "white",
-    cursor: "pointer",
-    position: "relative",
-    zIndex: 10
-  },
-
-  emailList: {
-    marginTop: "20px",
-    lineHeight: "2"
-  }
+  page: { background: "#000", minHeight: "100vh" },
+  container: { background: "#000", color: "white", minHeight: "100vh", padding: "140px 40px 60px" },
+  title: { textAlign: "center", marginBottom: "10px" },
+  subtitle: { textAlign: "center", color: "#aaa", marginBottom: "40px" },
+  statsGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "20px", marginBottom: "40px" },
+  statCard: { background: "#111", padding: "25px", borderRadius: "10px", textAlign: "center" },
+  statValue: { fontSize: "32px", marginTop: "10px" },
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "25px", marginTop: "20px" },
+  card: { background: "#111", padding: "25px", borderRadius: "10px", position: "relative", zIndex: 1 },
+  desc: { fontSize: "14px", color: "#aaa", marginTop: "8px", marginBottom: "18px", lineHeight: "1.6" },
+  bannerItem: { marginTop: "12px", padding: "10px", background: "#000", borderRadius: "6px" },
+  buttonRow: { display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "15px" },
+  button: { padding: "10px 14px", border: "none", background: "#e50914", color: "white", cursor: "pointer", position: "relative", zIndex: 10 },
+  deleteButton: { padding: "10px 14px", border: "none", background: "#444", color: "white", cursor: "pointer", position: "relative", zIndex: 10 },
+  preview: { marginTop: "10px", color: "#00ffae", fontSize: "14px", wordBreak: "break-word" },
+  modal: { marginTop: "40px", background: "#111", padding: "30px", borderRadius: "10px", maxWidth: "500px" },
+  input: { display: "block", marginTop: "10px", marginBottom: "14px", padding: "10px", width: "100%", border: "none" },
+  close: { marginTop: "15px", padding: "8px 12px", background: "#444", border: "none", color: "white", cursor: "pointer", position: "relative", zIndex: 10 },
+  emailList: { marginTop: "20px", lineHeight: "2" }
 };
 
 export default AdminDashboard;
