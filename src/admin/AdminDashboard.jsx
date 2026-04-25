@@ -75,20 +75,45 @@ async function uploadBanner() {
         </div>
       ))}
 
-      {/* UPLOAD NEW */}
+      {/* UPLOAD */}
       <input
         type="file"
         accept="image/*,video/mp4"
         onChange={(e) => setNewBannerFile(e.target.files[0])}
-        style={{ marginTop: "10px" }}
       />
 
       {newBannerFile && (
         <p style={styles.preview}>{newBannerFile.name}</p>
       )}
 
-      <div style={{ marginTop: "10px" }}>
-        <button style={styles.button} onClick={uploadBanner}>
+      <div style={styles.buttonRow}>
+        <button
+          style={styles.button}
+          onClick={async () => {
+            if (!newBannerFile) return;
+
+            const fileName = `${Date.now()}-${newBannerFile.name}`;
+
+            await supabase.storage
+              .from("posters")
+              .upload(fileName, newBannerFile);
+
+            const { data } = supabase.storage
+              .from("posters")
+              .getPublicUrl(fileName);
+
+            await supabase.from("banners").insert([
+              {
+                file_url: data.publicUrl,
+                file_type: newBannerFile.type,
+                file_name: newBannerFile.name
+              }
+            ]);
+
+            setNewBannerFile(null);
+            loadBanners();
+          }}
+        >
           Go Live
         </button>
 
