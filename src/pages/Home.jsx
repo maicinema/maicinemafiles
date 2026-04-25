@@ -150,11 +150,13 @@ const styles = {
   },
 
   imageBanner: {
-    position: "absolute",
-    inset: 0,
-    backgroundSize: "cover",
-    backgroundPosition: "center"
-  },
+  position: "absolute",
+  inset: 0,
+  backgroundSize: "contain",
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
+  backgroundColor: "#000"
+},
 
   fallback: {
     position: "absolute",
