@@ -1,68 +1,55 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import logo from "../assets/logo.png";
+import { useEffect, useState } from "react";
+import defaultLogo from "../assets/logo.png";
+import { supabase } from "../lib/supabase";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(defaultLogo);
 
- const navItems = [
-  { name: "Home", path: "/" },
-  { name: "MyCinema", path: "/mycinema" },
-  { name: "Events", path: "/events" }
-];
+  const navItems = [
+    { name: "Home", path: "/" },
+    { name: "MyCinema", path: "/mycinema" },
+    { name: "Events", path: "/events" }
+  ];
+
+  useEffect(() => {
+    loadLogo();
+  }, []);
+
+  async function loadLogo() {
+    const { data, error } = await supabase
+      .from("logos")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error || !data || data.length === 0) {
+      setLogoUrl(defaultLogo);
+      return;
+    }
+
+    setLogoUrl(data[0].file_url);
+  }
 
   return (
     <nav style={styles.nav}>
-      <Link
-        to="/"
-        style={styles.logoWrap}
-        onMouseEnter={(e) => {
-          if (window.innerWidth > 768) {
-            const img = e.currentTarget.querySelector("img");
-            if (img) img.style.transform = "scale(1.12)";
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (window.innerWidth > 768) {
-            const img = e.currentTarget.querySelector("img");
-            if (img) img.style.transform = "scale(1)";
-          }
-        }}
-      >
-        <img src={logo} alt="MaiCinema" style={styles.logo} />
+      <Link to="/" style={styles.logoWrap}>
+        <img src={logoUrl} alt="MaiCinema" style={styles.logo} />
       </Link>
 
-      {/* Desktop Links */}
       <div style={styles.linksDesktop}>
         {navItems.map((item) => (
-          <Link
-            key={item.name}
-            to={item.path}
-            style={styles.link}
-            onMouseEnter={(e) => {
-              if (window.innerWidth > 768) {
-                e.target.style.color = "red";
-                e.target.style.transform = "scale(1.12)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (window.innerWidth > 768) {
-                e.target.style.color = "white";
-                e.target.style.transform = "scale(1)";
-              }
-            }}
-          >
+          <Link key={item.name} to={item.path} style={styles.link}>
             {item.name}
           </Link>
         ))}
       </div>
 
-      {/* Hamburger */}
       <div style={styles.hamburger} onClick={() => setMenuOpen(!menuOpen)}>
         ☰
       </div>
 
-      {/* Mobile Menu */}
       {menuOpen && (
         <div style={styles.mobileMenu}>
           {navItems.map((item) => (
