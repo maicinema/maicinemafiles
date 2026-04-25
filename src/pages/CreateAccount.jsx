@@ -28,17 +28,33 @@ function CreateAccount() {
       });
 
       if (error) {
-        alert(error.message);
-        setLoading(false);
-        return;
-      }
+  alert(error.message);
+  setLoading(false);
+  return;
+}
 
-      if (isSubscribeFlow) {
-        navigate("/subscribe");
-      } else {
-        navigate("/");
+const { error: newsletterError } = await supabase
+  .from("newsletter_subscribers")
+  .upsert(
+    [
+      {
+        email: email.trim().toLowerCase(),
+        source: "account_signup"
       }
+    ],
+    { onConflict: "email" }
+  );
 
+if (newsletterError) {
+  console.log("Newsletter save error:", newsletterError);
+  alert("Account created, but email was not saved to newsletter list.");
+}
+
+if (isSubscribeFlow) {
+  navigate("/subscribe");
+} else {
+  navigate("/");
+}
       setLoading(false);
       return;
     }
@@ -70,7 +86,7 @@ function CreateAccount() {
       setLoading(false);
       return;
     }
-    
+
 await supabase.from("newsletter_subscribers").upsert(
   [
     {
