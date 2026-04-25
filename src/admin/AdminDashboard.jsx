@@ -156,74 +156,77 @@ function AdminDashboard() {
         </div>
 
         <div style={styles.grid}>
-          <div style={styles.card}>
-            <h2>Home Banner</h2>
+  <div style={styles.card}>
+    <h2>Home Banner</h2>
 
-            <p style={styles.desc}>
-              Edit homepage advert banner, delete old media, or upload new image/video.
-            </p>
+  {!editingBanner ? (
+    <button
+      type="button"
+      style={styles.button}
+      onClick={() => setEditingBanner(true)}
+    >
+      Edit
+    </button>
+  ) : (
+    <>
+      {/* EXISTING BANNERS */}
+      <div style={{ marginBottom: "20px" }}>
+        {banners.length === 0 ? (
+          <p style={styles.desc}>No banner files uploaded yet.</p>
+        ) : (
+          banners.map((item, index) => (
+            <div key={item.id} style={styles.bannerItem}>
+              <p style={styles.preview}>
+                Banner {index + 1} —{" "}
+                {item.file_name || item.file_url.split("/").pop()}
+              </p>
 
-            {!editingBanner ? (
               <button
                 type="button"
-                style={styles.button}
-                onClick={() => setEditingBanner(true)}
+                style={styles.deleteButton}
+                onClick={() => deleteBanner(item.id)}
               >
-                Edit
+                Delete
               </button>
-            ) : (
-              <>
-                {banners.length === 0 ? (
-                  <p style={styles.desc}>No banner files found.</p>
-                ) : (
-                  banners.map((item) => (
-                    <div key={item.id} style={styles.bannerItem}>
-                      <p style={styles.preview}>
-                        {item.file_name || item.file_url?.split("/").pop()}
-                      </p>
+            </div>
+          ))
+        )}
+      </div>
 
-                      <button
-                        type="button"
-                        style={styles.deleteButton}
-                        onClick={() => deleteBanner(item.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  ))
-                )}
+      {/* UPLOAD NEW */}
+      <div style={{ marginTop: "10px" }}>
+        <input
+          type="file"
+          accept="image/*,video/mp4"
+          onChange={(e) => setNewBannerFile(e.target.files[0])}
+        />
 
-                <input
-                  type="file"
-                  accept="image/*,video/mp4"
-                  onChange={(e) => setNewBannerFile(e.target.files[0])}
-                  style={{ marginTop: "15px" }}
-                />
+        {newBannerFile && (
+          <p style={styles.preview}>{newBannerFile.name}</p>
+        )}
+      </div>
 
-                {newBannerFile && (
-                  <p style={styles.preview}>{newBannerFile.name}</p>
-                )}
+      {/* ACTION BUTTONS */}
+      <div style={styles.buttonRow}>
+        <button
+          type="button"
+          style={styles.button}
+          onClick={uploadBanner}
+        >
+          Go Live
+        </button>
 
-                <div style={styles.buttonRow}>
-                  <button
-                    type="button"
-                    style={styles.button}
-                    onClick={uploadBanner}
-                  >
-                    Go Live
-                  </button>
-
-                  <button
-                    type="button"
-                    style={styles.close}
-                    onClick={() => setEditingBanner(false)}
-                  >
-                    Close
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+        <button
+          type="button"
+          style={styles.close}
+          onClick={() => setEditingBanner(false)}
+        >
+          Close
+        </button>
+      </div>
+    </>
+  )}
+</div>
 
           <div style={styles.card}>
             <h2>Platform Logo</h2>
