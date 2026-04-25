@@ -2,11 +2,18 @@ export async function onRequestPost(context) {
   try {
     const { emails, message } = await context.request.json();
 
+    if (!context.env.RESEND_API_KEY) {
+      return Response.json(
+        { error: "RESEND_API_KEY is missing in Cloudflare" },
+        { status: 500 }
+      );
+    }
+
     if (!emails || !Array.isArray(emails) || emails.length === 0) {
       return Response.json({ error: "No emails provided" }, { status: 400 });
     }
 
-    if (!message) {
+    if (!message || !message.trim()) {
       return Response.json({ error: "Message is required" }, { status: 400 });
     }
 
@@ -20,7 +27,7 @@ export async function onRequestPost(context) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          from: "MaiCinema <updates@maicinema.com>",
+          from: "MaiCinema <onboarding@resend.dev>",
           to: email,
           subject: "MaiCinema Update",
           html: `
@@ -32,10 +39,25 @@ export async function onRequestPost(context) {
         })
       });
 
+      const text = await res.text();
+
       results.push({
         email,
-        success: res.ok
+        success: res.ok,
+        response: text
       });
+    }
+
+    const failed = results.filter((item) => !item.success);
+
+    if (failed.length > 0) {
+      return Response.json(
+        {
+          error: "Some emails failed",
+          results
+        },
+        { status: 500 }
+      );
     }
 
     return Response.json({ success: true, results });
