@@ -13,7 +13,9 @@ function AdminDashboard() {
   const [editingBanner, setEditingBanner] = useState(false);
   const [newBannerFile, setNewBannerFile] = useState(null);
 
-  const [logo, setLogo] = useState(null);
+  const [logos, setLogos] = useState([]);
+const [editingLogo, setEditingLogo] = useState(false);
+const [newLogoFile, setNewLogoFile] = useState(null);
 
   const [showFooterEditor, setShowFooterEditor] = useState(false);
   const [showEmails, setShowEmails] = useState(false);
@@ -37,6 +39,57 @@ function AdminDashboard() {
     loadBanners();
   }, []);
 
+  useEffect(() => {
+  loadDashboardStats();
+  loadBanners();
+  loadLogo(); // ADD THIS
+}, []);
+
+async function uploadLogo() {
+  if (!newLogoFile) {
+    alert("Choose a logo first");
+    return;
+  }
+
+  const fileName = `${Date.now()}-${newLogoFile.name}`;
+
+  const { error } = await supabase.storage
+    .from("logos")
+    .upload(fileName, newLogoFile, { upsert: true });
+
+  if (error) {
+    console.log(error);
+    alert("Logo upload failed");
+    return;
+  }
+
+  const { data } = supabase.storage
+    .from("logos")
+    .getPublicUrl(fileName);
+
+  // delete old logo (only 1 allowed)
+  await supabase.from("logos").delete().neq("id", 0);
+
+  await supabase.from("logos").insert([
+    {
+      file_url: data.publicUrl,
+      file_name: newLogoFile.name
+    }
+  ]);
+
+  setNewLogoFile(null);
+  loadLogo();
+  alert("Logo updated successfully");
+}
+
+async function deleteLogo(id) {
+  const confirmed = window.confirm("Delete current logo?");
+  if (!confirmed) return;
+
+  await supabase.from("logos").delete().eq("id", id);
+  loadLogo();
+}
+
   async function loadDashboardStats() {
     try {
       const [visitorsRes, filmsRes, eventsRes] = await Promise.all([
@@ -52,6 +105,16 @@ function AdminDashboard() {
       console.log("Dashboard load error:", error);
     }
   }
+
+  async function loadLogo() {
+  const { data, error } = await supabase
+    .from("logos")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (!error) setLogos(data || []);
+}
 
   async function loadBanners() {
     const { data, error } = await supabase
@@ -272,28 +335,76 @@ fileUrl = `https://iframe.videodelivery.net/${uid}`;    } else {
 </div>
 
           <div style={styles.card}>
-            <h2>Platform Logo</h2>
-            <p style={styles.desc}>Replace existing logo and switch live branding</p>
+  <h2>Platform Logo</h2>
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setLogo(e.target.files[0])}
-            />
+  {!editingLogo ? (
+    <button
+      type="button"
+      style={styles.button}
+      onClick={() => setEditingLogo(true)}
+    >
+      Edit
+    </button>
+  ) : (
+    <div style={styles.editForm}>
+      <h3 style={styles.formTitle}>Edit Platform Logo</h3>
 
-            {logo && <p style={styles.preview}>{logo.name}</p>}
+      <div style={styles.formSection}>
+        <h4>Current Logo</h4>
 
-            <div style={styles.buttonRow}>
-              <button type="button" style={styles.button}>Edit</button>
+        {logos.length === 0 ? (
+          <p style={styles.desc}>No logo uploaded yet.</p>
+        ) : (
+          logos.map((item) => (
+            <div key={item.id} style={styles.bannerRow}>
+              <span>{item.file_name}</span>
+
               <button
                 type="button"
-                style={styles.button}
-                onClick={() => handleSave("Logo")}
+                style={styles.deleteButton}
+                onClick={() => deleteLogo(item.id)}
               >
-                Go Live
+                Delete
               </button>
             </div>
-          </div>
+          ))
+        )}
+      </div>
+
+      <div style={styles.formSection}>
+        <h4>Upload New Logo</h4>
+
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setNewLogoFile(e.target.files[0])}
+        />
+
+        {newLogoFile && (
+          <p style={styles.preview}>{newLogoFile.name}</p>
+        )}
+      </div>
+
+      <div style={styles.buttonRow}>
+        <button
+          type="button"
+          style={styles.button}
+          onClick={uploadLogo}
+        >
+          Go Live
+        </button>
+
+        <button
+          type="button"
+          style={styles.close}
+          onClick={() => setEditingLogo(false)}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  )}
+</div>
 
           <div style={styles.card}>
             <h2>Footer Settings</h2>
