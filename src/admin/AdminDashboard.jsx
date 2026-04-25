@@ -14,8 +14,8 @@ function AdminDashboard() {
   const [newBannerFile, setNewBannerFile] = useState(null);
 
   const [logos, setLogos] = useState([]);
-const [editingLogo, setEditingLogo] = useState(false);
-const [newLogoFile, setNewLogoFile] = useState(null);
+  const [editingLogo, setEditingLogo] = useState(false);
+  const [newLogoFile, setNewLogoFile] = useState(null);
 
   const [showFooterEditor, setShowFooterEditor] = useState(false);
   const [showEmails, setShowEmails] = useState(false);
@@ -27,130 +27,15 @@ const [newLogoFile, setNewLogoFile] = useState(null);
   const [whatsappQR, setWhatsappQR] = useState(null);
 
   const [newsletterEmails, setNewsletterEmails] = useState([]);
-const [newsletterMessage, setNewsletterMessage] = useState("");
-const [sendingNewsletter, setSendingNewsletter] = useState(false);
+  const [newsletterMessage, setNewsletterMessage] = useState("");
+  const [sendingNewsletter, setSendingNewsletter] = useState(false);
+
   useEffect(() => {
     loadDashboardStats();
     loadBanners();
+    loadLogo();
+    loadNewsletterEmails();
   }, []);
-
-  useEffect(() => {
-  loadDashboardStats();
-  loadBanners();
-  loadLogo(); // ADD THIS
-}, []);
-
-useEffect(() => {
-  loadDashboardStats();
-  loadBanners();
-  loadLogo();
-  loadNewsletterEmails();
-}, []);
-
-async function uploadLogo() {
-  if (!newLogoFile) {
-    alert("Choose a logo first");
-    return;
-  }
-
-  const fileName = `${Date.now()}-${newLogoFile.name}`;
-
-  const { error } = await supabase.storage
-    .from("logos")
-    .upload(fileName, newLogoFile, { upsert: true });
-
-  if (error) {
-    console.log(error);
-    alert("Logo upload failed");
-    return;
-  }
-
-  const { data } = supabase.storage
-    .from("logos")
-    .getPublicUrl(fileName);
-
-  // delete old logo (only 1 allowed)
-  await supabase.from("logos").delete().neq("id", 0);
-
-  await supabase.from("logos").insert([
-    {
-      file_url: data.publicUrl,
-      file_name: newLogoFile.name
-    }
-  ]);
-
-  setNewLogoFile(null);
-  loadLogo();
-  alert("Logo updated successfully");
-}
-
-async function loadNewsletterEmails() {
-  const { data, error } = await supabase
-    .from("newsletter_subscribers")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.log("Newsletter load error:", error);
-    return;
-  }
-
-  setNewsletterEmails(data || []);
-}
-
-async function sendNewsletter() {
-  if (!newsletterMessage.trim()) {
-    alert("Please type a message first");
-    return;
-  }
-
-  const emails = newsletterEmails.map((item) => item.email);
-
-  if (emails.length === 0) {
-    alert("No emails found");
-    return;
-  }
-
-  setSendingNewsletter(true);
-
-  try {
-    const res = await fetch("/api/send-newsletter", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        emails,
-        message: newsletterMessage
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.log("Newsletter error:", data);
-      alert(data.error || JSON.stringify(data));
-      setSendingNewsletter(false);
-      return;
-    }
-
-    alert("Newsletter sent successfully");
-    setNewsletterMessage("");
-  } catch (error) {
-    console.log("Newsletter send crash:", error);
-    alert(error.message || "Newsletter send failed");
-  }
-
-  setSendingNewsletter(false);
-}
-
-async function deleteLogo(id) {
-  const confirmed = window.confirm("Delete current logo?");
-  if (!confirmed) return;
-
-  await supabase.from("logos").delete().eq("id", id);
-  loadLogo();
-}
 
   async function loadDashboardStats() {
     try {
@@ -167,16 +52,6 @@ async function deleteLogo(id) {
       console.log("Dashboard load error:", error);
     }
   }
-
-  async function loadLogo() {
-  const { data, error } = await supabase
-    .from("logos")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  if (!error) setLogos(data || []);
-}
 
   async function loadBanners() {
     const { data, error } = await supabase
@@ -207,87 +82,222 @@ async function deleteLogo(id) {
   }
 
   async function uploadBanner() {
-  if (!newBannerFile) {
-    alert("Please choose a file first");
-    return;
-  }
-
-  let fileUrl = "";
-  let fileType = newBannerFile.type;
-
-  try {
-    if (newBannerFile.type.startsWith("video/")) {
-      const res = await fetch(
-        "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
-        { method: "POST" }
-      );
-
-      const uploadData = await res.json();
-
-      if (!uploadData.success) {
-        console.log("Cloudflare upload URL error:", uploadData);
-        alert("Video upload setup failed");
-        return;
-      }
-
-      const { uploadURL, uid } = uploadData;
-
-      const formData = new FormData();
-      formData.append("file", newBannerFile);
-
-      const uploadRes = await fetch(uploadURL, {
-        method: "POST",
-        body: formData
-      });
-
-      if (!uploadRes.ok) {
-        console.log("Cloudflare video upload failed:", await uploadRes.text());
-        alert("Video upload failed");
-        return;
-      }
-
-fileUrl = `https://iframe.videodelivery.net/${uid}`;    } else {
-      const fileName = `${Date.now()}-${newBannerFile.name.replace(/\s+/g, "-")}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("banners")
-        .upload(fileName, newBannerFile, { upsert: true });
-
-      if (uploadError) {
-        console.log("Banner image upload error:", uploadError);
-        alert("Image upload failed");
-        return;
-      }
-
-      const { data } = supabase.storage
-        .from("banners")
-        .getPublicUrl(fileName);
-
-      fileUrl = data.publicUrl;
+    if (!newBannerFile) {
+      alert("Please choose a file first");
+      return;
     }
 
-    const { error: insertError } = await supabase.from("banners").insert([
+    let fileUrl = "";
+    const fileType = newBannerFile.type;
+
+    try {
+      if (newBannerFile.type.startsWith("video/")) {
+        const res = await fetch(
+          "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
+          { method: "POST" }
+        );
+
+        const uploadData = await res.json();
+
+        if (!uploadData.success) {
+          console.log("Cloudflare upload URL error:", uploadData);
+          alert("Video upload setup failed");
+          return;
+        }
+
+        const { uploadURL, uid } = uploadData;
+
+        const formData = new FormData();
+        formData.append("file", newBannerFile);
+
+        const uploadRes = await fetch(uploadURL, {
+          method: "POST",
+          body: formData
+        });
+
+        if (!uploadRes.ok) {
+          console.log("Cloudflare video upload failed:", await uploadRes.text());
+          alert("Video upload failed");
+          return;
+        }
+
+        fileUrl = `https://iframe.videodelivery.net/${uid}`;
+      } else {
+        const fileName = `${Date.now()}-${newBannerFile.name.replace(/\s+/g, "-")}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("banners")
+          .upload(fileName, newBannerFile, { upsert: true });
+
+        if (uploadError) {
+          console.log("Banner image upload error:", uploadError);
+          alert("Image upload failed");
+          return;
+        }
+
+        const { data } = supabase.storage.from("banners").getPublicUrl(fileName);
+        fileUrl = data.publicUrl;
+      }
+
+      const { error: insertError } = await supabase.from("banners").insert([
+        {
+          file_url: fileUrl,
+          file_type: fileType,
+          file_name: newBannerFile.name
+        }
+      ]);
+
+      if (insertError) {
+        console.log("Banner save error:", insertError);
+        alert(insertError.message || "Failed to save banner");
+        return;
+      }
+
+      setNewBannerFile(null);
+      await loadBanners();
+      alert("Banner uploaded successfully");
+    } catch (error) {
+      console.log("Banner upload crash:", error);
+      alert("Upload crashed");
+    }
+  }
+
+  async function loadLogo() {
+    const { data, error } = await supabase
+      .from("logos")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.log("Load logo error:", error);
+      return;
+    }
+
+    setLogos(data || []);
+  }
+
+  async function deleteLogo(id) {
+    const confirmed = window.confirm("Delete current logo?");
+    if (!confirmed) return;
+
+    const { error } = await supabase.from("logos").delete().eq("id", id);
+
+    if (error) {
+      alert("Failed to delete logo");
+      return;
+    }
+
+    await loadLogo();
+  }
+
+  async function uploadLogo() {
+    if (!newLogoFile) {
+      alert("Choose a logo first");
+      return;
+    }
+
+    const fileName = `${Date.now()}-${newLogoFile.name.replace(/\s+/g, "-")}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("logos")
+      .upload(fileName, newLogoFile, { upsert: true });
+
+    if (uploadError) {
+      console.log("Logo upload error:", uploadError);
+      alert("Logo upload failed");
+      return;
+    }
+
+    const { data } = supabase.storage.from("logos").getPublicUrl(fileName);
+
+    await supabase.from("logos").delete().neq("file_url", "");
+
+    const { error: insertError } = await supabase.from("logos").insert([
       {
-        file_url: fileUrl,
-        file_type: fileType,
-        file_name: newBannerFile.name
+        file_url: data.publicUrl,
+        file_name: newLogoFile.name
       }
     ]);
 
     if (insertError) {
-      console.log("Banner save error:", insertError);
-      alert(insertError.message || "Failed to save banner");
+      console.log("Logo save error:", insertError);
+      alert(insertError.message || "Failed to save logo");
       return;
     }
 
-    setNewBannerFile(null);
-    await loadBanners();
-    alert("Banner uploaded successfully");
-  } catch (error) {
-    console.log("Banner upload crash:", error);
-    alert("Upload crashed");
+    setNewLogoFile(null);
+    await loadLogo();
+    alert("Logo updated successfully");
   }
-}
+
+  async function loadNewsletterEmails() {
+    const { data, error } = await supabase
+      .from("newsletter_subscribers")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.log("Newsletter load error:", error);
+      return;
+    }
+
+    setNewsletterEmails(data || []);
+  }
+
+  async function sendNewsletter() {
+    if (!newsletterMessage.trim()) {
+      alert("Please type a message first");
+      return;
+    }
+
+    const emails = newsletterEmails.map((item) => item.email);
+
+    if (emails.length === 0) {
+      alert("No emails found");
+      return;
+    }
+
+    setSendingNewsletter(true);
+
+    try {
+      const res = await fetch("/api/send-newsletter", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          emails,
+          message: newsletterMessage
+        })
+      });
+
+      const raw = await res.text();
+      console.log("Newsletter RAW response:", raw);
+
+      let data = {};
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        console.log("JSON parse failed:", e);
+        data = { error: raw || "Empty response from server" };
+      }
+
+      if (!res.ok) {
+        alert(data.error || "Newsletter send failed");
+        setSendingNewsletter(false);
+        return;
+      }
+
+      alert("Newsletter sent successfully");
+      setNewsletterMessage("");
+    } catch (error) {
+      console.log("Newsletter send crash:", error);
+      alert(error.message || "Newsletter send failed");
+    }
+
+    setSendingNewsletter(false);
+  }
 
   function handleSave(item) {
     alert(item + " updated");
@@ -321,152 +331,130 @@ fileUrl = `https://iframe.videodelivery.net/${uid}`;    } else {
 
         <div style={styles.grid}>
           <div style={styles.card}>
-  <h2>Home Banner</h2>
+            <h2>Home Banner</h2>
 
-  {!editingBanner ? (
-    <button
-      type="button"
-      style={styles.button}
-      onClick={() => setEditingBanner(true)}
-    >
-      Edit
-    </button>
-  ) : (
-    <div style={styles.editForm}>
-      <h3 style={styles.formTitle}>Edit Home Banner</h3>
-
-      <div style={styles.formSection}>
-        <h4>Existing Banner Files</h4>
-
-        {banners.length === 0 ? (
-          <p style={styles.desc}>
-            No banner files found in database yet.
-          </p>
-        ) : (
-          banners.map((item, index) => (
-            <div key={item.id} style={styles.bannerRow}>
-              <span>
-                Banner {index + 1}: {item.file_name || "Uploaded file"}
-              </span>
-
-              <button
-                type="button"
-                style={styles.deleteButton}
-                onClick={() => deleteBanner(item.id)}
-              >
-                Delete
+            {!editingBanner ? (
+              <button type="button" style={styles.button} onClick={() => setEditingBanner(true)}>
+                Edit
               </button>
-            </div>
-          ))
-        )}
-      </div>
+            ) : (
+              <div style={styles.editForm}>
+                <h3 style={styles.formTitle}>Edit Home Banner</h3>
 
-      <div style={styles.formSection}>
-        <h4>Upload New Banner</h4>
+                <div style={styles.formSection}>
+                  <h4>Existing Banner Files</h4>
 
-        <input
-          type="file"
-          accept="image/*,video/mp4"
-          onChange={(e) => setNewBannerFile(e.target.files[0])}
-        />
+                  {banners.length === 0 ? (
+                    <p style={styles.desc}>No banner files found in database yet.</p>
+                  ) : (
+                    banners.map((item, index) => (
+                      <div key={item.id} style={styles.bannerRow}>
+                        <span>
+                          Banner {index + 1}: {item.file_name || "Uploaded file"}
+                        </span>
 
-        {newBannerFile && (
-          <p style={styles.preview}>{newBannerFile.name}</p>
-        )}
-      </div>
+                        <button
+                          type="button"
+                          style={styles.deleteButton}
+                          onClick={() => deleteBanner(item.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
 
-      <div style={styles.buttonRow}>
-        <button
-          type="button"
-          style={styles.button}
-          onClick={uploadBanner}
-        >
-          Go Live
-        </button>
+                <div style={styles.formSection}>
+                  <h4>Upload New Banner</h4>
 
-        <button
-          type="button"
-          style={styles.close}
-          onClick={() => setEditingBanner(false)}
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  )}
-</div>
+                  <input
+                    type="file"
+                    accept="image/*,video/mp4"
+                    onChange={(e) => setNewBannerFile(e.target.files[0])}
+                  />
+
+                  {newBannerFile && <p style={styles.preview}>{newBannerFile.name}</p>}
+                </div>
+
+                <div style={styles.buttonRow}>
+                  <button type="button" style={styles.button} onClick={uploadBanner}>
+                    Go Live
+                  </button>
+
+                  <button
+                    type="button"
+                    style={styles.close}
+                    onClick={() => setEditingBanner(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div style={styles.card}>
-  <h2>Platform Logo</h2>
+            <h2>Platform Logo</h2>
 
-  {!editingLogo ? (
-    <button
-      type="button"
-      style={styles.button}
-      onClick={() => setEditingLogo(true)}
-    >
-      Edit
-    </button>
-  ) : (
-    <div style={styles.editForm}>
-      <h3 style={styles.formTitle}>Edit Platform Logo</h3>
-
-      <div style={styles.formSection}>
-        <h4>Current Logo</h4>
-
-        {logos.length === 0 ? (
-          <p style={styles.desc}>No logo uploaded yet.</p>
-        ) : (
-          logos.map((item) => (
-            <div key={item.id} style={styles.bannerRow}>
-              <span>{item.file_name}</span>
-
-              <button
-                type="button"
-                style={styles.deleteButton}
-                onClick={() => deleteLogo(item.id)}
-              >
-                Delete
+            {!editingLogo ? (
+              <button type="button" style={styles.button} onClick={() => setEditingLogo(true)}>
+                Edit
               </button>
-            </div>
-          ))
-        )}
-      </div>
+            ) : (
+              <div style={styles.editForm}>
+                <h3 style={styles.formTitle}>Edit Platform Logo</h3>
 
-      <div style={styles.formSection}>
-        <h4>Upload New Logo</h4>
+                <div style={styles.formSection}>
+                  <h4>Current Logo</h4>
 
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setNewLogoFile(e.target.files[0])}
-        />
+                  {logos.length === 0 ? (
+                    <p style={styles.desc}>No logo uploaded yet.</p>
+                  ) : (
+                    logos.map((item) => (
+                      <div key={item.id} style={styles.bannerRow}>
+                        <span>{item.file_name}</span>
 
-        {newLogoFile && (
-          <p style={styles.preview}>{newLogoFile.name}</p>
-        )}
-      </div>
+                        <button
+                          type="button"
+                          style={styles.deleteButton}
+                          onClick={() => deleteLogo(item.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
 
-      <div style={styles.buttonRow}>
-        <button
-          type="button"
-          style={styles.button}
-          onClick={uploadLogo}
-        >
-          Go Live
-        </button>
+                <div style={styles.formSection}>
+                  <h4>Upload New Logo</h4>
 
-        <button
-          type="button"
-          style={styles.close}
-          onClick={() => setEditingLogo(false)}
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  )}
-</div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setNewLogoFile(e.target.files[0])}
+                  />
+
+                  {newLogoFile && <p style={styles.preview}>{newLogoFile.name}</p>}
+                </div>
+
+                <div style={styles.buttonRow}>
+                  <button type="button" style={styles.button} onClick={uploadLogo}>
+                    Go Live
+                  </button>
+
+                  <button
+                    type="button"
+                    style={styles.close}
+                    onClick={() => setEditingLogo(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div style={styles.card}>
             <h2>Footer Settings</h2>
@@ -532,37 +520,43 @@ fileUrl = `https://iframe.videodelivery.net/${uid}`;    } else {
           </div>
         )}
 
-<textarea
-  placeholder="Write newsletter message here..."
-  value={newsletterMessage}
-  onChange={(e) => setNewsletterMessage(e.target.value)}
-  style={styles.newsletterBox}
-/>
-
-<button
-  type="button"
-  style={styles.button}
-  onClick={sendNewsletter}
-  disabled={sendingNewsletter}
->
-  {sendingNewsletter ? "Sending..." : "Send"}
-</button>
-
         {showEmails && (
-          <div style={styles.modal}>
+          <div style={styles.modalWide}>
             <h2>Newsletter Subscribers</h2>
 
             <ul style={styles.emailList}>
-              {newsletterEmails.map((item) => (
-  <li key={item.id}>
-    {item.email} — {item.source || "unknown"}
-  </li>
-))}
+              {newsletterEmails.length === 0 ? (
+                <li>No emails found.</li>
+              ) : (
+                newsletterEmails.map((item) => (
+                  <li key={item.id}>
+                    {item.email} — {item.source || "unknown"}
+                  </li>
+                ))
+              )}
             </ul>
 
-            <button type="button" style={styles.close} onClick={() => setShowEmails(false)}>
-              Close
-            </button>
+            <textarea
+              placeholder="Write newsletter message here..."
+              value={newsletterMessage}
+              onChange={(e) => setNewsletterMessage(e.target.value)}
+              style={styles.newsletterBox}
+            />
+
+            <div style={styles.buttonRow}>
+              <button
+                type="button"
+                style={styles.button}
+                onClick={sendNewsletter}
+                disabled={sendingNewsletter}
+              >
+                {sendingNewsletter ? "Sending..." : "Send"}
+              </button>
+
+              <button type="button" style={styles.close} onClick={() => setShowEmails(false)}>
+                Close
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -572,62 +566,149 @@ fileUrl = `https://iframe.videodelivery.net/${uid}`;    } else {
 
 const styles = {
   page: { background: "#000", minHeight: "100vh" },
-  container: { background: "#000", color: "white", minHeight: "100vh", padding: "140px 40px 60px" },
+  container: {
+    background: "#000",
+    color: "white",
+    minHeight: "100vh",
+    padding: "140px 40px 60px"
+  },
   title: { textAlign: "center", marginBottom: "10px" },
   subtitle: { textAlign: "center", color: "#aaa", marginBottom: "40px" },
-  statsGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "20px", marginBottom: "40px" },
-  statCard: { background: "#111", padding: "25px", borderRadius: "10px", textAlign: "center" },
+  statsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
+    gap: "20px",
+    marginBottom: "40px"
+  },
+  statCard: {
+    background: "#111",
+    padding: "25px",
+    borderRadius: "10px",
+    textAlign: "center"
+  },
   statValue: { fontSize: "32px", marginTop: "10px" },
-  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "25px", marginTop: "20px" },
-  card: { background: "#111", padding: "25px", borderRadius: "10px", position: "relative", zIndex: 1 },
-  desc: { fontSize: "14px", color: "#aaa", marginTop: "8px", marginBottom: "18px", lineHeight: "1.6" },
-  bannerItem: { marginTop: "12px", padding: "10px", background: "#000", borderRadius: "6px" },
-  buttonRow: { display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "15px" },
-  button: { padding: "10px 14px", border: "none", background: "#e50914", color: "white", cursor: "pointer", position: "relative", zIndex: 10 },
-  deleteButton: { padding: "10px 14px", border: "none", background: "#444", color: "white", cursor: "pointer", position: "relative", zIndex: 10 },
-  preview: { marginTop: "10px", color: "#00ffae", fontSize: "14px", wordBreak: "break-word" },
-  modal: { marginTop: "40px", background: "#111", padding: "30px", borderRadius: "10px", maxWidth: "500px" },
-  input: { display: "block", marginTop: "10px", marginBottom: "14px", padding: "10px", width: "100%", border: "none" },
-  close: { marginTop: "15px", padding: "8px 12px", background: "#444", border: "none", color: "white", cursor: "pointer", position: "relative", zIndex: 10 },
-  emailList: { marginTop: "20px", lineHeight: "2" },
-
-editForm: {
-  marginTop: "20px",
-  background: "#000",
-  padding: "20px",
-  borderRadius: "8px",
-  textAlign: "left"
-},
-
-formTitle: {
-  marginBottom: "20px",
-  textAlign: "center"
-},
-
-formSection: {
-  marginBottom: "25px"
-},
-
-newsletterBox: {
-  width: "100%",
-  minHeight: "120px",
-  marginTop: "20px",
-  padding: "12px",
-  border: "none",
-  borderRadius: "6px"
-},
-
-bannerRow: {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: "15px",
-  background: "#111",
-  padding: "12px",
-  borderRadius: "6px",
-  marginTop: "10px"
-},
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))",
+    gap: "25px",
+    marginTop: "20px"
+  },
+  card: {
+    background: "#111",
+    padding: "25px",
+    borderRadius: "10px",
+    position: "relative",
+    zIndex: 1,
+    textAlign: "center"
+  },
+  desc: {
+    fontSize: "14px",
+    color: "#aaa",
+    marginTop: "8px",
+    marginBottom: "18px",
+    lineHeight: "1.6"
+  },
+  buttonRow: {
+    display: "flex",
+    gap: "10px",
+    flexWrap: "wrap",
+    marginTop: "15px"
+  },
+  button: {
+    padding: "10px 14px",
+    border: "none",
+    background: "#e50914",
+    color: "white",
+    cursor: "pointer",
+    position: "relative",
+    zIndex: 10
+  },
+  deleteButton: {
+    padding: "10px 14px",
+    border: "none",
+    background: "#444",
+    color: "white",
+    cursor: "pointer",
+    position: "relative",
+    zIndex: 10
+  },
+  preview: {
+    marginTop: "10px",
+    color: "#00ffae",
+    fontSize: "14px",
+    wordBreak: "break-word"
+  },
+  modal: {
+    marginTop: "40px",
+    background: "#111",
+    padding: "30px",
+    borderRadius: "10px",
+    maxWidth: "500px"
+  },
+  modalWide: {
+    marginTop: "40px",
+    background: "#111",
+    padding: "30px",
+    borderRadius: "10px",
+    width: "100%",
+    boxSizing: "border-box"
+  },
+  input: {
+    display: "block",
+    marginTop: "10px",
+    marginBottom: "14px",
+    padding: "10px",
+    width: "100%",
+    border: "none"
+  },
+  close: {
+    padding: "10px 14px",
+    background: "#444",
+    border: "none",
+    color: "white",
+    cursor: "pointer",
+    position: "relative",
+    zIndex: 10
+  },
+  emailList: {
+    marginTop: "20px",
+    lineHeight: "2",
+    maxHeight: "260px",
+    overflowY: "auto"
+  },
+  newsletterBox: {
+    width: "100%",
+    minHeight: "150px",
+    marginTop: "20px",
+    padding: "12px",
+    border: "none",
+    borderRadius: "6px",
+    boxSizing: "border-box"
+  },
+  editForm: {
+    marginTop: "20px",
+    background: "#000",
+    padding: "20px",
+    borderRadius: "8px",
+    textAlign: "left"
+  },
+  formTitle: {
+    marginBottom: "20px",
+    textAlign: "center"
+  },
+  formSection: {
+    marginBottom: "25px"
+  },
+  bannerRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "15px",
+    background: "#111",
+    padding: "12px",
+    borderRadius: "6px",
+    marginTop: "10px"
+  }
 };
-
 
 export default AdminDashboard;
