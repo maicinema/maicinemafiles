@@ -82,43 +82,88 @@ function AdminDashboard() {
   }
 
   async function uploadBanner() {
-    if (!newBannerFile) {
-      alert("Please choose a file first");
-      return;
+  if (!newBannerFile) {
+    alert("Please choose a file first");
+    return;
+  }
+
+  let fileUrl = "";
+  let fileType = newBannerFile.type;
+
+  try {
+    if (newBannerFile.type.startsWith("video/")) {
+      const res = await fetch(
+        "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
+        { method: "POST" }
+      );
+
+      const uploadData = await res.json();
+
+      if (!uploadData.success) {
+        console.log("Cloudflare upload URL error:", uploadData);
+        alert("Video upload setup failed");
+        return;
+      }
+
+      const { uploadURL, uid } = uploadData;
+
+      const formData = new FormData();
+      formData.append("file", newBannerFile);
+
+      const uploadRes = await fetch(uploadURL, {
+        method: "POST",
+        body: formData
+      });
+
+      if (!uploadRes.ok) {
+        console.log("Cloudflare video upload failed:", await uploadRes.text());
+        alert("Video upload failed");
+        return;
+      }
+
+      fileUrl = `https://videodelivery.net/${uid}/manifest/video.m3u8`;
+    } else {
+      const fileName = `${Date.now()}-${newBannerFile.name.replace(/\s+/g, "-")}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("banners")
+        .upload(fileName, newBannerFile, { upsert: true });
+
+      if (uploadError) {
+        console.log("Banner image upload error:", uploadError);
+        alert("Image upload failed");
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from("banners")
+        .getPublicUrl(fileName);
+
+      fileUrl = data.publicUrl;
     }
-
-    const fileName = `${Date.now()}-${newBannerFile.name.replace(/\s+/g, "-")}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("banners")
-      .upload(fileName, newBannerFile, { upsert: true });
-
-    if (uploadError) {
-      console.log("Banner upload error:", uploadError);
-      alert("Upload failed");
-      return;
-    }
-
-    const { data } = supabase.storage.from("banners").getPublicUrl(fileName);
 
     const { error: insertError } = await supabase.from("banners").insert([
       {
-        file_url: data.publicUrl,
-        file_type: newBannerFile.type,
+        file_url: fileUrl,
+        file_type: fileType,
         file_name: newBannerFile.name
       }
     ]);
 
     if (insertError) {
-  console.log("Banner save error:", insertError);
-  alert(insertError.message || "Failed to save banner");
-  return;
-}
+      console.log("Banner save error:", insertError);
+      alert(insertError.message || "Failed to save banner");
+      return;
+    }
 
     setNewBannerFile(null);
     await loadBanners();
     alert("Banner uploaded successfully");
+  } catch (error) {
+    console.log("Banner upload crash:", error);
+    alert("Upload crashed");
   }
+}
 
   function handleSave(item) {
     alert(item + " updated");
