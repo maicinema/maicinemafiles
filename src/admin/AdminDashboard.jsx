@@ -27,7 +27,8 @@ const [newLogoFile, setNewLogoFile] = useState(null);
   const [whatsappQR, setWhatsappQR] = useState(null);
 
   const [newsletterEmails, setNewsletterEmails] = useState([]);
-
+const [newsletterMessage, setNewsletterMessage] = useState("");
+const [sendingNewsletter, setSendingNewsletter] = useState(false);
   useEffect(() => {
     loadDashboardStats();
     loadBanners();
@@ -95,6 +96,50 @@ async function loadNewsletterEmails() {
   }
 
   setNewsletterEmails(data || []);
+}
+
+async function sendNewsletter() {
+  if (!newsletterMessage.trim()) {
+    alert("Please type a message first");
+    return;
+  }
+
+  const emails = newsletterEmails.map((item) => item.email);
+
+  if (emails.length === 0) {
+    alert("No emails found");
+    return;
+  }
+
+  setSendingNewsletter(true);
+
+  try {
+    const res = await fetch("/api/send-newsletter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        emails,
+        message: newsletterMessage
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Failed to send newsletter");
+      setSendingNewsletter(false);
+      return;
+    }
+
+    alert("Newsletter sent successfully");
+    setNewsletterMessage("");
+  } catch (error) {
+    alert("Newsletter send failed");
+  }
+
+  setSendingNewsletter(false);
 }
 
 async function deleteLogo(id) {
@@ -485,6 +530,22 @@ fileUrl = `https://iframe.videodelivery.net/${uid}`;    } else {
           </div>
         )}
 
+<textarea
+  placeholder="Write newsletter message here..."
+  value={newsletterMessage}
+  onChange={(e) => setNewsletterMessage(e.target.value)}
+  style={styles.newsletterBox}
+/>
+
+<button
+  type="button"
+  style={styles.button}
+  onClick={sendNewsletter}
+  disabled={sendingNewsletter}
+>
+  {sendingNewsletter ? "Sending..." : "Send"}
+</button>
+
         {showEmails && (
           <div style={styles.modal}>
             <h2>Newsletter Subscribers</h2>
@@ -543,6 +604,15 @@ formTitle: {
 
 formSection: {
   marginBottom: "25px"
+},
+
+newsletterBox: {
+  width: "100%",
+  minHeight: "120px",
+  marginTop: "20px",
+  padding: "12px",
+  border: "none",
+  borderRadius: "6px"
 },
 
 bannerRow: {
