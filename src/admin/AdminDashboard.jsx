@@ -26,13 +26,7 @@ const [newLogoFile, setNewLogoFile] = useState(null);
   const [email, setEmail] = useState(PLATFORM.email);
   const [whatsappQR, setWhatsappQR] = useState(null);
 
-  const newsletterEmails = [
-    "johnfilmlover@gmail.com",
-    "sarahproducer@gmail.com",
-    "cinemafan88@yahoo.com",
-    "director.james@outlook.com",
-    "shortfilmsubmissions@gmail.com"
-  ];
+  const [newsletterEmails, setNewsletterEmails] = useState([]);
 
   useEffect(() => {
     loadDashboardStats();
@@ -43,6 +37,13 @@ const [newLogoFile, setNewLogoFile] = useState(null);
   loadDashboardStats();
   loadBanners();
   loadLogo(); // ADD THIS
+}, []);
+
+useEffect(() => {
+  loadDashboardStats();
+  loadBanners();
+  loadLogo();
+  loadNewsletterEmails();
 }, []);
 
 async function uploadLogo() {
@@ -80,6 +81,20 @@ async function uploadLogo() {
   setNewLogoFile(null);
   loadLogo();
   alert("Logo updated successfully");
+}
+
+async function loadNewsletterEmails() {
+  const { data, error } = await supabase
+    .from("newsletter_subscribers")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.log("Newsletter load error:", error);
+    return;
+  }
+
+  setNewsletterEmails(data || []);
 }
 
 async function deleteLogo(id) {
@@ -475,9 +490,11 @@ fileUrl = `https://iframe.videodelivery.net/${uid}`;    } else {
             <h2>Newsletter Subscribers</h2>
 
             <ul style={styles.emailList}>
-              {newsletterEmails.map((mail, index) => (
-                <li key={index}>{mail}</li>
-              ))}
+              {newsletterEmails.map((item) => (
+  <li key={item.id}>
+    {item.email} — {item.source || "unknown"}
+  </li>
+))}
             </ul>
 
             <button type="button" style={styles.close} onClick={() => setShowEmails(false)}>
