@@ -50,22 +50,35 @@ function Home() {
     <>
       <div style={styles.banner}>
         {activeBanner?.file_type?.includes("video") ? (
-          <iframe
-  src={`${activeBanner.file_url}?autoplay=true&muted=true&loop=true&controls=false`}
-  allow="autoplay; fullscreen"
-  style={styles.media}
-  title="MaiCinema Banner Video"
-/>
-        ) : activeBanner?.file_url ? (
-          <div
-            style={{
-              ...styles.imageBanner,
-              backgroundImage: `url(${activeBanner.file_url})`
-            }}
-          />
-        ) : (
-          <div style={styles.fallback} />
-        )}
+  <iframe
+    src={
+      activeBanner.file_url.includes("iframe.videodelivery.net")
+        ? `${activeBanner.file_url}?autoplay=true&muted=true&loop=true&controls=false`
+        : activeBanner.file_url.replace(
+            "https://videodelivery.net/",
+            "https://iframe.videodelivery.net/"
+          ).replace(
+            "/manifest/video.m3u8",
+            "?autoplay=true&muted=true&loop=true&controls=false"
+          )
+    }
+    allow="autoplay; fullscreen"
+    title="MaiCinema Banner Video"
+    style={{
+      ...styles.media,
+      border: "none"
+    }}
+  />
+) : activeBanner?.file_url ? (
+  <div
+    style={{
+      ...styles.imageBanner,
+      backgroundImage: `url(${activeBanner.file_url})`
+    }}
+  />
+) : (
+  <div style={styles.fallback} />
+)}
 
         <div style={styles.overlay} />
 
