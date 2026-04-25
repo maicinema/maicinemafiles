@@ -90,7 +90,7 @@ function AdminDashboard() {
     const fileName = `${Date.now()}-${newBannerFile.name.replace(/\s+/g, "-")}`;
 
     const { error: uploadError } = await supabase.storage
-      .from("posters")
+      .from("banners")
       .upload(fileName, newBannerFile, { upsert: true });
 
     if (uploadError) {
@@ -99,7 +99,7 @@ function AdminDashboard() {
       return;
     }
 
-    const { data } = supabase.storage.from("posters").getPublicUrl(fileName);
+    const { data } = supabase.storage.from("banners").getPublicUrl(fileName);
 
     const { error: insertError } = await supabase.from("banners").insert([
       {
