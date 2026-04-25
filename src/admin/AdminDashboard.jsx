@@ -110,10 +110,10 @@ function AdminDashboard() {
     ]);
 
     if (insertError) {
-      console.log("Banner save error:", insertError);
-      alert("Failed to save banner");
-      return;
-    }
+  console.log("Banner save error:", insertError);
+  alert(insertError.message || "Failed to save banner");
+  return;
+}
 
     setNewBannerFile(null);
     await loadBanners();
