@@ -1,188 +1,217 @@
 import { useState, useEffect } from "react";
-
-import banner1 from "../assets/cinema-banner.jpg";
-import banner2 from "../assets/cinema-banner-2.jpg";
-
+import { supabase } from "../lib/supabase";
 import SubscribeSection from "../components/SubscribeSection";
+
 function Home() {
+  const [banners, setBanners] = useState([]);
+  const [currentBanner, setCurrentBanner] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  // refresh every 60s
   useEffect(() => {
-    const interval = setInterval(() => {
-      window.location.reload();
-    }, 60000);
-
-    return () => clearInterval(interval);
+    loadBanners();
   }, []);
 
-const introVideo =
-  "https://qrujwmcbobhthwzqmmjp.supabase.co/storage/v1/object/public/banners/studiointro.MP4";
+  async function loadBanners() {
+    const { data, error } = await supabase
+      .from("banners")
+      .select("*")
+      .order("created_at", { ascending: true });
 
-const banners = [banner1, banner2];
-  const [currentBanner, setCurrentBanner] = useState(0);
-const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    if (error) {
+      console.log("Load homepage banners error:", error);
+      return;
+    }
 
-  // auto-slide banner
+    setBanners(data || []);
+  }
+
   useEffect(() => {
+    if (banners.length === 0) return;
+
     const interval = setInterval(() => {
       setCurrentBanner((prev) => (prev + 1) % banners.length);
     }, 9000);
 
     return () => clearInterval(interval);
   }, [banners.length]);
-useEffect(() => {
-  const handleResize = () => {
-   setIsMobile(window.innerWidth <= 768);
-  };
 
-  window.addEventListener("resize", handleResize);
-  return () => window.removeEventListener("resize", handleResize);
-}, []);
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const activeBanner = banners[currentBanner];
 
   return (
-  <>
-        {/* BANNER */}
-    <div
-      style={{
-        width: "100vw",
-        marginLeft: "calc(50% - 50vw)",
-        height: "auto",
-        aspectRatio: "16 / 9",
-        backgroundColor: "#000",
-        position: "relative",
-        color: "white",
-        overflow: "hidden"
-      }}
-    >
-      {currentBanner === 0 && (
-        <video
-          src={introVideo}
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover"
-          }}
-        />
-      )}
-
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage: `url(${banners[currentBanner]}?t=${Date.now()})`,
-          transition: "background-image 1s ease-in-out",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          opacity: currentBanner === 0 ? 0.18 : 1
-        }}
-      >
-        {/* Overlay */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            width: "100%",
-            height: "50%",
-            background:
-              "linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent)"
-          }}
-        />
-
-        {/* DESKTOP TEXT ONLY */}
-        {!isMobile && (
+    <>
+      <div style={styles.banner}>
+        {activeBanner?.file_type?.includes("video") ? (
+          <video
+            src={activeBanner.file_url}
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={styles.media}
+          />
+        ) : activeBanner?.file_url ? (
           <div
             style={{
-              position: "relative",
-              height: "100%",
-              display: "flex",
-              alignItems: "flex-end",
-              padding: "0 16px 40px 16px"
+              ...styles.imageBanner,
+              backgroundImage: `url(${activeBanner.file_url})`
             }}
-          >
-            <div
-              style={{
-                maxWidth: "800px",
-                animation: "heroMove 25s linear infinite"
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "clamp(28px, 6vw, 64px)",
-                  margin: "0"
-                }}
-              >
+          />
+        ) : (
+          <div style={styles.fallback} />
+        )}
+
+        <div style={styles.overlay} />
+
+        {!isMobile && (
+          <div style={styles.desktopTextWrap}>
+            <div style={styles.textBox}>
+              <h1 style={styles.heading}>
                 Welcome to <span style={{ color: "red" }}>MaiCinema</span>
               </h1>
 
-              <p
-                style={{
-                  marginTop: "0px",
-                  fontSize: "clamp(14px, 2.5vw, 18px)",
-                  color: "#ccc"
-                }}
-              >
+              <p style={styles.subText}>
                 Stream powerful short films. Discover new voices. Experience cinema differently.
               </p>
             </div>
           </div>
         )}
       </div>
-    </div>
-    {/* MOBILE TEXT BELOW BANNER */}
-    {isMobile && (
-  <div
-    style={{
-      padding: "16px",
-      textAlign: "center",
-      color: "white",
-      marginTop: "-30px",
-      animation: "heroMove 25s linear infinite"
-    }}
-  >
-        <h1 style={{ fontSize: "22px", margin: 0 }}>
-          Welcome to <span style={{ color: "red" }}>MaiCinema</span>
-        </h1>
 
-        <p style={{ marginTop: "8px", fontSize: "14px", color: "#ccc" }}>
-          Stream powerful short films. Discover new voices. Experience cinema differently.
-        </p>
+      {isMobile && (
+        <div style={styles.mobileTextWrap}>
+          <h1 style={styles.mobileHeading}>
+            Welcome to <span style={{ color: "red" }}>MaiCinema</span>
+          </h1>
+
+          <p style={styles.mobileText}>
+            Stream powerful short films. Discover new voices. Experience cinema differently.
+          </p>
+        </div>
+      )}
+
+      <style>
+        {`
+          @keyframes heroMove {
+            0% { transform: translateX(0%); opacity: 1; }
+            70% { transform: translateX(0%); opacity: 1; }
+            80% { transform: translateX(120%); opacity: 0; }
+            81% { transform: translateX(-120%); opacity: 0; }
+            100% { transform: translateX(0%); opacity: 1; }
+          }
+        `}
+      </style>
+
+      <div style={styles.subscribeWrap}>
+        <SubscribeSection />
       </div>
-    )}
+    </>
+  );
+}
 
-    {/* ANIMATION */}
-    <style>
-      {`
-        @keyframes heroMove {
-          0% { transform: translateX(0%); opacity: 1; }
-          70% { transform: translateX(0%); opacity: 1; }
-          80% { transform: translateX(120%); opacity: 0; }
-          81% { transform: translateX(-120%); opacity: 0; }
-          100% { transform: translateX(0%); opacity: 1; }
-        }
-      `}
-    </style>
+const styles = {
+  banner: {
+    width: "100vw",
+    marginLeft: "calc(50% - 50vw)",
+    height: "auto",
+    aspectRatio: "16 / 9",
+    backgroundColor: "#000",
+    position: "relative",
+    color: "white",
+    overflow: "hidden"
+  },
 
-    {/* SUBSCRIPTION */}
-    <div
-  style={{
+  media: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover"
+  },
+
+  imageBanner: {
+    position: "absolute",
+    inset: 0,
+    backgroundSize: "cover",
+    backgroundPosition: "center"
+  },
+
+  fallback: {
+    position: "absolute",
+    inset: 0,
+    backgroundColor: "#000"
+  },
+
+  overlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    height: "50%",
+    background:
+      "linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent)"
+  },
+
+  desktopTextWrap: {
+    position: "relative",
+    height: "100%",
+    display: "flex",
+    alignItems: "flex-end",
+    padding: "0 16px 40px 16px",
+    zIndex: 2
+  },
+
+  textBox: {
+    maxWidth: "800px",
+    animation: "heroMove 25s linear infinite"
+  },
+
+  heading: {
+    fontSize: "clamp(28px, 6vw, 64px)",
+    margin: "0"
+  },
+
+  subText: {
+    marginTop: "0px",
+    fontSize: "clamp(14px, 2.5vw, 18px)",
+    color: "#ccc"
+  },
+
+  mobileTextWrap: {
+    padding: "16px",
+    textAlign: "center",
+    color: "white",
+    marginTop: "-30px",
+    animation: "heroMove 25s linear infinite"
+  },
+
+  mobileHeading: {
+    fontSize: "22px",
+    margin: 0
+  },
+
+  mobileText: {
+    marginTop: "8px",
+    fontSize: "14px",
+    color: "#ccc"
+  },
+
+  subscribeWrap: {
     width: "100vw",
     marginLeft: "calc(50% - 50vw)",
     backgroundColor: "#000",
     marginTop: "-30px",
     paddingBottom: "20px"
-  }}
->
-  <SubscribeSection />
-</div>
-  </>
-);
-}
+  }
+};
+
 export default Home;
