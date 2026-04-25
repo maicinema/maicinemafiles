@@ -50,14 +50,12 @@ function Home() {
     <>
       <div style={styles.banner}>
         {activeBanner?.file_type?.includes("video") ? (
-          <video
-            src={activeBanner.file_url}
-            autoPlay
-            loop
-            muted
-            playsInline
-            style={styles.media}
-          />
+          <iframe
+  src={`${activeBanner.file_url}?autoplay=true&muted=true&loop=true&controls=false`}
+  allow="autoplay; fullscreen"
+  style={styles.media}
+  title="MaiCinema Banner Video"
+/>
         ) : activeBanner?.file_url ? (
           <div
             style={{

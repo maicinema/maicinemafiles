@@ -121,8 +121,7 @@ function AdminDashboard() {
         return;
       }
 
-      fileUrl = `https://videodelivery.net/${uid}/manifest/video.m3u8`;
-    } else {
+fileUrl = `https://iframe.videodelivery.net/${uid}`;    } else {
       const fileName = `${Date.now()}-${newBannerFile.name.replace(/\s+/g, "-")}`;
 
       const { error: uploadError } = await supabase.storage
