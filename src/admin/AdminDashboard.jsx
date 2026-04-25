@@ -152,67 +152,80 @@ function AdminDashboard() {
 
         <div style={styles.grid}>
           <div style={styles.card}>
-            <h2>Home Banner</h2>
+  <h2>Home Banner</h2>
 
-            {!editingBanner ? (
+  {!editingBanner ? (
+    <button
+      type="button"
+      style={styles.button}
+      onClick={() => setEditingBanner(true)}
+    >
+      Edit
+    </button>
+  ) : (
+    <div style={styles.editForm}>
+      <h3 style={styles.formTitle}>Edit Home Banner</h3>
+
+      <div style={styles.formSection}>
+        <h4>Existing Banner Files</h4>
+
+        {banners.length === 0 ? (
+          <p style={styles.desc}>
+            No banner files found in database yet.
+          </p>
+        ) : (
+          banners.map((item, index) => (
+            <div key={item.id} style={styles.bannerRow}>
+              <span>
+                Banner {index + 1}: {item.file_name || "Uploaded file"}
+              </span>
+
               <button
                 type="button"
-                style={styles.button}
-                onClick={() => setEditingBanner(true)}
+                style={styles.deleteButton}
+                onClick={() => deleteBanner(item.id)}
               >
-                Edit
+                Delete
               </button>
-            ) : (
-              <>
-                <div style={{ marginBottom: "20px" }}>
-                  {banners.length === 0 ? (
-                    <p style={styles.desc}>No banner files uploaded yet.</p>
-                  ) : (
-                    banners.map((item, index) => (
-                      <div key={item.id} style={styles.bannerItem}>
-                        <p style={styles.preview}>
-                          Banner {index + 1} —{" "}
-                          {item.file_name || item.file_url?.split("/").pop()}
-                        </p>
+            </div>
+          ))
+        )}
+      </div>
 
-                        <button
-                          type="button"
-                          style={styles.deleteButton}
-                          onClick={() => deleteBanner(item.id)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
+      <div style={styles.formSection}>
+        <h4>Upload New Banner</h4>
 
-                <input
-                  type="file"
-                  accept="image/*,video/mp4"
-                  onChange={(e) => setNewBannerFile(e.target.files[0])}
-                />
+        <input
+          type="file"
+          accept="image/*,video/mp4"
+          onChange={(e) => setNewBannerFile(e.target.files[0])}
+        />
 
-                {newBannerFile && (
-                  <p style={styles.preview}>{newBannerFile.name}</p>
-                )}
+        {newBannerFile && (
+          <p style={styles.preview}>{newBannerFile.name}</p>
+        )}
+      </div>
 
-                <div style={styles.buttonRow}>
-                  <button type="button" style={styles.button} onClick={uploadBanner}>
-                    Go Live
-                  </button>
+      <div style={styles.buttonRow}>
+        <button
+          type="button"
+          style={styles.button}
+          onClick={uploadBanner}
+        >
+          Go Live
+        </button>
 
-                  <button
-                    type="button"
-                    style={styles.close}
-                    onClick={() => setEditingBanner(false)}
-                  >
-                    Close
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+        <button
+          type="button"
+          style={styles.close}
+          onClick={() => setEditingBanner(false)}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  )}
+</div>
 
           <div style={styles.card}>
             <h2>Platform Logo</h2>
@@ -341,7 +354,36 @@ const styles = {
   modal: { marginTop: "40px", background: "#111", padding: "30px", borderRadius: "10px", maxWidth: "500px" },
   input: { display: "block", marginTop: "10px", marginBottom: "14px", padding: "10px", width: "100%", border: "none" },
   close: { marginTop: "15px", padding: "8px 12px", background: "#444", border: "none", color: "white", cursor: "pointer", position: "relative", zIndex: 10 },
-  emailList: { marginTop: "20px", lineHeight: "2" }
+  emailList: { marginTop: "20px", lineHeight: "2" },
+
+editForm: {
+  marginTop: "20px",
+  background: "#000",
+  padding: "20px",
+  borderRadius: "8px",
+  textAlign: "left"
+},
+
+formTitle: {
+  marginBottom: "20px",
+  textAlign: "center"
+},
+
+formSection: {
+  marginBottom: "25px"
+},
+
+bannerRow: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: "15px",
+  background: "#111",
+  padding: "12px",
+  borderRadius: "6px",
+  marginTop: "10px"
+},
 };
+
 
 export default AdminDashboard;
