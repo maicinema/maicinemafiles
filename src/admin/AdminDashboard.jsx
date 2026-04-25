@@ -128,7 +128,8 @@ async function sendNewsletter() {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.error || "Failed to send newsletter");
+      console.log("Newsletter error:", data);
+      alert(data.error || JSON.stringify(data));
       setSendingNewsletter(false);
       return;
     }
@@ -136,7 +137,8 @@ async function sendNewsletter() {
     alert("Newsletter sent successfully");
     setNewsletterMessage("");
   } catch (error) {
-    alert("Newsletter send failed");
+    console.log("Newsletter send crash:", error);
+    alert(error.message || "Newsletter send failed");
   }
 
   setSendingNewsletter(false);
