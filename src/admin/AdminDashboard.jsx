@@ -261,7 +261,7 @@ function AdminDashboard() {
     setSendingNewsletter(true);
 
     try {
-      const res = await fetch("/api/send-newsletter", {
+      const res = await fetch("https://maicinemafiles.pages.dev/api/send-newsletter", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
