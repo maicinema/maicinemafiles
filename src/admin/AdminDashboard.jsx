@@ -261,7 +261,7 @@ function AdminDashboard() {
     setSendingNewsletter(true);
 
     try {
-const res = await fetch("/api/send-newsletter", {        method: "POST",
+const res = await fetch("/api/paystack/send-newsletter", {       method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
