@@ -1,25 +1,44 @@
-export async function onRequestPost(context) {
+export async function onRequest(context) {
+  if (context.request.method !== "POST") {
+    return new Response(
+      JSON.stringify({ error: "Method not allowed. Use POST." }),
+      {
+        status: 405,
+        headers: { "Content-Type": "application/json" }
+      }
+    );
+  }
+
   try {
     const { emails, message } = await context.request.json();
 
     if (!context.env.RESEND_API_KEY) {
       return new Response(
         JSON.stringify({ error: "Missing RESEND_API_KEY" }),
-        { headers: { "Content-Type": "application/json" }, status: 500 }
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" }
+        }
       );
     }
 
-    if (!emails || emails.length === 0) {
+    if (!emails || !Array.isArray(emails) || emails.length === 0) {
       return new Response(
         JSON.stringify({ error: "No emails provided" }),
-        { headers: { "Content-Type": "application/json" }, status: 400 }
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" }
+        }
       );
     }
 
-    if (!message) {
+    if (!message || !message.trim()) {
       return new Response(
         JSON.stringify({ error: "Message is required" }),
-        { headers: { "Content-Type": "application/json" }, status: 400 }
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" }
+        }
       );
     }
 
@@ -33,8 +52,8 @@ export async function onRequestPost(context) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-         from: "MaiCinema <no-reply@maicinema.com>",
-to: email,
+          from: "MaiCinema <no-reply@maicinema.com>",
+          to: email,
           subject: "MaiCinema Update",
           html: `<p>${message}</p>`
         })
@@ -54,15 +73,20 @@ to: email,
         success: true,
         results
       }),
-      { headers: { "Content-Type": "application/json" } }
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      }
     );
-
   } catch (error) {
     return new Response(
       JSON.stringify({
-        error: error.message
+        error: error.message || "Newsletter send failed"
       }),
-      { headers: { "Content-Type": "application/json" }, status: 500 }
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
+      }
     );
   }
 }
