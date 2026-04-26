@@ -45,19 +45,16 @@ export async function onRequest(context) {
     const results = [];
 
     for (const email of emails) {
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${context.env.RESEND_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          from: "MaiCinema <no-reply@maicinema.com>",
-          to: email,
-          subject: "MaiCinema Update",
-          html: `<p>${message}</p>`
-        })
-      });
+      const res = await fetch("https://maicinemafiles.pages.dev/api/send-newsletter", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    emails,
+    message: newsletterMessage
+  })
+});
 
       const text = await res.text();
 
