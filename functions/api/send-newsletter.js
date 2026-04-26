@@ -33,8 +33,8 @@ export async function onRequestPost(context) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          from: "MaiCinema <onboarding@resend.dev>",
-          to: email,
+         from: "MaiCinema <no-reply@maicinema.com>",
+to: email,
           subject: "MaiCinema Update",
           html: `<p>${message}</p>`
         })
