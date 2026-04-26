@@ -283,10 +283,22 @@ const res = await fetch("/api/send-newsletter", {        method: "POST",
       }
 
       if (!res.ok) {
-        alert(data.error || "Newsletter send failed");
-        setSendingNewsletter(false);
-        return;
-      }
+  console.log("FULL NEWSLETTER ERROR:", data);
+  alert(data.error || JSON.stringify(data));
+  setSendingNewsletter(false);
+  return;
+}
+
+if (data.results) {
+  const failed = data.results.filter((item) => !item.success);
+
+  if (failed.length > 0) {
+    console.log("FAILED EMAIL RESULTS:", failed);
+    alert(failed[0].response || "Some emails failed");
+    setSendingNewsletter(false);
+    return;
+  }
+}
 
       alert("Newsletter sent successfully");
       setNewsletterMessage("");
