@@ -261,8 +261,7 @@ function AdminDashboard() {
     setSendingNewsletter(true);
 
     try {
-const res = await fetch("/api/paystack/send-newsletter", {       method: "POST",
-        headers: {
+const res = await fetch("https://maicinemafiles.pages.dev/api/send-newsletter", {        headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
