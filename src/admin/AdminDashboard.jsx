@@ -261,14 +261,16 @@ function AdminDashboard() {
     setSendingNewsletter(true);
 
     try {
-const res = await fetch("https://maicinemafiles.pages.dev/api/send-newsletter", {        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          emails,
-          message: newsletterMessage
-        })
-      });
+const res = await fetch("https://maicinemafiles.pages.dev/api/send-newsletter", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    emails,
+    message: newsletterMessage
+  })
+});
 
       const raw = await res.text();
       console.log("Newsletter RAW response:", raw);
