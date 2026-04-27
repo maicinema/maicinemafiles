@@ -1,5 +1,4 @@
-export async function onRequest(context) {
-  if (context.request.method !== "POST") {
+export async function onRequestPost(context) {  if (context.request.method !== "POST") {
     return new Response(
       JSON.stringify({ error: "Method not allowed. Use POST." }),
       {
