@@ -11,7 +11,8 @@ export async function onRequest(context) {
   }
 
   try {
-    const { emails, message } = await context.request.json();
+    const { emails, message, filmTitle, filmLink, poster } =
+      await context.request.json();
 
     if (!context.env.RESEND_API_KEY) {
       return new Response(JSON.stringify({ error: "Missing RESEND_API_KEY" }), {
@@ -27,16 +28,15 @@ export async function onRequest(context) {
       });
     }
 
-    if (!message || !message.trim()) {
-      return new Response(JSON.stringify({ error: "Message is required" }), {
-        status: 400,
-        headers: corsHeaders()
-      });
-    }
+    const safeTitle = filmTitle || "New Film Available";
+    const safeMessage = message || "Now streaming on MaiCinema";
+    const safeLink = filmLink || "https://maicinema.com";
 
     const results = [];
 
     for (const email of emails) {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -46,8 +46,35 @@ export async function onRequest(context) {
         body: JSON.stringify({
           from: "MaiCinema <no-reply@maicinema.com>",
           to: email,
-          subject: "MaiCinema Update",
-          html: `<p>${message}</p>`
+          subject: `${safeTitle} is now live on MaiCinema`,
+          html: `
+            <div style="background:#000;color:#fff;padding:24px;font-family:Arial,Helvetica,sans-serif;">
+              <h2 style="color:#e50914;margin:0 0 20px;">MaiCinema</h2>
+
+              <h1 style="margin:0 0 16px;font-size:28px;">
+                ${safeTitle}
+              </h1>
+
+              ${
+                poster
+                  ? `<img src="${poster}" alt="${safeTitle}" style="width:100%;max-width:560px;border-radius:10px;margin:16px 0;display:block;" />`
+                  : ""
+              }
+
+              <p style="font-size:16px;line-height:1.6;color:#ddd;">
+                ${safeMessage}
+              </p>
+
+              <a href="${safeLink}"
+                 style="display:inline-block;background:#e50914;color:#fff;padding:14px 22px;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:18px;">
+                ▶ Watch Now
+              </a>
+
+              <p style="font-size:12px;color:#777;margin-top:30px;">
+                You are receiving this because you subscribed to MaiCinema updates.
+              </p>
+            </div>
+          `
         })
       });
 

@@ -199,8 +199,13 @@ const uploadRes = await fetch(uploadURL, {
   contract_expires_at: film.contract_expires_at || null,
 
   // ✅ preview fields (we test both safely)
-  previewStart: film.previewStart || "00:00",
-previewDuration: film.previewDuration || "00:10"
+  // ✅ Standard preview fields used by public pages
+preview_start: film.preview_start || film.previewStart || "00:00",
+preview_end: film.preview_end || film.previewDuration || "00:10",
+
+// ✅ Keep old fields updated too, so nothing breaks
+previewStart: film.preview_start || film.previewStart || "00:00",
+previewDuration: film.preview_end || film.previewDuration || "00:10"
 };
 
     const { error } = await supabase
@@ -258,7 +263,7 @@ previewDuration: film.previewDuration || "00:10"
       return;
     }
 
-    const message = `A new film is now live on MaiCinema: ${film.title}. Visit MaiCinema now to watch.`;
+    const filmLink = `https://maicinema.com/watch/${film.id}`;
 
     const res = await fetch("https://maicinemafiles.pages.dev/api/send-newsletter", {
       method: "POST",
@@ -267,7 +272,10 @@ previewDuration: film.previewDuration || "00:10"
       },
       body: JSON.stringify({
         emails,
-        message
+        filmTitle: film.title,
+        filmLink: filmLink,
+        poster: film.poster_url,
+        message: "Now streaming on MaiCinema"
       })
     });
 

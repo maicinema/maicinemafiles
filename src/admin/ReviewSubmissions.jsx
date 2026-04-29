@@ -319,8 +319,8 @@ async function approveFilm(submission) {
   description: adminFilm.description.trim(),
   poster_url: posterUrl,
   video_url: videoUrl, // ✅ FIXED
-  preview_start: adminFilm.previewStart,
-  preview_end: adminFilm.previewEnd,
+  preview_start: adminFilm.previewStart?.trim() || "00:00",
+preview_end: adminFilm.previewEnd?.trim() || "00:10",
   views: 0,
   price: 3,
   status: releaseStatus,
