@@ -7,13 +7,19 @@ function parseTimeToSeconds(time) {
   if (!time) return 0;
   if (typeof time === "number") return time;
 
-  const parts = String(time).split(":");
-  if (parts.length !== 2) return 0;
+  const parts = String(time).trim().split(":").map(Number);
 
-  const minutes = Number(parts[0]);
-  const seconds = Number(parts[1]);
+  if (parts.length === 2) {
+    const [minutes, seconds] = parts;
+    return (minutes || 0) * 60 + (seconds || 0);
+  }
 
-  return minutes * 60 + seconds;
+  if (parts.length === 3) {
+    const [hours, minutes, seconds] = parts;
+    return (hours || 0) * 3600 + (minutes || 0) * 60 + (seconds || 0);
+  }
+
+  return 0;
 }
 
 function MovieCard({ movie }) {
@@ -41,6 +47,8 @@ function MovieCard({ movie }) {
       previewEnd > startTime ? previewEnd : startTime + previewDuration;
 
     video.onloadeddata = null;
+    video.onloadedmetadata = null;
+    video.onseeked = null;
     video.ontimeupdate = null;
 
     if (!video.src) {
@@ -48,27 +56,28 @@ function MovieCard({ movie }) {
       video.load();
     }
 
-    const playPreview = () => {
+    const seekAndPlay = () => {
       video.currentTime = startTime;
-      video.muted = false;
-video.defaultMuted = false;
-video.volume = 1;
-      video.play().catch((err) => {
-        console.log("Preview play error:", err);
-      });
 
-      video.ontimeupdate = () => {
-        if (video.currentTime >= endTime) {
-          video.pause();
-          video.ontimeupdate = null;
-        }
+      video.onseeked = () => {
+        video.play().catch((err) => {
+          console.log("Preview play error:", err);
+        });
+
+        video.ontimeupdate = () => {
+          if (video.currentTime >= endTime) {
+            video.pause();
+            video.ontimeupdate = null;
+            video.onseeked = null;
+          }
+        };
       };
     };
 
-    if (video.readyState >= 2) {
-      playPreview();
+    if (video.readyState >= 1) {
+      seekAndPlay();
     } else {
-      video.onloadeddata = playPreview;
+      video.onloadedmetadata = seekAndPlay;
     }
   };
 
