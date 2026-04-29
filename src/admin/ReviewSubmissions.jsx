@@ -308,25 +308,25 @@ async function approveFilm(submission) {
     const videoUrl = await uploadVideo(adminFilm.film, setUploadProgress);
 
     const filmPayload = {
-      title: adminFilm.title.trim(),
-      director: adminFilm.director.trim(),
-      genre: adminFilm.genre.trim(),
-      rating: adminFilm.rating.trim(),
-      language: adminFilm.language.trim(),
-      year: adminFilm.year.trim(),
-      duration:
-        parseInt(String(adminFilm.duration).replace(/\D/g, ""), 10) || 0,
-      description: adminFilm.description.trim(),
-      poster_url: posterUrl,
-     video_id: videoUrl.split("/")[3], // extracts ID from Cloudflare URL
-      preview_start: adminFilm.previewStart,
-      preview_end: adminFilm.previewEnd,
-      views: 0,
-      price: 3,
-      status: releaseStatus,
-      go_live_at: goLiveAt.toISOString(),
-      contract_expires_at: null
-    };
+  title: adminFilm.title.trim(),
+  director: adminFilm.director.trim(),
+  genre: adminFilm.genre.trim(),
+  rating: adminFilm.rating.trim(),
+  language: adminFilm.language.trim(),
+  year: adminFilm.year.trim(),
+  duration:
+    parseInt(String(adminFilm.duration).replace(/\D/g, ""), 10) || 0,
+  description: adminFilm.description.trim(),
+  poster_url: posterUrl,
+  video_url: videoUrl, // ✅ FIXED
+  preview_start: adminFilm.previewStart,
+  preview_end: adminFilm.previewEnd,
+  views: 0,
+  price: 3,
+  status: releaseStatus,
+  go_live_at: goLiveAt.toISOString(),
+  contract_expires_at: null
+};
 
     const { error: filmError } = await supabase
       .from("films")
