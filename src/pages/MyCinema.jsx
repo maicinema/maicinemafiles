@@ -376,11 +376,19 @@ function MyCinema() {
             if (!video || !bannerFilm.video_url) return;
 
             const startTime = parseTimeToSeconds(
-              bannerFilm.previewStart || "00:00"
-            );
-            const duration = parseTimeToSeconds(
-              bannerFilm.previewDuration || "00:10"
-            );
+  bannerFilm.previewStart || bannerFilm.preview_start || "00:00"
+);
+
+const previewEnd = parseTimeToSeconds(
+  bannerFilm.previewEnd || bannerFilm.preview_end || ""
+);
+
+const previewDuration = parseTimeToSeconds(
+  bannerFilm.previewDuration || bannerFilm.preview_duration || "00:10"
+);
+
+const endTime =
+  previewEnd > startTime ? previewEnd : startTime + previewDuration;
 
             video.src = bannerFilm.video_url;
             video.load();
@@ -393,8 +401,8 @@ function MyCinema() {
               video.play().catch(() => {});
 
               video.ontimeupdate = () => {
-                if (video.currentTime >= startTime + duration) {
-                  video.pause();
+                if (video.currentTime >= endTime) {
+  video.pause();
                 }
               };
             };
