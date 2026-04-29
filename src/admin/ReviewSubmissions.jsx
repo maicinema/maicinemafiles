@@ -88,6 +88,23 @@ previewEnd: "",
     }));
   }
 
+  async function uploadPoster(file, prefix = "submission") {
+  if (!file) return "";
+
+  const fileName = `${prefix}-poster-${Date.now()}-${file.name}`;
+
+  const { error } = await supabase.storage
+    .from("posters")
+    .upload(fileName, file, { upsert: true });
+
+  if (error) {
+    throw new Error(error.message || "Poster upload failed");
+  }
+
+  const { data } = supabase.storage.from("posters").getPublicUrl(fileName);
+  return data?.publicUrl || "";
+}
+
   async function uploadVideo(file, onProgress) {
   if (!file) return "";
 
