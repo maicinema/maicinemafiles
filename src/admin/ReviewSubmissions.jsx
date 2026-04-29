@@ -88,60 +88,48 @@ previewEnd: "",
     }));
   }
 
-  async function uploadPoster(file, prefix = "submission") {
-    if (!file) return "";
-
-    const fileName = `${prefix}-poster-${Date.now()}-${file.name}`;
-
-    const { error } = await supabase.storage
-      .from("posters")
-      .upload(fileName, file, { upsert: true });
-
-    if (error) {
-      throw new Error(error.message || "Poster upload failed");
-    }
-
-    const { data } = supabase.storage.from("posters").getPublicUrl(fileName);
-    return data?.publicUrl || "";
-  }
-
-async function uploadVideo(file, onProgress) {
+  async function uploadVideo(file, onProgress) {
   if (!file) return "";
 
-  const formData = new FormData();
-  formData.append("file", file);
-
-  let res;
-
   try {
-   res = await fetch(
-  "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
-  {
-    method: "POST",
-    headers: {
-      "x-api-key": "your-super-secret-key"
-    },
-    body: formData,
-  }
-);
+    console.log("🚀 Cloudflare upload starting...");
 
+    const res = await fetch(
+      "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
+      {
+        method: "POST"
+      }
+    );
+
+    const data = await res.json();
+
+    if (!data.success) {
+      console.log("❌ Cloudflare upload URL error:", data);
+      throw new Error(data.error || "Video upload setup failed");
+    }
+
+    const { uploadURL, uid } = data;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const uploadRes = await fetch(uploadURL, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!uploadRes.ok) {
+      console.log("🔥 Cloudflare video upload failed:", await uploadRes.text());
+      throw new Error("Upload failed");
+    }
+
+    if (onProgress) onProgress(100);
+
+    return `https://videodelivery.net/${uid}/manifest/video.m3u8`;
   } catch (err) {
-    console.error("FETCH ERROR:", err);
-    throw new Error("Network error while uploading video");
+    console.log("🔥 Upload crash:", err);
+    throw new Error(err.message || "Upload failed");
   }
-
-  const raw = await res.text();
-
-  if (!res.ok) {
-    console.error("FUNCTION ERROR:", raw);
-    throw new Error("Upload failed");
-  }
-
-  const result = JSON.parse(raw);
-
-  if (onProgress) onProgress(100);
-
-  return result.playbackUrl;
 }
 
   function formatDuration(minutes) {

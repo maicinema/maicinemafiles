@@ -240,7 +240,47 @@ previewDuration: film.previewDuration || "00:10"
     alert("Film deleted successfully");
   }
 
+  async function sendFilmLiveEmail(film) {
+  try {
+    const { data, error } = await supabase
+      .from("newsletter_subscribers")
+      .select("email");
+
+    if (error) {
+      console.log("Newsletter email load error:", error);
+      return;
+    }
+
+    const emails = (data || []).map((item) => item.email).filter(Boolean);
+
+    if (emails.length === 0) {
+      console.log("No newsletter subscribers found");
+      return;
+    }
+
+    const message = `A new film is now live on MaiCinema: ${film.title}. Visit MaiCinema now to watch.`;
+
+    const res = await fetch("https://maicinemafiles.pages.dev/api/send-newsletter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        emails,
+        message
+      })
+    });
+
+    const result = await res.text();
+    console.log("Auto film email result:", result);
+  } catch (error) {
+    console.log("Auto film email failed:", error);
+  }
+}
+
  async function goLiveFilm(film) {
+  const shouldSendAnnouncement = film.status !== "live" || isExpired(film);
+
   const now = new Date();
   const currentExpiry = film.contract_expires_at
     ? new Date(film.contract_expires_at)
@@ -266,6 +306,10 @@ previewDuration: film.previewDuration || "00:10"
     console.log("🔥 Go live error FULL:", error);
     alert(error.message || "Failed to return film to live");
     return;
+  }
+
+  if (shouldSendAnnouncement) {
+    await sendFilmLiveEmail(film);
   }
 
   await loadFilms();
