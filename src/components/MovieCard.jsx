@@ -50,10 +50,9 @@ function MovieCard({ movie }) {
 
     const playPreview = () => {
       video.currentTime = startTime;
-      video.muted = true;
-      video.defaultMuted = true;
-      video.volume = 0;
-
+      video.muted = false;
+video.defaultMuted = false;
+video.volume = 1;
       video.play().catch((err) => {
         console.log("Preview play error:", err);
       });
@@ -146,7 +145,6 @@ function MovieCard({ movie }) {
           style={styles.image}
           preload="metadata"
           playsInline
-          muted
         />
       ) : (
         <img
