@@ -5,10 +5,9 @@ import { useAuth } from "../context/AuthContext";
 
 function parseTimeToSeconds(time) {
   if (!time) return 0;
-
   if (typeof time === "number") return time;
 
-  const parts = time.split(":");
+  const parts = String(time).split(":");
   if (parts.length !== 2) return 0;
 
   const minutes = Number(parts[0]);
@@ -20,96 +19,105 @@ function parseTimeToSeconds(time) {
 function MovieCard({ movie }) {
   const videoRef = useRef(null);
   const navigate = useNavigate();
-const { user, loading } = useAuth();
+  const { user, loading } = useAuth();
 
-const startPreview = () => {
-  const video = videoRef.current;
-  if (!video || !movie.video_url) return;
+  const startPreview = () => {
+    const video = videoRef.current;
+    if (!video || !movie.video_url) return;
 
-  const startTime = parseTimeToSeconds(movie.previewStart || "00:00");
-  const duration = parseTimeToSeconds(movie.previewDuration || "00:10");
+    const startTime = parseTimeToSeconds(
+      movie.previewStart || movie.preview_start || "00:00"
+    );
 
-  // ✅ CLEAR old listeners
-  video.onloadeddata = null;
-  video.ontimeupdate = null;
+    const previewEnd = parseTimeToSeconds(
+      movie.previewEnd || movie.preview_end || ""
+    );
 
-  const playPreview = () => {
-    video.currentTime = startTime;
+    const previewDuration = parseTimeToSeconds(
+      movie.previewDuration || movie.preview_duration || "00:10"
+    );
 
-    video.muted = false;
-video.defaultMuted = false;
-    video.volume = 1;
+    const endTime =
+      previewEnd > startTime ? previewEnd : startTime + previewDuration;
 
-    video.play().catch(() => {});
+    video.onloadeddata = null;
+    video.ontimeupdate = null;
 
-    video.ontimeupdate = () => {
-      if (video.currentTime >= startTime + duration) {
-        video.pause();
-        video.ontimeupdate = null;
-      }
+    if (!video.src) {
+      video.src = movie.video_url;
+      video.load();
+    }
+
+    const playPreview = () => {
+      video.currentTime = startTime;
+      video.muted = true;
+      video.defaultMuted = true;
+      video.volume = 0;
+
+      video.play().catch((err) => {
+        console.log("Preview play error:", err);
+      });
+
+      video.ontimeupdate = () => {
+        if (video.currentTime >= endTime) {
+          video.pause();
+          video.ontimeupdate = null;
+        }
+      };
     };
+
+    if (video.readyState >= 2) {
+      playPreview();
+    } else {
+      video.onloadeddata = playPreview;
+    }
   };
 
-  // ✅ WAIT for readiness (fix for new uploads)
-  if (video.readyState >= 2) {
-    playPreview();
-  } else {
-    video.onloadeddata = playPreview;
-  }
-};
-
-
   const stopPreview = () => {
-  const video = videoRef.current;
-  if (!video) return;
+    const video = videoRef.current;
+    if (!video) return;
 
-  // ✅ STOP playback
-  video.pause();
-  video.currentTime = 0;
+    video.pause();
+    video.currentTime = 0;
+    video.onloadeddata = null;
+    video.ontimeupdate = null;
+    video.removeAttribute("src");
+    video.load();
+  };
 
-  // ✅ KILL ALL ACTIVE EVENTS (THIS WAS MISSING)
-  video.onloadeddata = null;
-  video.ontimeupdate = null;
+  const handleClick = async () => {
+    if (loading) return;
 
-  // ✅ RESET TO POSTER (YOUR ORIGINAL BEHAVIOR)
-  video.removeAttribute("src");
-  video.load();
-  video.src = video.getAttribute("data-src");
-};
+    if (!user) {
+      navigate(`/createaccount?filmId=${movie.id}`);
+      return;
+    }
 
- const handleClick = async () => {
-  if (loading) return;
+    const now = new Date().toISOString();
 
-  if (!user) {
-    navigate(`/createaccount?filmId=${movie.id}`);
-    return;
-  }
+    const { data } = await supabase
+      .from("payments")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("status", "completed");
 
-  const now = new Date().toISOString();
+    const hasSubscription = data?.some(
+      (p) => p.type === "subscription" && p.expires_at > now
+    );
 
-  const { data } = await supabase
-    .from("payments")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("status", "completed");
+    if (!hasSubscription) {
+      navigate(`/subscribe`);
+      return;
+    }
 
-  const hasSubscription = data?.some(
-    (p) => p.type === "subscription" && p.expires_at > now
-  );
-
-  if (!hasSubscription) {
-    navigate(`/subscribe`);
-    return;
-  }
-
-  navigate(`/watch/${movie.id}`);
-};
+    navigate(`/watch/${movie.id}`);
+  };
 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Movie",
     name: movie.title,
-   image: movie.poster_url,
+    image: movie.poster_url,
     description: movie.description,
     genre: movie.genre,
     aggregateRating: {
@@ -118,12 +126,11 @@ video.defaultMuted = false;
       reviewCount: movie.views || "100"
     }
   };
-console.log("MOVIE DATA:", movie);
 
   return (
     <div
       style={styles.card}
-      onMouseEnter={startPreview}  // ✅ faster than onMouseEnter
+      onMouseEnter={startPreview}
       onMouseLeave={stopPreview}
       onClick={handleClick}
     >
@@ -133,16 +140,17 @@ console.log("MOVIE DATA:", movie);
 
       {movie.video_url ? (
         <video
-  ref={videoRef}
-  data-src={movie.video_url}
-  poster={movie.poster_url + "?t=" + Date.now()}
-  style={styles.image}
-  preload="auto"
-  playsInline
-/>
+          ref={videoRef}
+          data-src={movie.video_url}
+          poster={movie.poster_url ? movie.poster_url + "?t=" + Date.now() : ""}
+          style={styles.image}
+          preload="metadata"
+          playsInline
+          muted
+        />
       ) : (
         <img
-          src={movie.poster_url + "?t=" + Date.now()}
+          src={movie.poster_url ? movie.poster_url + "?t=" + Date.now() : ""}
           alt={movie.title}
           style={styles.image}
           loading="lazy"
@@ -223,8 +231,7 @@ const styles = {
     color: "#e50914",
     padding: "4px 10px",
     cursor: "pointer"
-  },
-
+  }
 };
 
 export default MovieCard;
