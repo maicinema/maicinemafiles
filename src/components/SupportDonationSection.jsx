@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import spotlightImg from "../assets/donations/spotlight.jpg";
 import premiereImg from "../assets/donations/premiere.jpg";
 import executiveImg from "../assets/donations/executive.jpg";
+import exystPoster from "../assets/donations/Exystposter.png";
 
 function SupportDonationSection() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ function SupportDonationSection() {
       {/* 🔥 NEW BANNER */}
       <div style={styles.banner}>
         <img
-          src="/assets/Exystposter.png" // 🔥 CHANGE THIS TO YOUR FILM POSTER
+          src={exystPoster} // 🔥 CHANGE THIS TO YOUR FILM POSTER
           alt="Support Film"
           style={styles.bannerImage}
         />
