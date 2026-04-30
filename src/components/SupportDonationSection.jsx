@@ -56,12 +56,6 @@ function SupportDonationSection() {
         />
       </div>
 
-      <h1 style={styles.bannerTitle}>Support EXYST</h1>
-
-      <p style={styles.bannerText}>
-        Help bring this film to life. Become part of the story.
-      </p>
-
       <h2 style={styles.title}>Support the Film</h2>
 
       <p style={styles.subtitle}>
