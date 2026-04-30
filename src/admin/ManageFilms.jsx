@@ -414,20 +414,20 @@ previewDuration: film.preview_end || film.previewDuration || "00:10"
   style={styles.input}
   type="text"
   placeholder="00:30"
-  value={formatToMMSS(film.previewStart)}
-  onChange={(e) =>
-    handleChange(film.id, "previewStart", e.target.value)
-  }
+  value={formatToMMSS(film.preview_start || film.previewStart)}
+onChange={(e) =>
+  handleChange(film.id, "preview_start", e.target.value)
+}
 />
 
                       <input
   style={styles.input}
   type="text"
   placeholder="01:45"
-  value={formatToMMSS(film.previewDuration)}
-  onChange={(e) =>
-    handleChange(film.id, "previewDuration", e.target.value)
-  }
+  value={formatToMMSS(film.preview_end || film.previewDuration)}
+onChange={(e) =>
+  handleChange(film.id, "preview_end", e.target.value)
+}
 />
 
                       <select
