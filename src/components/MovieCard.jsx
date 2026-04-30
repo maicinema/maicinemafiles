@@ -32,20 +32,20 @@ function MovieCard({ movie }) {
     if (!video || !movie.video_url) return;
 
     const startTime = parseTimeToSeconds(
-      movie.previewStart || movie.preview_start || "00:00"
-    );
+  movie.preview_start || movie.previewStart || "00:00"
+);
 
-    const previewEnd = parseTimeToSeconds(
-      movie.previewEnd || movie.preview_end || ""
-    );
+const previewEnd = parseTimeToSeconds(
+  movie.preview_end || movie.previewEnd || ""
+);
 
-    const previewDuration = parseTimeToSeconds(
-      movie.previewDuration || movie.preview_duration || "00:10"
-    );
+const previewDuration = parseTimeToSeconds(
+  movie.preview_duration || movie.previewDuration || "00:10"
+);
 
-    const endTime =
-      previewEnd > startTime ? previewEnd : startTime + previewDuration;
-
+const endTime =
+  previewEnd > startTime ? previewEnd : startTime + previewDuration;
+  
     video.onloadeddata = null;
     video.onloadedmetadata = null;
     video.onseeked = null;

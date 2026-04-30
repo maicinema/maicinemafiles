@@ -375,16 +375,16 @@ function MyCinema() {
             const video = videoRef.current;
             if (!video || !bannerFilm.video_url) return;
 
-            const startTime = parseTimeToSeconds(
-  bannerFilm.previewStart || bannerFilm.preview_start || "00:00"
+           const startTime = parseTimeToSeconds(
+  bannerFilm.preview_start || bannerFilm.previewStart || "00:00"
 );
 
 const previewEnd = parseTimeToSeconds(
-  bannerFilm.previewEnd || bannerFilm.preview_end || ""
+  bannerFilm.preview_end || bannerFilm.previewEnd || ""
 );
 
 const previewDuration = parseTimeToSeconds(
-  bannerFilm.previewDuration || bannerFilm.preview_duration || "00:10"
+  bannerFilm.preview_duration || bannerFilm.previewDuration || "00:10"
 );
 
 const endTime =
