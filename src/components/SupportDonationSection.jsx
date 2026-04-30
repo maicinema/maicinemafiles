@@ -50,21 +50,31 @@ function SupportDonationSection() {
 
   return (
     <div style={styles.container}>
+
+      {/* 🔥 NEW BANNER */}
+      <div style={styles.banner}>
+        <img
+          src="/assets/Exystposter.png" // 🔥 CHANGE THIS TO YOUR FILM POSTER
+          alt="Support Film"
+          style={styles.bannerImage}
+        />
+
+        <div style={styles.bannerOverlay}>
+          <h1 style={styles.bannerTitle}>Support EXYST</h1>
+          <p style={styles.bannerText}>
+            Help bring this film to life. Become part of the story.
+          </p>
+        </div>
+      </div>
+
       <h2 style={styles.title}>Patron Circle Donators</h2>
 
       <p style={styles.subtitle}>
         Support the journey of <strong>MaiCinema Originals and Streams</strong>.
-        Be part of what we are building and unlock special supporter benefits.
       </p>
 
-      <div style={styles.totalBox}>
-        <p>Total Support Raised</p>
-        <h1>$0</h1>
-      </div>
-
-      {/* TOP ROW */}
       <div style={styles.row}>
-        {tiers.slice(0, 2).map((tier) => (
+        {tiers.map((tier) => (
           <div key={tier.name} style={styles.card}>
             <img src={tier.image} alt={tier.name} style={styles.image} />
 
@@ -78,44 +88,12 @@ function SupportDonationSection() {
                 ))}
               </ul>
 
-              <button
-                style={styles.button}
-                onClick={() => goToPayment(tier)}
-              >
+              <button onClick={() => goToPayment(tier)} style={styles.button}>
                 Support
               </button>
             </div>
           </div>
         ))}
-      </div>
-
-      {/* BOTTOM ROW */}
-      <div style={{ ...styles.row, justifyContent: "center" }}>
-        <div style={{ ...styles.card, maxWidth: "400px" }}>
-          <img
-            src={tiers[2].image}
-            alt={tiers[2].name}
-            style={styles.image}
-          />
-
-          <div style={styles.cardContent}>
-            <h3>{tiers[2].name}</h3>
-            <p style={styles.price}>{tiers[2].price}</p>
-
-            <ul style={styles.list}>
-              {tiers[2].benefits.map((b) => (
-                <li key={b}>{b}</li>
-              ))}
-            </ul>
-
-            <button
-              style={styles.button}
-              onClick={() => goToPayment(tiers[2])}
-            >
-              Support
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -127,11 +105,43 @@ const styles = {
     textAlign: "center",
   },
 
+  /* 🔥 BANNER STYLES */
+  banner: {
+    position: "relative",
+    width: "100%",
+    height: "350px",
+    marginBottom: "40px",
+    overflow: "hidden",
+  },
+
+  bannerImage: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  },
+
+  bannerOverlay: {
+    position: "absolute",
+    bottom: "20px",
+    left: "20px",
+    color: "white",
+    textAlign: "left",
+  },
+
+  bannerTitle: {
+    fontSize: "36px",
+    marginBottom: "10px",
+  },
+
+  bannerText: {
+    fontSize: "16px",
+    color: "#ddd",
+  },
+
   title: {
-  fontSize: "clamp(32px, 6vw, 48px)",
-  fontWeight: "bold",
-  marginBottom: "15px",
-},
+    fontSize: "32px",
+    marginBottom: "15px",
+  },
 
   subtitle: {
     maxWidth: "700px",
@@ -139,29 +149,22 @@ const styles = {
     color: "#ccc",
   },
 
-  totalBox: {
-    marginBottom: "40px",
-  },
-
   row: {
     display: "flex",
     gap: "20px",
     justifyContent: "center",
     flexWrap: "wrap",
-    marginBottom: "30px",
   },
 
   card: {
     background: "#111",
     borderRadius: "10px",
-    overflow: "hidden",
-    maxWidth: "320px",
-    width: "100%",
+    maxWidth: "300px",
   },
 
   image: {
     width: "100%",
-    height: "180px",
+    height: "160px",
     objectFit: "cover",
   },
 
@@ -171,14 +174,12 @@ const styles = {
 
   price: {
     color: "#e50914",
-    marginBottom: "10px",
   },
 
   list: {
     textAlign: "left",
-    fontSize: "14px",
     color: "#ccc",
-    marginBottom: "15px",
+    fontSize: "14px",
   },
 
   button: {
@@ -188,7 +189,6 @@ const styles = {
     padding: "10px",
     width: "100%",
     cursor: "pointer",
-    borderRadius: "5px",
   },
 };
 
