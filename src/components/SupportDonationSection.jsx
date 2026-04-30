@@ -9,38 +9,35 @@ function SupportDonationSection() {
 
   const tiers = [
     {
-      name: "Spotlight Donators",
-      price: "$100 – $500",
+      name: "Supporter",
+      price: "$3 – $10",
       image: spotlightImg,
       benefits: [
-        "Name listed on supporter wall",
-        "Name added to selected MaiCinema Originals end credits",
-        "Early supporter recognition on the platform",
-        "Access to supporter updates for selected projects",
+        "Name listed on MaiCinema supporter wall",
+        "Access to private project updates",
+        "Early announcements before public release",
       ],
     },
     {
-      name: "Premiere Donators",
-      price: "$500 – $1,000",
+      name: "Insider",
+      price: "$10 – $25",
       image: premiereImg,
       benefits: [
-        "Everything in Spotlight",
-        "Priority name placement in end credits",
-        "Exclusive MaiCinema supporter badge",
-        "Early preview updates on selected originals and streams",
-        "Special appreciation feature on supporter section",
+        "Everything in Supporter",
+        "Behind-the-scenes clips access",
+        "Early private screening link",
+        "Name included in film end credits",
       ],
     },
     {
-      name: "Executive Donators",
-      price: "$1,000 and above",
+      name: "Backer",
+      price: "$25 – $50",
       image: executiveImg,
       benefits: [
-        "Everything in Premiere",
-        "Executive supporter recognition on selected MaiCinema Originals",
-        "Featured supporter spotlight on the platform",
-        "Priority acknowledgment during premieres",
-        "Highest supporter tier recognition",
+        "Everything in Insider",
+        "Priority name placement in credits",
+        "Special Backer recognition",
+        "Exclusive digital supporter badge",
       ],
     },
   ];
@@ -65,10 +62,11 @@ function SupportDonationSection() {
         Help bring this film to life. Become part of the story.
       </p>
 
-      <h2 style={styles.title}>Patron Circle Donators</h2>
+      <h2 style={styles.title}>Support the Film</h2>
 
       <p style={styles.subtitle}>
-        Support the journey of <strong>MaiCinema Originals and Streams</strong>.
+        Support EXYST and become part of its journey. Get exclusive access,
+        early viewing, and recognition in the film.
       </p>
 
       <div style={styles.row}>
@@ -81,8 +79,8 @@ function SupportDonationSection() {
               <p style={styles.price}>{tier.price}</p>
 
               <ul style={styles.list}>
-                {tier.benefits.map((b) => (
-                  <li key={b}>{b}</li>
+                {tier.benefits.map((benefit) => (
+                  <li key={benefit}>{benefit}</li>
                 ))}
               </ul>
 
@@ -168,6 +166,7 @@ const styles = {
 
   price: {
     color: "#e50914",
+    fontWeight: "bold",
   },
 
   list: {
