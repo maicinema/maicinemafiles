@@ -51,22 +51,19 @@ function SupportDonationSection() {
 
   return (
     <div style={styles.container}>
-
-      {/* 🔥 NEW BANNER */}
       <div style={styles.banner}>
         <img
-          src={exystPoster} // 🔥 CHANGE THIS TO YOUR FILM POSTER
-          alt="Support Film"
+          src={exystPoster}
+          alt="Support EXYST"
           style={styles.bannerImage}
         />
-
-        <div style={styles.bannerOverlay}>
-          <h1 style={styles.bannerTitle}>Support EXYST</h1>
-          <p style={styles.bannerText}>
-            Help bring this film to life. Become part of the story.
-          </p>
-        </div>
       </div>
+
+      <h1 style={styles.bannerTitle}>Support EXYST</h1>
+
+      <p style={styles.bannerText}>
+        Help bring this film to life. Become part of the story.
+      </p>
 
       <h2 style={styles.title}>Patron Circle Donators</h2>
 
@@ -106,27 +103,21 @@ const styles = {
     textAlign: "center",
   },
 
-  /* 🔥 BANNER STYLES */
   banner: {
-    position: "relative",
     width: "100%",
-    height: "350px",
-    marginBottom: "40px",
+    height: "500px",
+    marginBottom: "30px",
+    background: "#000",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
     overflow: "hidden",
   },
 
   bannerImage: {
     width: "100%",
     height: "100%",
-    objectFit: "cover",
-  },
-
-  bannerOverlay: {
-    position: "absolute",
-    bottom: "20px",
-    left: "20px",
-    color: "white",
-    textAlign: "left",
+    objectFit: "contain",
   },
 
   bannerTitle: {
@@ -137,6 +128,7 @@ const styles = {
   bannerText: {
     fontSize: "16px",
     color: "#ddd",
+    marginBottom: "35px",
   },
 
   title: {
@@ -161,6 +153,7 @@ const styles = {
     background: "#111",
     borderRadius: "10px",
     maxWidth: "300px",
+    overflow: "hidden",
   },
 
   image: {
