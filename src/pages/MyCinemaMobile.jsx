@@ -15,16 +15,16 @@ function parseTimeToSeconds(time) {
 
 function getPreviewTimes(film) {
   const startTime = parseTimeToSeconds(
-    film.previewStart || film.preview_start || "00:00"
-  );
+  film.preview_start || film.previewStart || "00:00"
+);
 
-  const previewEnd = parseTimeToSeconds(
-    film.previewEnd || film.preview_end || ""
-  );
+const previewEnd = parseTimeToSeconds(
+  film.preview_end || film.previewEnd || ""
+);
 
-  const previewDuration = parseTimeToSeconds(
-    film.previewDuration || film.preview_duration || "00:10"
-  );
+const previewDuration = parseTimeToSeconds(
+  film.preview_duration || film.previewDuration || "00:10"
+);
 
   const endTime =
     previewEnd > startTime ? previewEnd : startTime + previewDuration;
