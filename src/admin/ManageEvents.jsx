@@ -13,6 +13,7 @@ function ManageEvents() {
   const [newPoster, setNewPoster] = useState(null);
 const [banner, setBanner] = useState(null);
 const [bannerFile, setBannerFile] = useState(null);
+const [supportTiers, setSupportTiers] = useState([]);
 
   const [showCreate, setShowCreate] = useState(false);
   const [createPoster, setCreatePoster] = useState(null);
@@ -28,9 +29,10 @@ const [bannerFile, setBannerFile] = useState(null);
     ticketPremium: ""
   });
 
-  useEffect(() => {
+ useEffect(() => {
   loadEvents();
   loadBanner();
+  loadSupportTiers();
 }, []);
 
 async function loadBanner() {
@@ -46,6 +48,40 @@ async function loadBanner() {
   }
 
   setBanner(data);
+}
+
+async function loadSupportTiers() {
+  const { data, error } = await supabase
+    .from("support_tiers")
+    .select("*")
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    console.log("Load support tiers error:", error);
+    return;
+  }
+
+  setSupportTiers(data || []);
+}
+
+async function updateSupportTier(tier) {
+  const { error } = await supabase
+    .from("support_tiers")
+    .update({
+      name: tier.name,
+      price: tier.price,
+      benefits: tier.benefits,
+    })
+    .eq("id", tier.id);
+
+  if (error) {
+    console.log("Update tier error:", error);
+    alert("Failed to update tier");
+    return;
+  }
+
+  alert("Tier updated ✅");
+  await loadSupportTiers();
 }
 
 async function saveBanner() {
@@ -287,6 +323,12 @@ async function loadEvents() {
       [name]: value
     }));
   };
+
+  function handleTierChange(index, field, value) {
+  const updated = [...supportTiers];
+  updated[index][field] = value;
+  setSupportTiers(updated);
+}
 
   async function uploadPoster(file) {
     if (!file) return "";
@@ -599,7 +641,45 @@ async function loadEvents() {
 
       <div style={styles.container}>
         <h1>Events</h1>
+<div style={{ marginBottom: "50px", width: "600px" }}>
+  <h2>Support Tiers (Edit Cards)</h2>
 
+  {supportTiers.map((tier, index) => (
+    <div key={tier.id} style={{ marginBottom: "20px" }}>
+      <input
+        value={tier.name}
+        onChange={(e) =>
+          handleTierChange(index, "name", e.target.value)
+        }
+        style={styles.input}
+      />
+
+      <input
+        value={tier.price}
+        onChange={(e) =>
+          handleTierChange(index, "price", e.target.value)
+        }
+        style={styles.input}
+      />
+
+      <textarea
+        value={tier.benefits}
+        onChange={(e) =>
+          handleTierChange(index, "benefits", e.target.value)
+        }
+        style={styles.textarea}
+        placeholder="Each benefit on new line"
+      />
+
+      <button
+        onClick={() => updateSupportTier(tier)}
+        style={styles.saveButton}
+      >
+        Save Tier
+      </button>
+    </div>
+  ))}
+</div>
         <button
           onClick={() => setShowCreate(!showCreate)}
           style={styles.addButton}
