@@ -11,6 +11,8 @@ function ManageEvents() {
   const [events, setEvents] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
   const [newPoster, setNewPoster] = useState(null);
+const [banner, setBanner] = useState(null);
+const [bannerFile, setBannerFile] = useState(null);
 
   const [showCreate, setShowCreate] = useState(false);
   const [createPoster, setCreatePoster] = useState(null);
@@ -27,8 +29,52 @@ function ManageEvents() {
   });
 
   useEffect(() => {
-    loadEvents();
-  }, []);
+  loadEvents();
+  loadBanner();
+}, []);
+
+async function loadBanner() {
+  const { data, error } = await supabase
+    .from("support_banner")
+    .select("*")
+    .limit(1)
+    .single();
+
+  if (error) {
+    console.log("Banner load error:", error);
+    return;
+  }
+
+  setBanner(data);
+}
+
+async function saveBanner() {
+  let imageUrl = banner?.image_url || "";
+
+  if (bannerFile) {
+    const uploaded = await uploadPoster(bannerFile);
+    if (uploaded) imageUrl = uploaded;
+  }
+
+  const { error } = await supabase
+    .from("support_banner")
+    .update({
+      title: banner.title,
+      subtitle: banner.subtitle,
+      image_url: imageUrl,
+    })
+    .eq("id", banner.id);
+
+  if (error) {
+    console.log("Banner save error:", error);
+    alert("Failed to save banner");
+    return;
+  }
+
+  alert("Banner updated ✅");
+  setBannerFile(null);
+  await loadBanner();
+}
 
   async function loadEvents() {
     const { data, error } = await supabase
@@ -479,6 +525,43 @@ function ManageEvents() {
             </button>
           </div>
         )}
+
+<div style={{ marginBottom: "40px", width: "600px" }}>
+  <h2>Support Banner</h2>
+
+  {banner && (
+    <>
+      <input
+        value={banner.title || ""}
+        onChange={(e) =>
+          setBanner({ ...banner, title: e.target.value })
+        }
+        placeholder="Title"
+        style={styles.input}
+      />
+
+      <textarea
+        value={banner.subtitle || ""}
+        onChange={(e) =>
+          setBanner({ ...banner, subtitle: e.target.value })
+        }
+        placeholder="Subtitle"
+        style={styles.textarea}
+      />
+
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setBannerFile(e.target.files[0])}
+        style={styles.input}
+      />
+
+      <button onClick={saveBanner} style={styles.saveButton}>
+        Save Banner
+      </button>
+    </>
+  )}
+</div>
 
         {events.map((event, index) => (
           <div key={event.id} style={styles.eventCard}>
