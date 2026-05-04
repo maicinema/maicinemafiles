@@ -77,10 +77,21 @@ const uploadVideo = async (file) => {
 
   console.log("🚀 Starting TUS upload...");
 
+  const res = await fetch(
+    "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
+    { method: "POST" }
+  );
+
+  const data = await res.json();
+  console.log("CREATE UPLOAD RESPONSE:", data);
+
+  if (!data.success || !data.tusEndpoint) {
+    throw new Error("Upload endpoint was not returned from server");
+  }
+
   return new Promise((resolve, reject) => {
     const upload = new tus.Upload(file, {
-      endpoint:
-        "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
+      endpoint: data.tusEndpoint,
 
       retryDelays: [0, 3000, 5000, 10000, 20000],
       chunkSize: 50 * 1024 * 1024,
