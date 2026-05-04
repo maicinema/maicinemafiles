@@ -71,37 +71,47 @@ const [uploadProgress, setUploadProgress] = useState(0);
     return data?.publicUrl || "";
   };
 
-  const uploadVideo = async (file) => {
+ import * as tus from "tus-js-client";
+
+const uploadVideo = async (file) => {
   if (!file) return "";
 
-  console.log("🚀 Filmmaker video upload starting...");
-
-  const formData = new FormData();
-  formData.append("file", file);
+  console.log("🚀 Starting TUS upload...");
 
   const res = await fetch(
-    "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
-    {
-      method: "POST",
-      body: formData
-    }
+    "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
+    { method: "POST" }
   );
 
-  const raw = await res.text();
-  console.log("🔥 RAW UPLOAD RESPONSE:", raw);
+  const data = await res.json();
 
-  if (!res.ok) {
-    throw new Error(raw || "Video upload failed");
+  if (!data.success) {
+    throw new Error(data.error || "Failed to get upload URL");
   }
 
-  const result = JSON.parse(raw);
+  const { uploadURL, uid } = data;
 
-  if (!result.playbackUrl) {
-    throw new Error("Cloudflare upload failed");
-  }
+  return new Promise((resolve, reject) => {
+    const upload = new tus.Upload(file, {
+      endpoint: uploadURL,
+      retryDelays: [0, 3000, 5000, 10000],
+      chunkSize: 5 * 1024 * 1024, // 5MB chunks
+      onError: function (error) {
+        console.error("❌ TUS ERROR:", error);
+        reject(error);
+      },
+      onProgress: function (bytesUploaded, bytesTotal) {
+        const percent = Math.round((bytesUploaded / bytesTotal) * 100);
+        setUploadProgress(percent);
+      },
+      onSuccess: function () {
+        console.log("✅ Upload complete");
+        resolve(`https://videodelivery.net/${uid}/manifest/video.m3u8`);
+      },
+    });
 
-  setUploadProgress(100);
-  return result.playbackUrl;
+    upload.start();
+  });
 };
 
   const handleSubmit = async (e) => {
