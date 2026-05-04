@@ -254,6 +254,21 @@ async function approveFilm(submission) {
       throw new Error(updateError.message || "Failed to update submission");
     }
 
+    await fetch("/api/send-review-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: submission.email,
+        title: submission.title,
+        status: "approved",
+        goLiveAt: submission.go_live_at
+          ? new Date(submission.go_live_at).toLocaleString()
+          : "the scheduled date"
+      })
+    });
+
     alert("Film approved successfully.");
     await loadSubmissions();
   } catch (error) {
@@ -262,14 +277,15 @@ async function approveFilm(submission) {
   }
 }
 
-  async function rejectFilm(submission) {
-    const note = reviewNotes[submission.id];
+ async function rejectFilm(submission) {
+  const note = reviewNotes[submission.id];
 
-    if (!note || !note.trim()) {
-      alert("Please write a reason for rejection.");
-      return;
-    }
+  if (!note || !note.trim()) {
+    alert("Please write a reason for rejection.");
+    return;
+  }
 
+  try {
     const { error } = await supabase
       .from("film_submissions")
       .update({
@@ -279,14 +295,29 @@ async function approveFilm(submission) {
       .eq("id", submission.id);
 
     if (error) {
-      console.log("Reject film error:", error);
-      alert(error.message || "Failed to reject submission");
-      return;
+      throw new Error(error.message || "Failed to reject submission");
     }
+
+    await fetch("/api/send-review-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: submission.email,
+        title: submission.title,
+        status: "rejected",
+        note: note
+      })
+    });
 
     alert("Film rejected successfully.");
     await loadSubmissions();
+  } catch (err) {
+    console.log("Reject film error:", err);
+    alert(err.message || "Failed to reject submission");
   }
+}
 
 
   async function approveAdminFilm(e) {
