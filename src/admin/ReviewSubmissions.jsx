@@ -175,14 +175,29 @@ previewEnd: "",
       });
   }
 
-  function watchFilm(film) {
-    if (film.video) {
-      window.open(film.video, "_blank");
-      return;
-    }
+  function cleanVideoUrl(url) {
+  if (!url) return "";
 
-    alert("No film file available yet for preview.");
+  let cleaned = url.replace("?tusv2=true", "");
+
+  if (!cleaned.includes("/manifest/video.m3u8")) {
+    cleaned = `${cleaned}/manifest/video.m3u8`;
   }
+
+  return cleaned;
+}
+
+function watchFilm(film) {
+  const videoUrl = cleanVideoUrl(film.video);
+
+  if (videoUrl) {
+    window.open(videoUrl, "_blank");
+    return;
+  }
+
+  alert("No film file available yet for preview.");
+}
+
 async function approveFilm(submission) {
   try {
     const goLiveAt = submission.go_live_at
@@ -207,7 +222,7 @@ async function approveFilm(submission) {
         parseInt(String(submission.duration).replace(/\D/g, ""), 10) || 0,
       description: submission.description || "",
       poster_url: submission.poster,
-      video_url: submission.video,
+      video_url: cleanVideoUrl(submission.video),
       views: 0,
       price: 3,
       status: releaseStatus,
