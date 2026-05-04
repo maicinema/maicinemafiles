@@ -26,6 +26,7 @@ function SubmitFilm() {
   });
 
   const [submitting, setSubmitting] = useState(false);
+const [uploadProgress, setUploadProgress] = useState(0);
 
   const minGoLiveDate = useMemo(() => {
     const date = new Date();
@@ -73,47 +74,52 @@ function SubmitFilm() {
   const uploadVideo = async (file) => {
   if (!file) return "";
 
-  const formData = new FormData();
-  formData.append("file", file);
+  console.log("🚀 Filmmaker video upload starting...");
 
-  let res;
+  const res = await fetch(
+    "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
+    {
+      method: "POST"
+    }
+  );
 
-  try {
-    res = await fetch(
-  "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
-  {
-    method: "POST",
-    headers: {
-      "x-api-key": "your-super-secret-key"
-    },
-    body: formData,
-  }
-);
+  const data = await res.json();
 
-  } catch (err) {
-    console.error("❌ FETCH ERROR:", err);
-    throw new Error("Network error while uploading video");
+  if (!data.success) {
+    throw new Error(data.error || "Video upload setup failed");
   }
 
-  let result;
+  const { uploadURL, uid } = data;
 
-  try {
-    result = await res.json(); // ✅ safer
-  } catch (err) {
-    console.error("❌ JSON PARSE ERROR");
-    throw new Error("Invalid server response");
-  }
+  return new Promise((resolve, reject) => {
+    const formData = new FormData();
+    formData.append("file", file);
 
-  if (!res.ok) {
-    console.error("❌ FUNCTION ERROR:", result);
-    throw new Error(result?.error || "Video upload failed");
-  }
+    const xhr = new XMLHttpRequest();
 
-  if (!result.playbackUrl) {
-    throw new Error("Cloudflare upload failed");
-  }
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        setUploadProgress(percent);
+      }
+    };
 
-  return result.playbackUrl;
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        setUploadProgress(100);
+        resolve(`https://videodelivery.net/${uid}/manifest/video.m3u8`);
+      } else {
+        reject(new Error("Video upload failed"));
+      }
+    };
+
+    xhr.onerror = () => {
+      reject(new Error("Network error while uploading video"));
+    };
+
+    xhr.open("POST", uploadURL);
+    xhr.send(formData);
+  });
 };
 
   const handleSubmit = async (e) => {
@@ -150,8 +156,10 @@ function SubmitFilm() {
       return;
     }
 
-    try {
+   try {
       setSubmitting(true);
+      setUploadProgress(0);
+
 
       const posterUrl = await uploadPoster(form.poster);
       const videoUrl = await uploadVideo(form.film);
@@ -293,9 +301,15 @@ function SubmitFilm() {
         <label style={styles.label}>Film File</label>
         <input type="file" name="film" accept="video/*" onChange={handleFile} style={styles.input} />
 
-        <button type="submit" style={styles.submit} disabled={submitting}>
-          {submitting ? "Submitting..." : "Submit Film"}
-        </button>
+        {uploadProgress > 0 && (
+  <p style={styles.progressText}>
+    Uploading film: {uploadProgress}%
+  </p>
+)}
+
+<button type="submit" style={styles.submit} disabled={submitting}>
+  {submitting ? `Submitting... ${uploadProgress}%` : "Submit Film"}
+</button>
       </form>
     </div>
   );
@@ -308,16 +322,22 @@ const styles = {
   label: { marginTop: "8px", color: "#ddd" },
   input: { padding: "10px", border: "none" },
   textarea: { padding: "10px", border: "none", height: "120px" },
- submit: { background: "#e50914", border: "none", padding: "12px", color: "white" },
+  submit: { background: "#e50914", border: "none", padding: "12px", color: "white" },
 
-posterNote: {
-  color: "#aaa",
-  fontSize: "14px",
-  lineHeight: "1.5",
-  marginTop: "0",
-  marginBottom: "8px"
-}
+  posterNote: {
+    color: "#aaa",
+    fontSize: "14px",
+    lineHeight: "1.5",
+    marginTop: "0",
+    marginBottom: "8px"
+  },
+
+  progressText: {
+    color: "#00ffae",
+    fontSize: "14px",
+    marginTop: "8px",
+    marginBottom: "8px"
+  }
 };
-
 
 export default SubmitFilm;
