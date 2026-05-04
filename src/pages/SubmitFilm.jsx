@@ -226,6 +226,7 @@ const [uploadProgress, setUploadProgress] = useState(0);
       alert(error.message || "Something went wrong while submitting the film.");
     } finally {
       setSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -308,7 +309,7 @@ const [uploadProgress, setUploadProgress] = useState(0);
 )}
 
 <button type="submit" style={styles.submit} disabled={submitting}>
-  {submitting ? `Submitting... ${uploadProgress}%` : "Submit Film"}
+  {submitting ? "Submitting..." : "Submit Film"}
 </button>
       </form>
     </div>
