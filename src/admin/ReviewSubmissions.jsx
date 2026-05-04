@@ -254,7 +254,7 @@ async function approveFilm(submission) {
       throw new Error(updateError.message || "Failed to update submission");
     }
 
-    await fetch("/api/send-review-email", {
+    await fetch("https://maicinema.com/api/send-review-email", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -298,7 +298,7 @@ async function approveFilm(submission) {
       throw new Error(error.message || "Failed to reject submission");
     }
 
-    await fetch("/api/send-review-email", {
+    await fetch("https://maicinema.com/api/send-review-email", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
