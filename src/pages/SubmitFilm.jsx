@@ -77,36 +77,36 @@ const uploadVideo = async (file) => {
 
   console.log("🚀 Starting TUS upload...");
 
-  const res = await fetch(
-    "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
-    { method: "POST" }
-  );
-
-  const data = await res.json();
-
-  if (!data.success) {
-    throw new Error(data.error || "Failed to get upload URL");
-  }
-
-  const { uploadURL, uid } = data;
-
   return new Promise((resolve, reject) => {
     const upload = new tus.Upload(file, {
-      endpoint: uploadURL,
-      retryDelays: [0, 3000, 5000, 10000],
-      chunkSize: 5 * 1024 * 1024, // 5MB chunks
+      endpoint:
+        "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
+
+      retryDelays: [0, 3000, 5000, 10000, 20000],
+      chunkSize: 50 * 1024 * 1024,
+
+      metadata: {
+        filename: file.name,
+        filetype: file.type
+      },
+
       onError: function (error) {
         console.error("❌ TUS ERROR:", error);
         reject(error);
       },
+
       onProgress: function (bytesUploaded, bytesTotal) {
         const percent = Math.round((bytesUploaded / bytesTotal) * 100);
         setUploadProgress(percent);
       },
+
       onSuccess: function () {
-        console.log("✅ Upload complete");
-        resolve(`https://videodelivery.net/${uid}/manifest/video.m3u8`);
-      },
+        console.log("✅ TUS upload complete:", upload.url);
+
+        const videoId = upload.url.split("/").pop();
+
+        resolve(`https://videodelivery.net/${videoId}/manifest/video.m3u8`);
+      }
     });
 
     upload.start();
