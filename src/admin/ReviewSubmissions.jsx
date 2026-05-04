@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 import AdminNavbar from "../components/AdminNavbar";
 import NavigationArrows from "../components/NavigationArrows";
+import * as tus from "tus-js-client";
 
 function ReviewSubmissions() {
   const [submissions, setSubmissions] = useState([]);
@@ -108,45 +109,48 @@ previewEnd: "",
   async function uploadVideo(file, onProgress) {
   if (!file) return "";
 
-  try {
-    console.log("🚀 Cloudflare upload starting...");
+  console.log("🚀 Starting Cloudflare TUS upload...");
 
-    const res = await fetch(
-      "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
-      {
-        method: "POST"
+  return new Promise((resolve, reject) => {
+    const upload = new tus.Upload(file, {
+      endpoint:
+        "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
+
+      retryDelays: [0, 3000, 5000, 10000, 20000],
+      chunkSize: 50 * 1024 * 1024,
+
+      metadata: {
+        filename: file.name,
+        filetype: file.type
+      },
+
+      onError(error) {
+        console.error("❌ Cloudflare TUS upload error:", error);
+        reject(new Error(error.message || "Video upload failed"));
+      },
+
+      onProgress(bytesUploaded, bytesTotal) {
+        const percent = Math.round((bytesUploaded / bytesTotal) * 100);
+
+        if (onProgress) {
+          onProgress(percent);
+        }
+      },
+
+      onSuccess() {
+        console.log("✅ Cloudflare TUS upload complete:", upload.url);
+
+        const rawVideoId = upload.url.split("/").pop();
+        const videoId = rawVideoId.split("?")[0];
+
+        const hlsUrl = `https://videodelivery.net/${videoId}/manifest/video.m3u8`;
+
+        resolve(hlsUrl);
       }
-    );
-
-    const data = await res.json();
-
-    if (!data.success) {
-      console.log("❌ Cloudflare upload URL error:", data);
-      throw new Error(data.error || "Video upload setup failed");
-    }
-
-    const { uploadURL, uid } = data;
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const uploadRes = await fetch(uploadURL, {
-      method: "POST",
-      body: formData
     });
 
-    if (!uploadRes.ok) {
-      console.log("🔥 Cloudflare video upload failed:", await uploadRes.text());
-      throw new Error("Upload failed");
-    }
-
-    if (onProgress) onProgress(100);
-
-    return `https://videodelivery.net/${uid}/manifest/video.m3u8`;
-  } catch (err) {
-    console.log("🔥 Upload crash:", err);
-    throw new Error(err.message || "Upload failed");
-  }
+    upload.start();
+  });
 }
 
   function formatDuration(minutes) {
