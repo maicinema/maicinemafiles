@@ -170,7 +170,7 @@ function SubmitFilm() {
         description: form.description.trim(),
         email: form.email.trim(),
         poster: posterUrl,
-       video_id: videoUrl.split("/")[3], // extracts ID from Cloudflare URL
+       video: videoUrl,
         go_live_at: goLiveAt.toISOString(),
         status: "pending",
         source: "filmmaker",
@@ -274,7 +274,21 @@ function SubmitFilm() {
         <textarea name="description" value={form.description} placeholder="Film Description" onChange={handleChange} style={styles.textarea} />
 
         <label style={styles.label}>Poster</label>
-        <input type="file" name="poster" accept="image/*" onChange={handleFile} style={styles.input} />
+
+<p style={styles.posterNote}>
+  Recommended poster size: <strong>1920 × 1080 px</strong> landscape.
+  Upload a clean poster image with <strong>no text or write-ups</strong>.
+  Do not include the film title, description, credits, or any written text.
+  MaiCinema will automatically display the film title on the banner and film cards.
+</p>
+
+<input
+  type="file"
+  name="poster"
+  accept="image/*"
+  onChange={handleFile}
+  style={styles.input}
+/>
 
         <label style={styles.label}>Film File</label>
         <input type="file" name="film" accept="video/*" onChange={handleFile} style={styles.input} />
@@ -294,7 +308,16 @@ const styles = {
   label: { marginTop: "8px", color: "#ddd" },
   input: { padding: "10px", border: "none" },
   textarea: { padding: "10px", border: "none", height: "120px" },
-  submit: { background: "#e50914", border: "none", padding: "12px", color: "white" }
+ submit: { background: "#e50914", border: "none", padding: "12px", color: "white" },
+
+posterNote: {
+  color: "#aaa",
+  fontSize: "14px",
+  lineHeight: "1.5",
+  marginTop: "0",
+  marginBottom: "8px"
+}
 };
+
 
 export default SubmitFilm;
