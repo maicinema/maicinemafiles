@@ -102,8 +102,10 @@ const uploadVideo = async (file) => {
 
       onSuccess: function () {
         console.log("✅ TUS upload complete:", upload.url);
-        const videoId = upload.url.split("/").pop();
-        resolve(`https://videodelivery.net/${videoId}/manifest/video.m3u8`);
+        const rawVideoId = upload.url.split("/").pop();
+const videoId = rawVideoId.split("?")[0];
+
+resolve(`https://videodelivery.net/${videoId}/manifest/video.m3u8`);
       }
     });
 
