@@ -100,17 +100,24 @@ const filmUrl = result.playbackUrl;
 const { error:dbError } = await supabase
 .from("films")
 .upsert({
-id: Number(filmId),   // 🔥 THIS IS THE FIX
-title,
-description,
-genre,
-rating,
-runtime,
-poster_url: posterUrl,
-video_url: filmUrl,   // 🔥 also fix this
-release_year: releaseYear,
-status: "coming_soon",
-views: 0
+  id: Number(filmId),
+
+  title,
+  description,
+  genre,
+  rating,
+  runtime,
+
+  poster_url: posterUrl,
+  video_url: filmUrl,
+
+  release_year: releaseYear,
+  status: "coming_soon",
+  views: 0,
+
+  // ✅ AUTO PREVIEW (VERY IMPORTANT)
+  preview_start: "00:00",
+  preview_end: "00:10"
 })
 
 if(dbError){
@@ -181,6 +188,15 @@ onChange={(e)=>setReleaseYear(e.target.value)}
 <br/><br/>
 
 <label>Poster</label>
+
+<p style={{ fontSize: "14px", color: "#555", maxWidth: "500px" }}>
+  Recommended poster size: <strong>1920 × 1080 px</strong> landscape.
+  Upload a clean poster image with <strong>no text or write-ups</strong>.
+  Do not include the film title, description, credits, or any written text,
+  because MaiCinema will automatically display the film title on the banner
+  and film cards.
+</p>
+
 <input
 type="file"
 accept="image/*"
