@@ -76,50 +76,32 @@ const [uploadProgress, setUploadProgress] = useState(0);
 
   console.log("🚀 Filmmaker video upload starting...");
 
+  const formData = new FormData();
+  formData.append("file", file);
+
   const res = await fetch(
-    "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/create-upload",
+    "https://qrujwmcbobhthwzqmmjp.supabase.co/functions/v1/upload-video",
     {
-      method: "POST"
+      method: "POST",
+      body: formData
     }
   );
 
-  const data = await res.json();
+  const raw = await res.text();
+  console.log("🔥 RAW UPLOAD RESPONSE:", raw);
 
-  if (!data.success) {
-    throw new Error(data.error || "Video upload setup failed");
+  if (!res.ok) {
+    throw new Error(raw || "Video upload failed");
   }
 
-  const { uploadURL, uid } = data;
+  const result = JSON.parse(raw);
 
-  return new Promise((resolve, reject) => {
-    const formData = new FormData();
-    formData.append("file", file);
+  if (!result.playbackUrl) {
+    throw new Error("Cloudflare upload failed");
+  }
 
-    const xhr = new XMLHttpRequest();
-
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percent = Math.round((event.loaded / event.total) * 100);
-        setUploadProgress(percent);
-      }
-    };
-
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        setUploadProgress(100);
-        resolve(`https://videodelivery.net/${uid}/manifest/video.m3u8`);
-      } else {
-        reject(new Error("Video upload failed"));
-      }
-    };
-
-    xhr.onerror = () => {
-      reject(new Error("Network error while uploading video"));
-    };
-
-    xhr.open("POST", uploadURL);
-    xhr.send(formData);
-  });
+  setUploadProgress(100);
+  return result.playbackUrl;
 };
 
   const handleSubmit = async (e) => {
