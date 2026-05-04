@@ -134,7 +134,7 @@ return(
 
 <div style={{padding:"80px"}}>
 
-<h1>Upload Film TEST</h1>
+<h1>Upload Film</h1>
 
 <input placeholder="Film Title"
 value={title}
@@ -188,15 +188,6 @@ onChange={(e)=>setReleaseYear(e.target.value)}
 <br/><br/>
 
 <label>Poster</label>
-
-<p style={{ fontSize: "14px", color: "#555", maxWidth: "500px" }}>
-  Recommended poster size: <strong>1920 × 1080 px</strong> landscape.
-  Upload a clean poster image with <strong>no text or write-ups</strong>.
-  Do not include the film title, description, credits, or any written text,
-  because MaiCinema will automatically display the film title on the banner
-  and film cards.
-</p>
-
 <input
 type="file"
 accept="image/*"

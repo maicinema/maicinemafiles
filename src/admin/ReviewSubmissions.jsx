@@ -582,14 +582,21 @@ preview_end: adminFilm.previewEnd?.trim() || "00:10",
           />
 
           <label style={styles.label}>Poster</label>
-          <input
-            type="file"
-            name="poster"
-            accept="image/*"
-            onChange={handleAdminFile}
-            style={styles.input}
-          />
 
+<p style={styles.posterNote}>
+  Recommended poster size: <strong>1920 × 1080 px</strong> landscape.
+  Upload a clean poster image with <strong>no text or write-ups</strong>.
+  Do not include the film title, description, credits, or any written text.
+  MaiCinema will automatically display the film title on the banner and film cards.
+</p>
+
+<input
+  type="file"
+  name="poster"
+  accept="image/*"
+  onChange={handleAdminFile}
+  style={styles.input}
+/>
           <label style={styles.label}>Film File</label>
           <input
             type="file"
@@ -713,6 +720,7 @@ const styles = {
     border: "none",
     height: "80px"
   },
+
   form: {
     maxWidth: "560px",
     display: "flex",
@@ -720,10 +728,19 @@ const styles = {
     gap: "10px",
     marginTop: "40px"
   },
+posterNote: {
+  color: "#aaa",
+  fontSize: "14px",
+  lineHeight: "1.5",
+  marginTop: "0",
+  marginBottom: "8px"
+},
+
   label: {
     marginTop: "8px",
     color: "#ddd"
   },
+
   input: {
     padding: "10px",
     border: "none"
