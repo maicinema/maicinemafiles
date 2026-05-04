@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
+import * as tus from "tus-js-client";
 
 function SubmitFilm() {
   const [form, setForm] = useState({
@@ -70,8 +71,6 @@ const [uploadProgress, setUploadProgress] = useState(0);
     const { data } = supabase.storage.from("posters").getPublicUrl(fileName);
     return data?.publicUrl || "";
   };
-
- import * as tus from "tus-js-client";
 
 const uploadVideo = async (file) => {
   if (!file) return "";
